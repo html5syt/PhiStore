@@ -43,5 +43,6 @@ class PhiBack(ft.Stack):
                 ft.Image(src="back.svg"),
                 # alignment=ft.alignment.center,
                 margin=ft.margin.only(top=26, left=44),
+                on_click=on_click,
             ),
         ]
