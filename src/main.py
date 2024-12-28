@@ -41,7 +41,7 @@ def main(page: ft.Page):
     audio1 = ft.Audio(
         src="Shop0.wav", autoplay=True, release_mode=ft.audio.ReleaseMode.LOOP
     )
-    # page.overlay.append(audio1)
+    page.overlay.append(audio1)
 
     # 组件
     datashow = phi.PhiData(n=n)
@@ -98,9 +98,9 @@ def test(e, data, datashow, page=ft.Page):
     global DATA
     DATA += 102400000
     print(data)
-    # for i in range(102400000):
-    #     PhiData.on_data_change(datashow, phi.hum_convert(i**5), page)
-    phi.PhiData.on_data_change(datashow, phi.hum_convert(DATA), page)
+    for i in range(102400000):
+        phi.PhiData.on_data_change(datashow, phi.hum_convert(i**5), page)
+    # phi.PhiData.on_data_change(datashow, phi.hum_convert(DATA), page)
 
 
 ft.app(target=main)

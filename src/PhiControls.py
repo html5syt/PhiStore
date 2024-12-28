@@ -52,7 +52,6 @@ class PhiBack(ft.Stack):
             ),
             ft.Container(
                 ft.Image(src="back.svg"),
-                # alignment=ft.alignment.center,
                 margin=ft.margin.only(top=26*n, left=44*n),
                 on_click=on_click,
                 width=40*n,
@@ -119,11 +118,15 @@ class PhiData(ft.Stack):
         ]
 
     def on_data_change(self, data, page=ft.Page, n=0.7):
-        n *= 1.05
+        if page.platform == ft.PagePlatform.ANDROID or page.platform == ft.PagePlatform.IOS:
+        # 缩放倍数
+            n*=0.747
+        else:
+            n*=1.05
         self.DATA = data
-        print("Data: ", len(self.DATA))
-        print("Data: ", self.DATA)
-        print("DataT: ", self.controls[0].controls[1].controls[1].content.spans[0].text)
+        # print("Data: ", len(self.DATA))
+        # print("Data: ", self.DATA)
+        # print("DataT: ", self.controls[0].controls[1].controls[1].content.spans[0].text)
         self.controls[0].controls[1].controls[1].content.spans[0].text = self.DATA
         self.controls[0].controls[1].controls[1].margin = ft.margin.only(
             top=(12 + (2 * (len(self.DATA) - 7))) * n * 1.1,
@@ -132,6 +135,6 @@ class PhiData(ft.Stack):
         self.controls[0].controls[1].controls[1].content.spans[0].style.size = (
             (35 - (2.5 * (len(self.DATA) - 7))) * n * 0.96
         )
-        print(self.controls[0].controls[1].controls[1].content.spans[0].style.size)
-        print(self.controls[0].controls[1].controls[1].margin)
+        # print(self.controls[0].controls[1].controls[1].content.spans[0].style.size)
+        # print(self.controls[0].controls[1].controls[1].margin)
         page.update()
