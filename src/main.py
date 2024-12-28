@@ -7,54 +7,6 @@ import flet.canvas as cv
 DATA = 0.0
 
 
-class PhiData(ft.Stack):
-    datatemp = 0.0
-
-    def __init__(self, on_click=None, n=0.7):
-        self.datatemp
-        super().__init__()
-        n = 1.15 * n
-        self.controls = [
-            ft.Stack(
-                [
-                    ft.Image(src="Data.png", width=350 * n),
-                    ft.ResponsiveRow(
-                        [
-                            ft.Image(
-                                src="dataicon.png",
-                                col=0.62,
-                                height=70 * n,
-                            ),
-                            ft.Container(
-                                ft.Text(
-                                    spans=[
-                                        ft.TextSpan(
-                                            "29.71 MB",
-                                            ft.TextStyle(
-                                                size=32 * n, color=ft.Colors.WHITE
-                                            ),
-                                        ),
-                                        ft.TextSpan(
-                                            "  Data",
-                                            ft.TextStyle(
-                                                size=27 * n, color=ft.Colors.WHITE
-                                            ),
-                                        ),
-                                    ],
-                                ),
-                                col=1.32,
-                                alignment=ft.alignment.top_left,
-                                margin=ft.margin.only(top=15 * n),
-                            ),
-                        ],
-                        alignment=ft.alignment.top_left,
-                        columns=2,
-                        spacing=0,
-                    ),
-                ],
-                width=350 * n,
-            )
-        ]
 
 
 def main(page: ft.Page):
@@ -91,6 +43,9 @@ def main(page: ft.Page):
     )
     # page.overlay.append(audio1)
 
+    # 组件
+    datashow = phi.PhiData(n=n)
+    # 页面组件树
     page.add(
         ft.Stack(
             [
@@ -119,10 +74,12 @@ def main(page: ft.Page):
                         ),
                         ft.Container(
                             # data
-                            PhiData(n=n),
+                            datashow,
                             col=1,
                             alignment=ft.alignment.top_right,
                             margin=ft.margin.only(right=25 * n),
+                            on_click=lambda e: test(e, DATA, datashow, page),
+                            height=70*n*1.25
                         ),
                     ],
                     columns=2,
@@ -135,6 +92,15 @@ def main(page: ft.Page):
     )
 
     page.update()
+
+
+def test(e, data, datashow, page=ft.Page):
+    global DATA
+    DATA += 102400000
+    print(data)
+    # for i in range(102400000):
+    #     PhiData.on_data_change(datashow, phi.hum_convert(i**5), page)
+    phi.PhiData.on_data_change(datashow, phi.hum_convert(DATA), page)
 
 
 ft.app(target=main)
