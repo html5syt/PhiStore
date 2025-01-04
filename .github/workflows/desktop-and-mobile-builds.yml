@@ -21,7 +21,7 @@ env:
 #   BUILD_VERSION: 1.0.0
   PYTHON_VERSION: 3.13
   FLUTTER_VERSION: 3.24.0
-  KEYSTORE_FILE: $GITHUB_WORKSPACE/html5syt.jks
+  KEYSTORE_FILE: /home/runner/work/PhiStore/PhiStore/html5syt.jks
   KEYSTORE_ALIAS: html5syt
 #   PROJECT_NAME: PhiStore
 #   ORG_NAME: com
