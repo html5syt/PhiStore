@@ -26,3 +26,14 @@ copyright = "Copyright (C) 2024 by Tim, Assets from Pigeon Games."
 
 [tool.flet.app]
 path = "src"
+
+# [tool.flet.android.signing]
+# 存储和密钥密码可以通过`--android-signing-key-store-password`
+# 和`--android-signing-key-password`选项或
+# FLET_ANDROID_SIGNING_KEY_STORE_PASSWORD
+# 和 FLET_ANDROID_SIGNING_KEY_PASSWORD 环境变量传递。
+key_store = "html5syt.jks" # --android-signing-key-store
+key_alias = "html5syt"
+
+[tool.flet.splash]
+android = false

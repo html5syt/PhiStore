@@ -41,7 +41,7 @@ def main(page: ft.Page):
     audio1 = ft.Audio(
         src="Shop0.wav", autoplay=True, release_mode=ft.audio.ReleaseMode.LOOP
     )
-    page.overlay.append(audio1)
+    # page.overlay.append(audio1)
 
     # 组件
     datashow = phi.PhiData(n=n)
