@@ -28,10 +28,10 @@ copyright = "Copyright (C) 2024 by Tim, Assets from Pigeon Games."
 path = "src"
 
 # [tool.flet.android.signing]
-# 存储和密钥密码可以通过`--android-signing-key-store-password`
-# 和`--android-signing-key-password`选项或
+# store and key passwords can be passed with `--android-signing-key-store-password`
+# and `--android-signing-key-password` options or
 # FLET_ANDROID_SIGNING_KEY_STORE_PASSWORD
-# 和 FLET_ANDROID_SIGNING_KEY_PASSWORD 环境变量传递。
+# and FLET_ANDROID_SIGNING_KEY_PASSWORD environment variables.
 key_store = "html5syt.jks" # --android-signing-key-store
 key_alias = "html5syt"
 
