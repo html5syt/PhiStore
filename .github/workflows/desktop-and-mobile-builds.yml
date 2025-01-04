@@ -55,7 +55,7 @@ jobs:
         flutter doctor
         sudo apt-get update -y
         sudo apt-get install -y ninja-build libgtk-3-dev
-        sudo apt-get install libgtk-3-dev libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev
+        sudo apt-get install libgtk-3-dev libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev libunwind-dev
         sudo apt install libmpv-dev mpv
         flutter doctor
 
@@ -177,7 +177,7 @@ jobs:
     - name: Flet Build aab
       run: |
         flutter config --no-analytics
-        flet build aab --verbose --build-number=$BUILD_NUMBER --build-version=$BUILD_VERSION --project=$PROJECT_NAME --product=$PRODUCT_NAME --org=$ORG_NAME ----android-signing-key-store-password $FLET_ANDROID_SIGNING_KEY_STORE_PASSWORD --android-signing-key-password $FLET_ANDROID_SIGNING_KEY_PASSWORD  --include-packages flet_audio
+        flet build aab --verbose --build-number=$BUILD_NUMBER --build-version=$BUILD_VERSION --project=$PROJECT_NAME --product=$PRODUCT_NAME --org=$ORG_NAME --android-signing-key-store-password $FLET_ANDROID_SIGNING_KEY_STORE_PASSWORD --android-signing-key-password $FLET_ANDROID_SIGNING_KEY_PASSWORD  --include-packages flet_audio
 
     - name: Upload aab Artifact
       uses: actions/upload-artifact@v4.3.4
@@ -222,7 +222,7 @@ jobs:
     - name: Flet Build apk
       run: |
         flutter config --no-analytics
-        flet build apk --verbose --build-number=$BUILD_NUMBER --build-version=$BUILD_VERSION --project=$PROJECT_NAME --product=$PRODUCT_NAME --org=$ORG_NAME ----android-signing-key-store-password $FLET_ANDROID_SIGNING_KEY_STORE_PASSWORD --android-signing-key-password $FLET_ANDROID_SIGNING_KEY_PASSWORD  --include-packages flet_audio
+        flet build apk --verbose --build-number=$BUILD_NUMBER --build-version=$BUILD_VERSION --project=$PROJECT_NAME --product=$PRODUCT_NAME --org=$ORG_NAME --android-signing-key-store-password $FLET_ANDROID_SIGNING_KEY_STORE_PASSWORD --android-signing-key-password $FLET_ANDROID_SIGNING_KEY_PASSWORD  --include-packages flet_audio
 
     - name: Upload apk Artifact
       uses: actions/upload-artifact@v4.3.4
