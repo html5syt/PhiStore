@@ -24,8 +24,7 @@ env:
   PROJECT_NAME: PhiStore
   ORG_NAME: com
   PRODUCT_NAME: PhiStore
-  FLET_ANDROID_SIGNING_KEY_STORE_PASSWORD: ${{ secrets.FLET_ANDROID_SIGNING_KEY_STORE_PASSWORD }}
-  FLET_ANDROID_SIGNING_KEY_PASSWORD: ${{ secrets.FLET_ANDROID_SIGNING_KEY_PASSWORD }}
+
 
 jobs:
   build-linux:
@@ -175,6 +174,9 @@ jobs:
       uses: android-actions/setup-android@v3
 
     - name: Flet Build aab
+      env:
+        FLET_ANDROID_SIGNING_KEY_STORE_PASSWORD: ${{ secrets.FLET_ANDROID_SIGNING_KEY_STORE_PASSWORD }}
+        FLET_ANDROID_SIGNING_KEY_PASSWORD: ${{ secrets.FLET_ANDROID_SIGNING_KEY_PASSWORD }}
       run: |
         flutter config --no-analytics
         flet build aab --verbose --build-number=$BUILD_NUMBER --build-version=$BUILD_VERSION --project=$PROJECT_NAME --product=$PRODUCT_NAME --org=$ORG_NAME --android-signing-key-store-password $FLET_ANDROID_SIGNING_KEY_STORE_PASSWORD --android-signing-key-password $FLET_ANDROID_SIGNING_KEY_PASSWORD  --include-packages flet_audio
@@ -220,6 +222,9 @@ jobs:
       uses: android-actions/setup-android@v3
 
     - name: Flet Build apk
+      env:
+        FLET_ANDROID_SIGNING_KEY_STORE_PASSWORD: ${{ secrets.FLET_ANDROID_SIGNING_KEY_STORE_PASSWORD }}
+        FLET_ANDROID_SIGNING_KEY_PASSWORD: ${{ secrets.FLET_ANDROID_SIGNING_KEY_PASSWORD }}
       run: |
         flutter config --no-analytics
         flet build apk --verbose --build-number=$BUILD_NUMBER --build-version=$BUILD_VERSION --project=$PROJECT_NAME --product=$PRODUCT_NAME --org=$ORG_NAME --android-signing-key-store-password $FLET_ANDROID_SIGNING_KEY_STORE_PASSWORD --android-signing-key-password $FLET_ANDROID_SIGNING_KEY_PASSWORD  --include-packages flet_audio
