@@ -53,7 +53,7 @@ def main(page: ft.Page):
                     # 背景层
                     [
                         ft.Image(
-                            str(random.randint(1, 119)) + ".png",
+                            str(random.randint(1, 119)) + ".webp",
                             # src="14.png",
                             fit=ft.ImageFit.COVER,
                             expand=True,
