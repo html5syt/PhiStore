@@ -6,7 +6,9 @@ import flet.canvas as cv
 
 DATA = 0.0
 
-
+# class PhiBack(ft.Stack):
+#     def __init__(self, on_click=None,n=1):
+#         super().__init__()
 
 
 def main(page: ft.Page):
@@ -73,17 +75,37 @@ def main(page: ft.Page):
                             col=1,
                         ),
                         ft.Container(
+                            # 文字
+                            ft.Text(
+                                "Data mining",
+                                color=ft.colors.WHITE,
+                                size=47 * n,
+                                expand=True,
+                                text_align=ft.TextAlign.CENTER,
+                            ),
+                            col=1,
+                            margin=ft.margin.only(top=27 * n),
+                        ),
+                        ft.Container(
                             # data
                             datashow,
                             col=1,
                             alignment=ft.alignment.top_right,
                             margin=ft.margin.only(right=25 * n),
                             on_click=lambda e: test(e, DATA, datashow, page),
-                            height=70*n*1.25
+                            height=70 * n * 1.25,
                         ),
                     ],
-                    columns=2,
+                    columns=3,
                 ),
+                ft.Container(
+                    # 分割线
+                    ft.Divider(thickness=2, color="#EE6E6E6E"),
+                    height=1,
+                    alignment=ft.alignment.top_center,
+                    margin=ft.margin.only(top=120 * n*0.9),
+                ),
+
             ],
             alignment=ft.alignment.center,
             fit=ft.StackFit.EXPAND,
