@@ -1,4 +1,5 @@
 import math
+import time
 import flet as ft
 import PhiControls as phi
 import random
@@ -6,9 +7,61 @@ import flet.canvas as cv
 
 DATA = 0.0
 
-# class PhiBack(ft.Stack):
-#     def __init__(self, on_click=None,n=1):
-#         super().__init__()
+
+class PhiLottery(ft.Stack):
+    def __init__(self, on_click=None, n=1, page=ft.Page):
+        if (
+            page.platform == ft.PagePlatform.ANDROID
+            or page.platform == ft.PagePlatform.IOS
+        ):
+            n = n * 0.8
+        super().__init__()
+        self.controls = [
+            ft.Image(
+                src="phi0101.webp",
+                width=350 * n,
+                offset=ft.transform.Offset(0, 0),
+                # animate_offset=ft.animation.Animation(100),
+            ),
+            ft.Column(
+                [
+                    ft.Container(
+                        ft.Image("icon.png", ),
+                        animate=ft.animation.Animation(
+                            200,curve=ft.AnimationCurve.BOUNCE_OUT
+                        ),
+                        height=0,
+                        width=100 * n,
+                        alignment=ft.alignment.center,
+                        margin=ft.margin.only(top=20 * n),
+                    ),
+                ],
+                expand=True,
+            ),
+            # phi.PhiBack(on_click=lambda e: page.window.close(), n=n),
+        ]
+
+    def on_click(self=ft.Image, e=None, page=ft.Page, n=0.8):
+        # self.controls[0].offset = ft.transform.Offset(-1.2, 0)
+        # page.update()
+        # time.sleep(0.1)
+        self.controls[0].visible = not self.controls[0].visible
+        detail=self.controls[1].controls[0]
+        detail.visible = True
+        # detail.height = 100 * n 
+        if detail.height == 0:
+            detail.height = 100 * n
+        else:
+            detail.offset = ft.transform.Offset(-1, 0)
+            page.update()
+            time.sleep(0.2)
+            detail.animate = None
+            page.update()
+            detail.visible = False
+            detail.offset = ft.transform.Offset(0, 0)
+            detail.animate = ft.animation.Animation(200,curve=ft.AnimationCurve.BOUNCE_OUT)
+            detail.height = 0
+        page.update()
 
 
 def main(page: ft.Page):
@@ -35,7 +88,7 @@ def main(page: ft.Page):
         # 缩放倍数
         n = 0.5
     else:
-        n = 0.7
+        n = 0.8
 
     page.theme = ft.Theme(font_family="Exo")  # 默认应用字体
 
@@ -45,8 +98,9 @@ def main(page: ft.Page):
     )
     # page.overlay.append(audio1)
 
-    # 组件
+    # 独立组件
     datashow = phi.PhiData(n=n)
+    lottery = PhiLottery(n=n, page=page)
     # 页面组件树
     page.add(
         ft.Stack(
@@ -78,7 +132,7 @@ def main(page: ft.Page):
                             # 文字
                             ft.Text(
                                 "Data mining",
-                                color=ft.colors.WHITE,
+                                color=ft.Colors.WHITE,
                                 size=47 * n,
                                 expand=True,
                                 text_align=ft.TextAlign.CENTER,
@@ -103,16 +157,28 @@ def main(page: ft.Page):
                     ft.Divider(thickness=2, color="#EE6E6E6E"),
                     height=1,
                     alignment=ft.alignment.top_center,
-                    margin=ft.margin.only(top=120 * n*0.9),
+                    margin=ft.margin.only(top=120 * n * 0.9),
                 ),
-
+                ft.Container(
+                    lottery,
+                    margin=ft.margin.only(top=190 * n),
+                    alignment=ft.alignment.top_center,
+                ),
+                ft.Container(
+                    ft.Button(
+                        "test",
+                        on_click=lambda e: PhiLottery.on_click(lottery, e, page, n),
+                    ),
+                    padding=ft.padding.all(10),
+                    alignment=ft.alignment.top_center,
+                    margin=ft.margin.only(top=300 * n),
+                ),
             ],
             alignment=ft.alignment.center,
             fit=ft.StackFit.EXPAND,
             expand=True,
         )
     )
-
     page.update()
 
 

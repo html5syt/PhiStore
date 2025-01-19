@@ -122,7 +122,7 @@ class PhiData(ft.Stack):
         # 缩放倍数
             n*=0.747
         else:
-            n*=1.05
+            n*=1.2
         self.DATA = data
         # print("Data: ", len(self.DATA))
         # print("Data: ", self.DATA)
