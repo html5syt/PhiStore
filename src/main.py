@@ -1,3 +1,4 @@
+import asyncio
 import math
 import time
 import flet as ft
@@ -5,6 +6,7 @@ import PhiControls as phi
 import random
 import flet.canvas as cv
 
+lock = asyncio.Lock()
 DATA = 0.0
 
 
@@ -26,45 +28,65 @@ class PhiLottery(ft.Stack):
             ft.Column(
                 [
                     ft.Container(
-                        ft.Image("icon.png", ),
-                        animate=ft.animation.Animation(
-                            200,curve=ft.AnimationCurve.BOUNCE_OUT
+                        ft.Image(
+                            "icon.png",
                         ),
-                        height=0,
-                        width=100 * n,
+                        animate=ft.animation.Animation(200),
+                        animate_offset=ft.animation.Animation(200),
+                        height=300 * n,
+                        width=350 * n,
                         alignment=ft.alignment.center,
-                        margin=ft.margin.only(top=20 * n),
+                        visible=False,
+                        # margin=ft.margin.only(top=20 * n),
+                        # offset=ft.transform.Offset(0, 0),
+                    ),
+                    ft.Text(
+                        "",
+                        color=ft.Colors.WHITE,
+                        size=30 * n,
+                        text_align=ft.TextAlign.CENTER,
+                        visible=False,
+                        width=350 * n,
                     ),
                 ],
                 expand=True,
+                # width=350 * n,
+                alignment=ft.alignment.center,
+                spacing=0,
             ),
             # phi.PhiBack(on_click=lambda e: page.window.close(), n=n),
         ]
 
-    def on_click(self=ft.Image, e=None, page=ft.Page, n=0.8):
-        # self.controls[0].offset = ft.transform.Offset(-1.2, 0)
-        # page.update()
-        # time.sleep(0.1)
-        self.controls[0].visible = not self.controls[0].visible
-        detail=self.controls[1].controls[0]
-        detail.visible = True
-        # detail.height = 100 * n 
-        if detail.height == 0:
-            detail.height = 100 * n
-        else:
-            detail.offset = ft.transform.Offset(-1, 0)
+    async def on_click(self, e=None, page=None, n=0.8):
+        async with (
+            lock
+        ):  # 确保只有一个 on_click 在执行，点几次执行几次，无忽略（写不动了
+            # 注：连抽功能未实现
+            if page and (
+                page.platform == ft.PagePlatform.ANDROID
+                or page.platform == ft.PagePlatform.IOS
+            ):
+                n = n * 1.2
+
+            detail = self.controls[1].controls[0]
+            detailText = self.controls[1].controls[1]
+            detailText.size = 30 * n
+            self.controls[0].visible = not self.controls[0].visible  # ?图
+            detail.visible = not detail.visible
+            detailText.visible = not detailText.visible
             page.update()
-            time.sleep(0.2)
-            detail.animate = None
-            page.update()
-            detail.visible = False
-            detail.offset = ft.transform.Offset(0, 0)
-            detail.animate = ft.animation.Animation(200,curve=ft.AnimationCurve.BOUNCE_OUT)
-            detail.height = 0
-        page.update()
+            if not self.controls[0].visible:
+                detailText.value = ""
+                text = "2 MB"
+                for textTemp in text:
+                    detailText.value += textTemp
+                    page.update()
+                    await asyncio.sleep(0.05)
+            else:
+                await asyncio.sleep(0.5)
 
 
-def main(page: ft.Page):
+async def main(page: ft.Page):
     global DATA
 
     # layout debug
@@ -101,6 +123,10 @@ def main(page: ft.Page):
     # 独立组件
     datashow = phi.PhiData(n=n)
     lottery = PhiLottery(n=n, page=page)
+
+    async def lottery_on_click(e):
+        await PhiLottery.on_click(self=lottery, page=page, n=n)
+
     # 页面组件树
     page.add(
         ft.Stack(
@@ -162,16 +188,17 @@ def main(page: ft.Page):
                 ft.Container(
                     lottery,
                     margin=ft.margin.only(top=190 * n),
-                    alignment=ft.alignment.top_center,
+                    alignment=ft.alignment.center,
+                    expand=True,
                 ),
                 ft.Container(
                     ft.Button(
                         "test",
-                        on_click=lambda e: PhiLottery.on_click(lottery, e, page, n),
+                        on_click=lottery_on_click,
                     ),
                     padding=ft.padding.all(10),
                     alignment=ft.alignment.top_center,
-                    margin=ft.margin.only(top=300 * n),
+                    margin=ft.margin.only(top=600 * n),
                 ),
             ],
             alignment=ft.alignment.center,
