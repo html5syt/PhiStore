@@ -9,6 +9,15 @@ import flet.canvas as cv
 lock = asyncio.Lock()
 DATA = 0.0
 
+from dataclasses import field
+
+
+class Scale:
+    scale: float = field(default=None)
+    scale_x: float = field(default=None)
+    scale_y: float = field(default=None)
+    alignment: ft.Alignment = field(default=None)
+
 
 class PhiLottery(ft.Stack):
     def __init__(self, on_click=None, n=1, page=ft.Page):
@@ -29,15 +38,16 @@ class PhiLottery(ft.Stack):
                 [
                     ft.Container(
                         ft.Image(
-                            "icon.png",
+                            "file.png",
                         ),
-                        animate=ft.animation.Animation(200),
-                        animate_offset=ft.animation.Animation(200),
                         height=300 * n,
                         width=350 * n,
                         alignment=ft.alignment.center,
-                        visible=False,
-                        # margin=ft.margin.only(top=20 * n),
+                        padding=0,
+                        scale=ft.transform.Scale(scale_x=0.8, scale_y=0),
+                        # border=ft.border.all(1, ft.Colors.WHITE),
+                        # visible=False,
+                        # margin=ft.margin.only(top=200 * n),
                         # offset=ft.transform.Offset(0, 0),
                     ),
                     ft.Text(
@@ -45,14 +55,18 @@ class PhiLottery(ft.Stack):
                         color=ft.Colors.WHITE,
                         size=30 * n,
                         text_align=ft.TextAlign.CENTER,
-                        visible=False,
+                        # visible=False,
                         width=350 * n,
                     ),
                 ],
                 expand=True,
                 # width=350 * n,
-                alignment=ft.alignment.center,
+                alignment=ft.alignment.top_center,
                 spacing=0,
+                offset=ft.transform.Offset(0, 0),
+                opacity=0,
+                animate_offset=300,
+                animate_opacity=300,
             ),
             # phi.PhiBack(on_click=lambda e: page.window.close(), n=n),
         ]
@@ -72,18 +86,42 @@ class PhiLottery(ft.Stack):
             detailText = self.controls[1].controls[1]
             detailText.size = 30 * n
             self.controls[0].visible = not self.controls[0].visible  # ?图
-            detail.visible = not detail.visible
-            detailText.visible = not detailText.visible
+
+            self.controls[1].animate_offset = 300
+            self.controls[1].animate_opacity = 300
             page.update()
             if not self.controls[0].visible:
+                # detail.visible = True
+                # detailText.visible = True
+                self.controls[1].animate_offset = 1
+                self.controls[1].animate_opacity = 1
+                detail.animate = 300
+                self.controls[1].opacity = 1
+                self.controls[1].offset = ft.transform.Offset(0, 0)
+                page.update()
                 detailText.value = ""
                 text = "2 MB"
+                for i in range(1,24):
+                    detail.scale = ft.transform.Scale(scale_x=0.8, scale_y=0.8/23*i)
+                    page.update()
+                    await asyncio.sleep(0.015)
                 for textTemp in text:
                     detailText.value += textTemp
                     page.update()
                     await asyncio.sleep(0.05)
             else:
+                self.controls[1].animate_offset = 300
+                self.controls[1].animate_opacity = 300
+                page.update()
+                self.controls[1].opacity = 0
+                self.controls[1].offset = ft.transform.Offset(
+                    -1 * (page.width // 4 / detail.width), 0
+                )
+                page.update()
+                # await asyncio.sleep(0.7)
                 await asyncio.sleep(0.5)
+            print(self.controls[1].animate_offset)
+            print(self.controls[1].animate_opacity)
 
 
 async def main(page: ft.Page):
@@ -187,7 +225,7 @@ async def main(page: ft.Page):
                 ),
                 ft.Container(
                     lottery,
-                    margin=ft.margin.only(top=190 * n),
+                    margin=ft.margin.only(top=160 * n),
                     alignment=ft.alignment.center,
                     expand=True,
                 ),
@@ -198,7 +236,7 @@ async def main(page: ft.Page):
                     ),
                     padding=ft.padding.all(10),
                     alignment=ft.alignment.top_center,
-                    margin=ft.margin.only(top=600 * n),
+                    margin=ft.margin.only(top=550 * n),
                 ),
             ],
             alignment=ft.alignment.center,
