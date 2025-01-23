@@ -38,7 +38,7 @@ class PhiLottery(ft.Stack):
                 [
                     ft.Container(
                         ft.Image(
-                            "file.png",
+                            "dataicon.png",
                         ),
                         height=300 * n,
                         width=350 * n,
@@ -104,7 +104,8 @@ class PhiLottery(ft.Stack):
                 for i in range(1,24):
                     detail.scale = ft.transform.Scale(scale_x=0.8, scale_y=0.8/23*i)
                     page.update()
-                    await asyncio.sleep(0.015)
+                    await asyncio.sleep(0.01)
+                    # scale_x和scale_y无法使用动画，只能用这种方法
                 for textTemp in text:
                     detailText.value += textTemp
                     page.update()
