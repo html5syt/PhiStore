@@ -1,0 +1,9 @@
+{
+  "accentColor": "#0090ff",
+  "interfaceFontFamily": "Avenir Next",
+  "monospaceFontFamily": "Source Code Pro",
+  "baseFontSize": 14,
+  "theme": "system",
+  "translucency": true,
+  "nativeMenus": false
+}

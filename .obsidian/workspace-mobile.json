@@ -1,0 +1,222 @@
+{
+  "main": {
+    "id": "b9ad4c4906ddafdf",
+    "type": "split",
+    "children": [
+      {
+        "id": "10b3a04021fe5d59",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "d736bd30e87b8f5b",
+            "type": "leaf",
+            "state": {
+              "type": "empty",
+              "state": {}
+            }
+          },
+          {
+            "id": "845fe3642ac2a575",
+            "type": "leaf",
+            "pinned": true,
+            "state": {
+              "type": "empty",
+              "state": {},
+              "pinned": true
+            }
+          },
+          {
+            "id": "890b76675b7f2fc3",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "docs/index.md",
+                "mode": "source",
+                "source": true
+              }
+            }
+          }
+        ],
+        "currentTab": 2
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "44c03858c5a96fb3",
+    "type": "mobile-drawer",
+    "children": [
+      {
+        "id": "69e10ba472f2700d",
+        "type": "leaf",
+        "state": {
+          "type": "file-explorer",
+          "state": {
+            "sortOrder": "byCreatedTimeReverse"
+          }
+        }
+      },
+      {
+        "id": "27ae966989d26b7d",
+        "type": "leaf",
+        "state": {
+          "type": "search",
+          "state": {
+            "query": "",
+            "matchingCase": false,
+            "explainSearch": false,
+            "collapseAll": false,
+            "extraContext": false,
+            "sortOrder": "alphabetical"
+          }
+        }
+      },
+      {
+        "id": "ddf39bcb93cc477b",
+        "type": "leaf",
+        "state": {
+          "type": "tag",
+          "state": {
+            "sortOrder": "frequency",
+            "useHierarchy": true
+          }
+        }
+      },
+      {
+        "id": "da7c34c1f32a8ab1",
+        "type": "leaf",
+        "state": {
+          "type": "bookmarks",
+          "state": {}
+        }
+      }
+    ],
+    "currentTab": 0
+  },
+  "right": {
+    "id": "eff6dfd495650315",
+    "type": "mobile-drawer",
+    "children": [
+      {
+        "id": "a629c3643afddbb8",
+        "type": "leaf",
+        "state": {
+          "type": "backlink",
+          "state": {
+            "file": "docs/index.md",
+            "collapseAll": false,
+            "extraContext": false,
+            "sortOrder": "byCreatedTimeReverse",
+            "showSearch": false,
+            "searchQuery": "",
+            "backlinkCollapsed": false,
+            "unlinkedCollapsed": true
+          }
+        }
+      },
+      {
+        "id": "b474e91a8f808ee9",
+        "type": "leaf",
+        "state": {
+          "type": "outgoing-link",
+          "state": {
+            "file": "docs/index.md",
+            "linksCollapsed": false,
+            "unlinkedCollapsed": true
+          }
+        }
+      },
+      {
+        "id": "fa558eb0b7e5776f",
+        "type": "leaf",
+        "state": {
+          "type": "outline",
+          "state": {
+            "file": "docs/index.md"
+          }
+        }
+      },
+      {
+        "id": "99f1268c8e8bdb2f",
+        "type": "leaf",
+        "state": {
+          "type": "git-view",
+          "state": {}
+        }
+      },
+      {
+        "id": "be4e41a46c234dce",
+        "type": "leaf",
+        "state": {
+          "type": "git-history-view",
+          "state": {}
+        }
+      }
+    ],
+    "currentTab": 3
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "command-palette:打开命令面板": false,
+      "canvas:新建白板": false,
+      "templates:插入模板": false,
+      "switcher:打开快速切换": false,
+      "graph:查看关系图谱": true,
+      "daily-notes:打开/创建今天的日记": false,
+      "workspaces:管理工作区布局": false,
+      "audio-recorder:开始/结束录音": false,
+      "markdown-importer:打开 Markdown 格式转换器": false,
+      "table-editor-obsidian:Advanced Tables Toolbar": false
+    }
+  },
+  "active": "890b76675b7f2fc3",
+  "lastOpenFiles": [
+    "docs/about/index.md",
+    "docs/about/contact.md",
+    "docs/index.md",
+    "docs/basic/2.5.小黑屋.md",
+    "docs/advanced/3.1.私密主题.md",
+    "docs/basic/2.6.个人设置.md",
+    "docs/basic/2.1.注册&登录.md",
+    "docs/advanced/3.4.markdown-bbcode.md",
+    "docs/index.md.html",
+    "docs/advanced/3.3.pwa.md",
+    "docs/basic/index.md",
+    "docs/basic/2.7.第三方登录.md",
+    "docs/advanced/index.md",
+    "docs/basic/2.3.发帖页.md",
+    "advanced/3.2.文件照片上传.html.md",
+    "advanced",
+    "docs/about/社区准则.md",
+    "docs/end.md",
+    "docs/info/iconsearch.md",
+    "docs/info/4.2.转存表情包.md",
+    "docs/info/4.1.dns解析流程图（暂未完成）.md",
+    "docs/info",
+    "d/88-zhan-dian-wen-ti-fan-kui.md",
+    "d",
+    "docs/assets/javascripts/iconsearch_index.json",
+    "docs/assets/javascripts/iconsearch.js",
+    "docs/custom/partials/copyright.html",
+    "docs/advanced/3.2.文件照片上传.md",
+    "docs/basic/2.2.主界面.md",
+    "未命名",
+    "docs/basic/2.4.帖子页.md",
+    "docs/about/about.md",
+    "docs/about",
+    "docs/about.md",
+    "10856822.tmp",
+    "docs/information/4.2.转存表情包.md",
+    "docs/images/material.png",
+    "docs/images/graduate-cap.96x96.png",
+    "docs/images/graduate-cap.png",
+    "docs/images/graduate-cap.48x48.png",
+    "docs/images/graduate-cap.192x192.png",
+    "docs_sample/images/material.png",
+    "docs_sample/images/graduate-cap.96x96.png",
+    "docs_sample/images/graduate-cap.png",
+    "docs_sample/images/graduate-cap.48x48.png",
+    "docs_sample/images/graduate-cap.192x192.png"
+  ]
+}

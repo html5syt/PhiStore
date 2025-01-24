@@ -1,0 +1,229 @@
+{
+  "main": {
+    "id": "9ff5b3a9e311ad7c",
+    "type": "split",
+    "children": [
+      {
+        "id": "80fe63b482054f2a",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "9b6019675fe3d703",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "README.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "README"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "873a4e6c6a6d9d47",
+    "type": "split",
+    "children": [
+      {
+        "id": "c7567c06eda21dcd",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "5c0dd7d16a3dedd1",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-folder-closed",
+              "title": "文件列表"
+            }
+          },
+          {
+            "id": "7bb13c5045741213",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "搜索"
+            }
+          },
+          {
+            "id": "7008a2e94bc4593c",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {},
+              "icon": "lucide-bookmark",
+              "title": "书签"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 200,
+    "collapsed": true
+  },
+  "right": {
+    "id": "09d09197c33c91c6",
+    "type": "split",
+    "children": [
+      {
+        "id": "0dad3251030c8d1b",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "5961bfdac5125ff6",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "docs/basic/2.2.主界面.md",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "2.2.主界面 的反向链接列表"
+            }
+          },
+          {
+            "id": "abb6807a7c8e51f1",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "docs/basic/2.2.主界面.md",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "2.2.主界面 的出链列表"
+            }
+          },
+          {
+            "id": "a7c465069e1b66bd",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true
+              },
+              "icon": "lucide-tags",
+              "title": "标签"
+            }
+          },
+          {
+            "id": "459df6b802a78897",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "docs/basic/2.2.主界面.md"
+              },
+              "icon": "lucide-list",
+              "title": "2.2.主界面 的大纲"
+            }
+          },
+          {
+            "id": "01ec1226e7081142",
+            "type": "leaf",
+            "state": {
+              "type": "all-properties",
+              "state": {
+                "sortOrder": "frequency"
+              },
+              "icon": "lucide-file",
+              "title": "插件不再活动"
+            }
+          },
+          {
+            "id": "708e8b83b73852a5",
+            "type": "leaf",
+            "state": {
+              "type": "advanced-tables-toolbar",
+              "state": {},
+              "icon": "spreadsheet",
+              "title": "Advanced Tables"
+            }
+          },
+          {
+            "id": "20d732a27d698e27",
+            "type": "leaf",
+            "state": {
+              "type": "git-view",
+              "state": {},
+              "icon": "git-pull-request",
+              "title": "Source Control"
+            }
+          }
+        ],
+        "currentTab": 6
+      }
+    ],
+    "direction": "horizontal",
+    "width": 285.5,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "workspaces:管理工作区布局": false,
+      "switcher:打开快速切换": false,
+      "graph:查看关系图谱": false,
+      "canvas:新建白板": false,
+      "daily-notes:打开/创建今天的日记": false,
+      "templates:插入模板": false,
+      "command-palette:打开命令面板": false,
+      "audio-recorder:开始/结束录音": false,
+      "markdown-importer:打开 Markdown 格式转换器": false,
+      "table-editor-obsidian:Advanced Tables Toolbar": false
+    }
+  },
+  "active": "9b6019675fe3d703",
+  "lastOpenFiles": [
+    "参考录屏.mp4",
+    "抽奖-结果消失点.png",
+    "抽奖-重叠.png",
+    "抽奖-基础.png",
+    "docs/basic/2.2.主界面.md",
+    "docs/basic/2.1.注册&登录.md",
+    "docs/basic/2.6.个人设置.md",
+    "docs/basic/index.md",
+    "docs/about/index.md",
+    "docs/basic/2.7.第三方登录.md",
+    "docs/index.md",
+    "docs/about/contact.md",
+    "docs/about/社区准则.md",
+    "社区准则.md",
+    "全站使用说明.md",
+    "社区说明.md",
+    "讲述-圆珠笔背后的故事.md",
+    "① -有趣的题目.md",
+    "不计回报≠无理取闹！.md",
+    "未命名.canvas",
+    "尺规作正八边形.md",
+    "手机上的GeoGebra桌面版.md",
+    "自我介绍.md"
+  ]
+}
