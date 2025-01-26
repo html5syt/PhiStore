@@ -86,8 +86,8 @@ class PhiLottery(ft.Stack):
                 detailText.value = ""
                 # 对接抽奖函数
                 text = "2 MB"
-                detail.content.src = "avatar.png"
-                # 存在BUG：手机电脑显示效果不一样
+                detailpic=['','file.png','dataicon.png','null.png','avatar.png','illustration.png']
+                detail.content.src = str(detailpic[random.randint(1, 5)])
                 
                 for i in range(1, 24):
                     detail.scale = ft.transform.Scale(scale_x=0.7, scale_y=0.7 / 23 * i)
