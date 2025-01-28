@@ -7,7 +7,7 @@ lock = asyncio.Lock()
 DATA = 0.0
 
 
-def LotteryCore(DATA=0.0,multi=False):
+def LotteryCore(multi=False):
     pass
     
 
@@ -173,12 +173,12 @@ async def main(page: ft.Page):
 
 
 def test(e, data, datashow, page=ft.Page):
-    global DATA
-    DATA += 102400000
-    print(data)
-    for i in range(102400000):
-        phi.PhiData.on_data_change(datashow, phi.hum_convert(i**5), page)
-    # phi.PhiData.on_data_change(datashow, phi.hum_convert(DATA), page)
+    # global DATA
+    # DATA += 102400000
+    # print(data)
+    # for i in range(102400000):
+    #     phi.PhiData.on_data_change(datashow, phi.hum_convert(i**5), page)
+    phi.PhiData.on_data_change(datashow, phi.hum_convert(256000), page)
 
 
 ft.app(target=main)
