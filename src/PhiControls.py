@@ -1,5 +1,8 @@
+import asyncio
+import random
 import flet as ft
 import flet.canvas as cv
+
 
 def hum_convert(value):
     # 单位：B
@@ -138,3 +141,109 @@ class PhiData(ft.Stack):
         # print(self.controls[0].controls[1].controls[1].content.spans[0].style.size)
         # print(self.controls[0].controls[1].controls[1].margin)
         page.update()
+
+class PhiLottery(ft.Stack):
+    def __init__(self, n=1, page=ft.Page):
+        if (
+            page.platform == ft.PagePlatform.ANDROID
+            or page.platform == ft.PagePlatform.IOS
+        ):
+            n = n * 0.8
+        super().__init__()
+        self.controls = [
+            ft.Image(
+                src="phi0101.webp", 
+                width=350 * n,
+                offset=ft.transform.Offset(0, 0),
+                # animate_offset=ft.animation.Animation(100),
+            ),
+            ft.Column(
+                [
+                    ft.Container(
+                        ft.Image(
+                            "dataicon.png",
+                        ),
+                        height=300 * n,
+                        width=350 * n,
+                        alignment=ft.alignment.center,
+                        padding=0,
+                        scale=ft.transform.Scale(scale_x=0.7, scale_y=0),
+                        margin=0,   
+                    ),
+                    ft.Text(
+                        "",
+                        color=ft.Colors.WHITE,
+                        size=30 * n,
+                        text_align=ft.TextAlign.CENTER,
+                        width=350 * n,
+                        style=ft.TextStyle(height=1),
+                        offset=ft.transform.Offset(0, -1.1*n),
+                    ),
+
+                ],
+                expand=True,
+                alignment=ft.MainAxisAlignment.START,
+                spacing=0,
+                offset=ft.transform.Offset(0, 0),
+                opacity=0,
+                animate_offset=300,
+                animate_opacity=300,
+            ),
+        ]
+
+    async def on_click(self, e=None, page=None, n=0.8,multi=False,DATA=0.0):
+        async with (
+            asyncio.Lock()
+        ):  # 确保只有一个 on_click 在执行，点几次执行几次，无忽略（写不动了
+            # 注：连抽功能未实现，方法已给出
+            if page and (
+                page.platform == ft.PagePlatform.ANDROID
+                or page.platform == ft.PagePlatform.IOS
+            ):
+                n = n * 1.2
+
+            detail = self.controls[1].controls[0]  # 图标
+            detailText = self.controls[1].controls[1]  # 描述
+            detailText.size = 30 * n
+            self.controls[0].visible = not self.controls[0].visible  # ?图
+
+            self.controls[1].animate_offset = 300
+            self.controls[1].animate_opacity = 300
+            page.update()
+            if not self.controls[0].visible:
+                self.controls[1].animate_offset = 1
+                self.controls[1].animate_opacity = 1
+                detail.animate = 300
+                self.controls[1].opacity = 1
+                self.controls[1].offset = ft.transform.Offset(0, 0)
+                page.update()
+                # 初始状态 -> 逐渐显示
+                detailText.value = ""
+                # 对接抽奖函数
+                text = "2 MB"
+                detailpic=['','file.png','dataicon.png','null.png','avatar.png','illustration.png']
+                detail.content.src = str(detailpic[random.randint(1, 5)])
+                
+                for i in range(1, 24):
+                    detail.scale = ft.transform.Scale(scale_x=0.7, scale_y=0.7 / 23 * i)
+                    page.update()
+                    await asyncio.sleep(0.016)
+                    # scale_x和scale_y无法使用动画，只能用这种方法
+                for textTemp in text:
+                    detailText.value += textTemp
+                    page.update()
+                    await asyncio.sleep(0.05)
+            else:
+                # 逐渐隐藏 -> 初始状态
+                self.controls[1].animate_offset = 300
+                self.controls[1].animate_opacity = 300
+                page.update()
+                self.controls[1].opacity = 0
+                self.controls[1].offset = ft.transform.Offset(
+                    -1 * (page.width // 4 / detail.width), 0
+                )
+                page.update()
+                if multi:
+                    await asyncio.sleep(0.1)
+                else:
+                    await asyncio.sleep(0.5)
