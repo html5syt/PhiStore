@@ -5,18 +5,107 @@ import flet.canvas as cv
 
 
 def hum_convert(value):
+    """_summary_: 将字节转换为人类可读的格式
+
+    Args:
+        value (_type_): _description_
+
+    Returns:
+        _type_: _description_
+    """
     # 单位：B
-    units = ["B","KB", "MB", "GB", "TB", "PB"]
+    units = ["B", "KB", "MB", "GB", "TB", "PB"]
     size = 1024.0
-    if value <1024.0:
+    if value < 1024.0:
         return "0.00 KB"
     for i in range(len(units)):
         if (value / size) < 1:
             return "%.2f %s" % (value, units[i])
         value = value / size
 
+
+def LotteryCore(multi=False, DATA=0.0, lottery_list={}):
+    def chance_prize(prize_list):
+        """
+        根据传入的奖品列表和对应的概率随机抽取一项奖品，并返回奖品名称。
+        
+        参数:
+        prize_list (list of tuples): 列表，每个子列表包含奖品名称（字符串）和抽到该奖品的概率（浮点数）。
+        
+        返回:
+        str: 抽中的奖品名称。
+        """
+        # 从 prize_list 中提取奖品名称和对应的概率
+        prizes, probabilities = zip(*prize_list)
+        
+        # 使用 random.choices 按照概率随机抽取一项奖品
+        chosen_prize = random.choices(prizes, weights=probabilities, k=1)[0]
+        
+        return chosen_prize
+
+    result = []
+    rd1 = chance_prize(
+        [
+            ("File", 0.1),
+            ("Data", 0.4),
+            ("Null", 0.4),
+            ("Avatar", 0.07),
+            ("Illustration", 0.03),
+        ]
+    )
+    if rd1 == "File":
+        rd2 = chance_prize(
+            [("White", 0.7), ("Blue", 0.19), ("Purple", 0.1), ("Yellow", 0.01)]
+        )
+        if rd2 == "White":
+            result.append(random.choice(lottery_list["File"]["White"]))
+        elif rd2 == "Blue":
+            result.append(random.choice(lottery_list["File"]["Blue"]))
+        elif rd2 == "Purple":
+            result.append(random.choice(lottery_list["File"]["Purple"]))
+        elif rd2 == "Yellow":
+            result.append(random.choice(lottery_list["File"]["Yellow"]))
+        result.append("file.png")
+        return result
+    if rd1 == "Data":
+        rd2 = chance_prize(
+            [("White", 0.7), ("Blue", 0.15), ("Purple", 0.14), ("Yellow", 0.01)]
+        )
+        if rd2 == "White":
+            result.append(random.choice(lottery_list["Data"]["White"]))
+        elif rd2 == "Blue":
+            result.append(random.choice(lottery_list["Data"]["Blue"]))
+        elif rd2 == "Purple":
+            result.append(random.choice(lottery_list["Data"]["Purple"]))
+        elif rd2 == "Yellow":
+            result.append(random.choice(lottery_list["Data"]["Yellow"]))
+        DATA += float(result[0])
+        result[0] = hum_convert(DATA)
+        result.append("dataicon.png")
+        return result
+    if rd1 == "Null":
+        return ["Null", "null.png"]
+    if rd1 == "Avatar":
+        rd2 = chance_prize([("Blue", 0.15), ("Purple", 0.14)])
+        if rd2 == "Blue":
+            result.append(random.choice(lottery_list["Avatar"]["Blue"]))
+        elif rd2 == "Purple":
+            result.append(random.choice(lottery_list["Avatar"]["Purple"]))
+        result.append("avatar.png")
+        return result
+    if rd1 == "Illustration":
+        rd2 = random.choice(lottery_list["Illustration"]["White"])
+        return [rd2, "illustration.png"]
+
+
 class PhiBack(ft.Stack):
-    def __init__(self, on_click=None,n=1):
+    """_summary_: 返回按钮
+
+    Args:
+        ft (_type_): _description_
+    """
+
+    def __init__(self, on_click=None, n=1):
         super().__init__()
         self.controls = [
             ft.Container(
@@ -24,9 +113,9 @@ class PhiBack(ft.Stack):
                     [
                         cv.Path(
                             [
-                                cv.Path.LineTo(150*n, 0),
-                                cv.Path.LineTo(124.5448267*n, 95*n),
-                                cv.Path.LineTo(0, 95*n),
+                                cv.Path.LineTo(150 * n, 0),
+                                cv.Path.LineTo(124.5448267 * n, 95 * n),
+                                cv.Path.LineTo(0, 95 * n),
                             ],
                             paint=ft.Paint(
                                 style=ft.PaintingStyle.FILL,
@@ -35,10 +124,10 @@ class PhiBack(ft.Stack):
                         ),
                         cv.Path(
                             [
-                                cv.Path.MoveTo(150*n, 0),
-                                cv.Path.LineTo(157.5*n, 0),
-                                cv.Path.LineTo(132.0448267*n, 95*n),
-                                cv.Path.LineTo(124.5448267*n, 95*n),
+                                cv.Path.MoveTo(150 * n, 0),
+                                cv.Path.LineTo(157.5 * n, 0),
+                                cv.Path.LineTo(132.0448267 * n, 95 * n),
+                                cv.Path.LineTo(124.5448267 * n, 95 * n),
                             ],
                             paint=ft.Paint(
                                 style=ft.PaintingStyle.FILL,
@@ -46,8 +135,8 @@ class PhiBack(ft.Stack):
                             ),
                         ),
                     ],
-                    width=157.5*n,
-                    height=95*n,
+                    width=157.5 * n,
+                    height=95 * n,
                     expand=True,
                 ),
                 padding=0,
@@ -55,14 +144,21 @@ class PhiBack(ft.Stack):
             ),
             ft.Container(
                 ft.Image(src="back.svg"),
-                margin=ft.margin.only(top=26*n, left=44*n),
+                margin=ft.margin.only(top=26 * n, left=44 * n),
                 on_click=on_click,
-                width=40*n,
-                height=40*n,
+                width=40 * n,
+                height=40 * n,
             ),
         ]
-        
+
+
 class PhiData(ft.Stack):
+    """_summary_: 数据显示
+
+    Args:
+        ft (_type_): _description_
+    """
+
     DATA = "0.00 KB"  # 7-9位字符，可能更多，防手欠
 
     # print("Data: ",len(DATA))
@@ -121,11 +217,21 @@ class PhiData(ft.Stack):
         ]
 
     def on_data_change(self, data, page=ft.Page, n=0.7):
-        if page.platform == ft.PagePlatform.ANDROID or page.platform == ft.PagePlatform.IOS:
-        # 缩放倍数
-            n*=0.747
+        """_summary_: 数据改变时调用
+
+        Args:
+            data (_type_): _description_
+            page (_type_, optional): _description_. Defaults to ft.Page.
+            n (float, optional): _description_. Defaults to 0.7.
+        """
+        if (
+            page.platform == ft.PagePlatform.ANDROID
+            or page.platform == ft.PagePlatform.IOS
+        ):
+            # 缩放倍数
+            n *= 0.747
         else:
-            n*=1.2
+            n *= 1.2
         self.DATA = data
         # print("Data: ", len(self.DATA))
         # print("Data: ", self.DATA)
@@ -142,7 +248,14 @@ class PhiData(ft.Stack):
         # print(self.controls[0].controls[1].controls[1].margin)
         page.update()
 
+
 class PhiLottery(ft.Stack):
+    """_summary_: 抽奖中心动画
+
+    Args:
+        ft (_type_): _description_
+    """
+
     def __init__(self, n=1, page=ft.Page):
         if (
             page.platform == ft.PagePlatform.ANDROID
@@ -152,7 +265,7 @@ class PhiLottery(ft.Stack):
         super().__init__()
         self.controls = [
             ft.Image(
-                src="phi0101.webp", 
+                src="phi0101.webp",
                 width=350 * n,
                 offset=ft.transform.Offset(0, 0),
                 # animate_offset=ft.animation.Animation(100),
@@ -168,7 +281,7 @@ class PhiLottery(ft.Stack):
                         alignment=ft.alignment.center,
                         padding=0,
                         scale=ft.transform.Scale(scale_x=0.7, scale_y=0),
-                        margin=0,   
+                        margin=0,
                     ),
                     ft.Text(
                         "",
@@ -177,9 +290,8 @@ class PhiLottery(ft.Stack):
                         text_align=ft.TextAlign.CENTER,
                         width=350 * n,
                         style=ft.TextStyle(height=1),
-                        offset=ft.transform.Offset(0, -1.1*n),
+                        offset=ft.transform.Offset(0, -1.1 * n),
                     ),
-
                 ],
                 expand=True,
                 alignment=ft.MainAxisAlignment.START,
@@ -191,9 +303,29 @@ class PhiLottery(ft.Stack):
             ),
         ]
 
-    async def on_click(self, e=None, page=None, n=0.8,multi=False,DATA=0.0):
+    async def on_click(
+        self,
+        e=None,
+        page=None,
+        n=0.8,
+        multi=False,
+        DATA=0.0,
+        lock=asyncio.Lock(),
+        lottery_list={},
+    ):
+        """_summary_: 点击时调用
+
+        Args:
+            e (_type_, optional): _description_. Defaults to None.
+            page (_type_, optional): _description_. Defaults to None.
+            n (float, optional): _description_. Defaults to 0.8.
+            multi (bool, optional): _description_. Defaults to False.
+            DATA (float, optional): 传入以实现抽到Data时增加实际Data。 Defaults to 0.0.
+            lock (_type_, optional): _description_. Defaults to asyncio.Lock().
+            lottery_list (_type_, optional): 奖品列表. Defaults to {}.
+        """
         async with (
-            asyncio.Lock()
+            lock
         ):  # 确保只有一个 on_click 在执行，点几次执行几次，无忽略（写不动了
             # 注：连抽功能未实现，方法已给出
             if page and (
@@ -220,10 +352,10 @@ class PhiLottery(ft.Stack):
                 # 初始状态 -> 逐渐显示
                 detailText.value = ""
                 # 对接抽奖函数
-                text = "2 MB"
-                detailpic=['','file.png','dataicon.png','null.png','avatar.png','illustration.png']
-                detail.content.src = str(detailpic[random.randint(1, 5)])
-                
+                result = LotteryCore(multi, DATA, lottery_list)
+                text = str(result[0])
+                detail.content.src = str(result[1])
+
                 for i in range(1, 24):
                     detail.scale = ft.transform.Scale(scale_x=0.7, scale_y=0.7 / 23 * i)
                     page.update()

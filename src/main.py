@@ -1,19 +1,21 @@
 import asyncio
+import json
+import random
 import flet as ft
 import PhiControls as phi
-import random
+import assets.default_json as default_json
 
-lock = asyncio.Lock()
+lock = asyncio.Lock()  # 防止连续点击单抽
+lock2 = False  # 防止连抽时点击单抽
+lock3 = False  # 防止连续点击单抽
 DATA = 0.0
-
-
-def LotteryCore(multi=False):
-    pass
-    
 
 
 async def main(page: ft.Page):
     global DATA
+
+    # 读取抽奖列表,如无自定义则使用默认
+    lottery_list = default_json.default_json()
 
     # layout debug
     def on_keyboard(e: ft.KeyboardEvent):
@@ -50,19 +52,34 @@ async def main(page: ft.Page):
     datashow = phi.PhiData(n=n)
     lottery = phi.PhiLottery(n=n, page=page)
 
-
-
     async def lottery_on_click(e):
-        nonlocal lottery
-        lottery.controls[0].src = "phi0101.webp"
-        await phi.PhiLottery.on_click(self=lottery, page=page, n=n)
+        global lock, lock2, lock3
+        nonlocal lottery, lottery_list
+        if not lock2 and not lock3:  # 防止连抽时点击&连续点击单抽
+            lock3 = True
+            lottery.controls[0].src = "phi0101.webp"
+            await phi.PhiLottery.on_click(
+                self=lottery, page=page, n=n, lock=lock, lottery_list=lottery_list
+            )
+            lock3 = False
+
     async def lottery_on_click_multi(e):
-        nonlocal lottery
+        global lock, lock2
+        nonlocal lottery, lottery_list
+        lock2 = True
         lottery.controls[0].src = " "
         # 连抽
         for i in range(1, 21):
-            await phi.PhiLottery.on_click(self=lottery, page=page, n=n,multi=True)
+            await phi.PhiLottery.on_click(
+                self=lottery,
+                page=page,
+                n=n,
+                multi=True,
+                lock=lock,
+                lottery_list=lottery_list,
+            )
         lottery.controls[0].src = "phi0101.webp"
+        lock2 = False
         page.update()
         # nonlocal multi0
         # multi0 = [0, 1]
@@ -178,7 +195,7 @@ def test(e, data, datashow, page=ft.Page):
     # print(data)
     # for i in range(102400000):
     #     phi.PhiData.on_data_change(datashow, phi.hum_convert(i**5), page)
-    phi.PhiData.on_data_change(datashow, phi.hum_convert(256000), page)
+    phi.PhiData.on_data_change(datashow, phi.hum_convert(262144), page)
 
 
 ft.app(target=main)
