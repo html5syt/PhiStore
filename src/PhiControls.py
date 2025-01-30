@@ -4,7 +4,7 @@ import flet as ft
 import flet.canvas as cv
 
 
-def hum_convert(value):
+def hum_convert(value, bit=2):
     """_summary_: 将字节转换为人类可读的格式
 
     Args:
@@ -17,30 +17,30 @@ def hum_convert(value):
     units = ["B", "KB", "MB", "GB", "TB", "PB"]
     size = 1024.0
     if value < 1024.0:
-        return "0.00 KB"
+        return "%.2f %s" % (value, units[0])  # 修改为返回字节单位
     for i in range(len(units)):
         if (value / size) < 1:
-            return "%.2f %s" % (value, units[i])
+            return "%.*f %s" % (bit, value, units[i])  # 使用 bit 参数来指定小数位数
         value = value / size
 
 
-def LotteryCore(multi=False, DATA=0.0, lottery_list={}):
+def lottery_core(multi=False, DATA=0.0, lottery_list={}):
     def chance_prize(prize_list):
         """
         根据传入的奖品列表和对应的概率随机抽取一项奖品，并返回奖品名称。
-        
+
         参数:
         prize_list (list of tuples): 列表，每个子列表包含奖品名称（字符串）和抽到该奖品的概率（浮点数）。
-        
+
         返回:
         str: 抽中的奖品名称。
         """
         # 从 prize_list 中提取奖品名称和对应的概率
         prizes, probabilities = zip(*prize_list)
-        
+
         # 使用 random.choices 按照概率随机抽取一项奖品
         chosen_prize = random.choices(prizes, weights=probabilities, k=1)[0]
-        
+
         return chosen_prize
 
     result = []
@@ -59,12 +59,16 @@ def LotteryCore(multi=False, DATA=0.0, lottery_list={}):
         )
         if rd2 == "White":
             result.append(random.choice(lottery_list["File"]["White"]))
+            result.append("White")
         elif rd2 == "Blue":
             result.append(random.choice(lottery_list["File"]["Blue"]))
+            result.append("Blue")
         elif rd2 == "Purple":
             result.append(random.choice(lottery_list["File"]["Purple"]))
+            result.append("Purple")
         elif rd2 == "Yellow":
             result.append(random.choice(lottery_list["File"]["Yellow"]))
+            result.append("Yellow")
         result.append("file.png")
         return result
     if rd1 == "Data":
@@ -73,29 +77,35 @@ def LotteryCore(multi=False, DATA=0.0, lottery_list={}):
         )
         if rd2 == "White":
             result.append(random.choice(lottery_list["Data"]["White"]))
+            result.append("White")
         elif rd2 == "Blue":
             result.append(random.choice(lottery_list["Data"]["Blue"]))
+            result.append("Blue")
         elif rd2 == "Purple":
             result.append(random.choice(lottery_list["Data"]["Purple"]))
+            result.append("Purple")
         elif rd2 == "Yellow":
             result.append(random.choice(lottery_list["Data"]["Yellow"]))
+            result.append("Yellow")
         DATA += float(result[0])
-        result[0] = hum_convert(DATA)
+        result[0] = hum_convert(DATA, bit=0)
         result.append("dataicon.png")
         return result
     if rd1 == "Null":
-        return ["Null", "null.png"]
+        return ["Null", "White", "null.png"]
     if rd1 == "Avatar":
         rd2 = chance_prize([("Blue", 0.15), ("Purple", 0.14)])
         if rd2 == "Blue":
             result.append(random.choice(lottery_list["Avatar"]["Blue"]))
+            result.append("Blue")
         elif rd2 == "Purple":
             result.append(random.choice(lottery_list["Avatar"]["Purple"]))
+            result.append("Purple")
         result.append("avatar.png")
         return result
     if rd1 == "Illustration":
         rd2 = random.choice(lottery_list["Illustration"]["White"])
-        return [rd2, "illustration.png"]
+        return [rd2, "White", "illustration.png"]
 
 
 class PhiBack(ft.Stack):
@@ -289,12 +299,13 @@ class PhiLottery(ft.Stack):
                         size=30 * n,
                         text_align=ft.TextAlign.CENTER,
                         width=350 * n,
+                        # TODO: 文字居中，宽度自适应
                         style=ft.TextStyle(height=1),
                         offset=ft.transform.Offset(0, -1.1 * n),
                     ),
                 ],
                 expand=True,
-                alignment=ft.MainAxisAlignment.START,
+                alignment=ft.CrossAxisAlignment.CENTER,
                 spacing=0,
                 offset=ft.transform.Offset(0, 0),
                 opacity=0,
@@ -352,9 +363,17 @@ class PhiLottery(ft.Stack):
                 # 初始状态 -> 逐渐显示
                 detailText.value = ""
                 # 对接抽奖函数
-                result = LotteryCore(multi, DATA, lottery_list)
+                result = lottery_core(multi, DATA, lottery_list)
                 text = str(result[0])
-                detail.content.src = str(result[1])
+                if result[1] == "White":
+                    detailText.color = ft.Colors.WHITE
+                elif result[1] == "Blue":
+                    detailText.color = "#00FFFF"
+                elif result[1] == "Purple":
+                    detailText.color = "#FF00FF"
+                elif result[1] == "Yellow":
+                    detailText.color = "#FCF81F"
+                detail.content.src = str(result[2])
 
                 for i in range(1, 24):
                     detail.scale = ft.transform.Scale(scale_x=0.7, scale_y=0.7 / 23 * i)
@@ -365,6 +384,8 @@ class PhiLottery(ft.Stack):
                     detailText.value += textTemp
                     page.update()
                     await asyncio.sleep(0.05)
+                if multi:
+                    await asyncio.sleep(0.25)
             else:
                 # 逐渐隐藏 -> 初始状态
                 self.controls[1].animate_offset = 300
