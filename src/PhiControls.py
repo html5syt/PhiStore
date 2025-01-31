@@ -31,9 +31,11 @@ def lottery_core(multi=False, DATA=0.0, lottery_list={}):
 
         参数:
         prize_list (list of tuples): 列表，每个子列表包含奖品名称（字符串）和抽到该奖品的概率（浮点数）。
+        示例：[("White", 0.7), ("Blue", 0.19), ("Purple", 0.1), ("Yellow", 0.01)]
 
         返回:
         str: 抽中的奖品名称。
+
         """
         # 从 prize_list 中提取奖品名称和对应的概率
         prizes, probabilities = zip(*prize_list)
@@ -46,10 +48,10 @@ def lottery_core(multi=False, DATA=0.0, lottery_list={}):
     result = []
     rd1 = chance_prize(
         [
-            ("File", 0.1),
-            ("Data", 0.4),
-            ("Null", 0.4),
-            ("Avatar", 0.07),
+            ("File", 0.12),
+            ("Data", 0.2),
+            ("Null", 0.6),
+            ("Avatar", 0.05),
             ("Illustration", 0.03),
         ]
     )
@@ -129,7 +131,7 @@ class PhiBack(ft.Stack):
                             ],
                             paint=ft.Paint(
                                 style=ft.PaintingStyle.FILL,
-                                color=("#90000000"),
+                                color="#90000000",
                             ),
                         ),
                         cv.Path(
@@ -252,7 +254,7 @@ class PhiData(ft.Stack):
             right=(19 - (3 * (len(self.DATA) - 7))) * n * 2,
         )
         self.controls[0].controls[1].controls[1].content.spans[0].style.size = (
-            (35 - (2.5 * (len(self.DATA) - 7))) * n * 0.96
+            (35 - (2.5 * (len(self.DATA) - 7))) * n * 0.92
         )
         # print(self.controls[0].controls[1].controls[1].content.spans[0].style.size)
         # print(self.controls[0].controls[1].controls[1].margin)
@@ -273,10 +275,12 @@ class PhiLottery(ft.Stack):
         ):
             n = n * 0.8
         super().__init__()
+        textwidth = 100000
         self.controls = [
             ft.Image(
                 src="phi0101.webp",
-                width=350 * n,
+                width=textwidth * n,
+                height=350 * n,
                 offset=ft.transform.Offset(0, 0),
                 # animate_offset=ft.animation.Animation(100),
             ),
@@ -287,7 +291,7 @@ class PhiLottery(ft.Stack):
                             "dataicon.png",
                         ),
                         height=300 * n,
-                        width=350 * n,
+                        width=textwidth * n,
                         alignment=ft.alignment.center,
                         padding=0,
                         scale=ft.transform.Scale(scale_x=0.7, scale_y=0),
@@ -298,10 +302,9 @@ class PhiLottery(ft.Stack):
                         color=ft.Colors.WHITE,
                         size=30 * n,
                         text_align=ft.TextAlign.CENTER,
-                        width=350 * n,
-                        # TODO: 文字居中，宽度自适应
+                        width=textwidth * n,
                         style=ft.TextStyle(height=1),
-                        offset=ft.transform.Offset(0, -1.1 * n),
+                        offset=ft.transform.Offset(0, -1.43 * n),
                     ),
                 ],
                 expand=True,
@@ -339,11 +342,13 @@ class PhiLottery(ft.Stack):
             lock
         ):  # 确保只有一个 on_click 在执行，点几次执行几次，无忽略（写不动了
             # 注：连抽功能未实现，方法已给出
+            n2 = n
             if page and (
                 page.platform == ft.PagePlatform.ANDROID
                 or page.platform == ft.PagePlatform.IOS
             ):
                 n = n * 1.2
+                n2 = n * 0.747
 
             detail = self.controls[1].controls[0]  # 图标
             detailText = self.controls[1].controls[1]  # 描述
@@ -380,6 +385,7 @@ class PhiLottery(ft.Stack):
                     page.update()
                     await asyncio.sleep(0.016)
                     # scale_x和scale_y无法使用动画，只能用这种方法
+                    # TODO: 文字逐渐显示(issue)
                 for textTemp in text:
                     detailText.value += textTemp
                     page.update()
@@ -392,9 +398,15 @@ class PhiLottery(ft.Stack):
                 self.controls[1].animate_opacity = 300
                 page.update()
                 self.controls[1].opacity = 0
+                offset_x =-1 * abs((page.width // 4 / (350 * n2) - 1))* 0.05 - 0.25
+                if offset_x >= -0.15:
+                    offset_x -= 0.1
+                if offset_x < -0.3:
+                    offset_x += 0.1
                 self.controls[1].offset = ft.transform.Offset(
-                    -1 * (page.width // 4 / detail.width), 0
+                    offset_x, 0
                 )
+                print(self.controls[1].offset.x)
                 page.update()
                 if multi:
                     await asyncio.sleep(0.1)
