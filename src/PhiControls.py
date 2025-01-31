@@ -17,7 +17,7 @@ def hum_convert(value, bit=2):
     units = ["B", "KB", "MB", "GB", "TB", "PB"]
     size = 1024.0
     if value < 1024.0:
-        return "%.2f %s" % (value, units[0])  # 修改为返回字节单位
+        return "%.2f %s" % (value, units[1])  # 修改为返回字节单位
     for i in range(len(units)):
         if (value / size) < 1:
             return "%.*f %s" % (bit, value, units[i])  # 使用 bit 参数来指定小数位数
@@ -25,6 +25,7 @@ def hum_convert(value, bit=2):
 
 
 def lottery_core(multi=False, DATA=0.0, lottery_list={}):
+    # TODO: 不重复抽奖
     def chance_prize(prize_list):
         """
         根据传入的奖品列表和对应的概率随机抽取一项奖品，并返回奖品名称。
@@ -89,8 +90,8 @@ def lottery_core(multi=False, DATA=0.0, lottery_list={}):
         elif rd2 == "Yellow":
             result.append(random.choice(lottery_list["Data"]["Yellow"]))
             result.append("Yellow")
-        DATA += float(result[0])
-        result[0] = hum_convert(DATA, bit=0)
+        data = float(result[0])
+        result[0] = hum_convert(data, bit=0)
         result.append("dataicon.png")
         return result
     if rd1 == "Null":
@@ -326,6 +327,8 @@ class PhiLottery(ft.Stack):
         DATA=0.0,
         lock=asyncio.Lock(),
         lottery_list={},
+        datadelta=0.0,
+        datashow=PhiData(),
     ):
         """_summary_: 点击时调用
 
@@ -392,20 +395,22 @@ class PhiLottery(ft.Stack):
                     await asyncio.sleep(0.05)
                 if multi:
                     await asyncio.sleep(0.25)
+                DATA -= datadelta
+                PhiData.on_data_change(datashow, hum_convert(DATA), page=page)
+                page.update()
+            #     TODO: Data扣除
             else:
                 # 逐渐隐藏 -> 初始状态
                 self.controls[1].animate_offset = 300
                 self.controls[1].animate_opacity = 300
                 page.update()
                 self.controls[1].opacity = 0
-                offset_x =-1 * abs((page.width // 4 / (350 * n2) - 1))* 0.05 - 0.25
+                offset_x = -1 * abs((page.width // 4 / (350 * n2) - 1)) * 0.05 - 0.25
                 if offset_x >= -0.15:
                     offset_x -= 0.1
                 if offset_x < -0.3:
                     offset_x += 0.1
-                self.controls[1].offset = ft.transform.Offset(
-                    offset_x, 0
-                )
+                self.controls[1].offset = ft.transform.Offset(offset_x, 0)
                 print(self.controls[1].offset.x)
                 page.update()
                 if multi:

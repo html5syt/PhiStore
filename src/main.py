@@ -8,7 +8,7 @@ import assets.default_json as default_json
 lock = asyncio.Lock()  # 防止连续点击单抽
 lock2 = False  # 防止连抽时点击单抽
 lock3 = False  # 防止连续点击单抽
-DATA = 0.0
+DATA = 104857600
 
 
 # noinspection PyTypeChecker
@@ -47,41 +47,74 @@ async def main(page: ft.Page):
     audio1 = ft.Audio(
         src="Shop0.wav", autoplay=True, release_mode=ft.audio.ReleaseMode.LOOP
     )
-    # page.overlay.append(audio1)
+    page.overlay.append(audio1)
 
     # 独立组件
     datashow = Phi.PhiData(n=n)
     lottery = Phi.PhiLottery(n=n, page=page)
+    setting = ft.AlertDialog(
+        modal=True,
+        title=ft.Text("设置"),
+        content=ft.Column(
+            [
+                ft.Text("当前Data：" + str(DATA) + " Byte"),
+                ft.TextField(value=str(DATA), label="Data/Byte"),
+            ],
+        ),
+        actions=[ft.Button("确定")],
+    )
 
+    # 事件监听
     async def lottery_on_click(e):
-        global lock, lock2, lock3
-        nonlocal lottery, lottery_list
-        if not lock2 and not lock3:  # 防止连抽时点击&连续点击单抽
-            lock3 = True
-            lottery.controls[0].src = "phi0101.webp"
-            await Phi.PhiLottery.on_click(
-                self=lottery, page=page, n=n, lock=lock, lottery_list=lottery_list
-            )
-            lock3 = False
+        global lock, lock2, lock3, DATA
+        nonlocal lottery, lottery_list, page, n
+        if DATA >= 1048576:
+            if not lock2 and not lock3:  # 防止连抽时点击&连续点击单抽
+                lock3 = True
+                lottery.controls[0].src = "phi0101.webp"
+                await Phi.PhiLottery.on_click(
+                    self=lottery,
+                    page=page,
+                    n=n,
+                    lock=lock,
+                    lottery_list=lottery_list,
+                    DATA=DATA,
+                    datadelta=1048576,
+                    datashow=datashow,
+                )
+                lock3 = False
+                page.update()
+        elif DATA < 1048576:
+            page.snack_bar = ft.SnackBar(ft.Text("余额不足"))
+            page.snack_bar.open = True
+            page.update()
 
     async def lottery_on_click_multi(e):
-        global lock, lock2
+        global lock, lock2, DATA
         nonlocal lottery, lottery_list
         lock2 = True
         lottery.controls[0].src = " "
         # 连抽
-        for i in range(1, 21):
-            await Phi.PhiLottery.on_click(
-                self=lottery,
-                page=page,
-                n=n,
-                multi=True,
-                lock=lock,
-                lottery_list=lottery_list,
-            )
-        lottery.controls[0].src = "phi0101.webp"
-        lock2 = False
-        page.update()
+        if DATA >= 8388608:
+            for i in range(1, 21):
+                await Phi.PhiLottery.on_click(
+                    self=lottery,
+                    page=page,
+                    n=n,
+                    multi=True,
+                    lock=lock,
+                    lottery_list=lottery_list,
+                    DATA=DATA,
+                    datadelta=8388860.8,
+                    datashow=datashow,
+                )
+            lottery.controls[0].src = "phi0101.webp"
+            lock2 = False
+            page.update()
+        elif DATA < 8388608:
+            page.snack_bar = ft.SnackBar(ft.Text("余额不足"))
+            page.snack_bar.open = True
+            page.update()
         # nonlocal multi0
         # multi0 = [0, 1]
         # # 连抽
@@ -98,6 +131,27 @@ async def main(page: ft.Page):
         #     multi0=[0,1]
         # 单抽
         # await phi.PhiLottery.on_click(self=lottery, page=page, n=n)
+
+    def set(e, data, datashow, page=ft.Page):
+        global DATA
+        nonlocal setting
+        # DATA += 102400000
+        # print(data)
+        # for i in range(102400000):
+        #     Phi.PhiData.on_data_change(datashow, Phi.hum_convert(i ** 5), page)
+        # # Phi.PhiData.on_data_change(datashow, Phi.hum_convert(262144), page)
+        setting.content.controls[0].value = "当前Data：" + str(DATA) + " Byte"
+        setting.actions[0].on_click = lambda e: setting_on_submit(
+            e, data, datashow, page
+        )
+        page.open(setting)
+
+    def setting_on_submit(e, data, datashow, page=ft.Page):
+        global DATA
+        nonlocal setting
+        DATA = float(setting.content.controls[1].value)
+        Phi.PhiData.on_data_change(datashow, Phi.hum_convert(DATA), page=page)
+        page.close(setting)
 
     # 页面组件树
     page.add(
@@ -144,7 +198,7 @@ async def main(page: ft.Page):
                             col=1,
                             alignment=ft.alignment.top_right,
                             margin=ft.margin.only(right=25 * n),
-                            on_click=lambda e: test(e, DATA, datashow, page),
+                            on_click=lambda e: set(e, DATA, datashow, page),
                             height=70 * n * 1.25,
                         ),
                     ],
@@ -187,16 +241,8 @@ async def main(page: ft.Page):
             expand=True,
         )
     )
+    Phi.PhiData.on_data_change(datashow, Phi.hum_convert(DATA), page=page)
     page.update()
-
-
-def test(e, data, datashow, page=ft.Page):
-    global DATA
-    DATA += 102400000
-    print(data)
-    for i in range(102400000):
-        Phi.PhiData.on_data_change(datashow, Phi.hum_convert(i**5), page)
-    # Phi.PhiData.on_data_change(datashow, Phi.hum_convert(262144), page)
 
 
 ft.app(target=main)
