@@ -1,22 +1,29 @@
 import asyncio
-import json
 import random
 import flet as ft
+import flet_audio as ft_a
 import PhiControls as Phi
 import assets.default_json as default_json
 
 lock = asyncio.Lock()  # 防止连续点击单抽
 lock2 = False  # 防止连抽时点击单抽
 lock3 = False  # 防止连续点击单抽
-DATA = 104857600
+# DATA = 104857600.0  # 初始Data
 
 
 # noinspection PyTypeChecker
 async def main(page: ft.Page):
-    global DATA
+    # global DATA
 
+    # 数据读取
     # 读取抽奖列表,如无自定义则使用默认
+    # TODO: 自定义抽奖列表
     lottery_list = default_json.default_json()
+    # 读取Data
+    try:
+        Phi.storage(page=page, key="data")
+    except:
+        Phi.storage(page=page, key="data", value=104857600.0, mode="w")
 
     # layout debug
     def on_keyboard(e: ft.KeyboardEvent):
@@ -44,8 +51,8 @@ async def main(page: ft.Page):
     page.theme = ft.Theme(font_family="Exo")  # 默认应用字体
 
     # 背景音乐
-    audio1 = ft.Audio(
-        src="Shop0.wav", autoplay=True, release_mode=ft.audio.ReleaseMode.LOOP
+    audio1 = ft_a.Audio(
+        src="Shop0.wav", autoplay=True, release_mode=ft_a.audio.ReleaseMode.LOOP
     )
     page.overlay.append(audio1)
 
@@ -57,18 +64,27 @@ async def main(page: ft.Page):
         title=ft.Text("设置"),
         content=ft.Column(
             [
-                ft.Text("当前Data：" + str(DATA) + " Byte"),
-                ft.TextField(value=str(DATA), label="Data/Byte"),
+                ft.Text(
+                    "当前Data：" + str(Phi.storage(page=page, key="data")) + " Byte"
+                ),
+                ft.TextField(
+                    value=str(Phi.storage(page=page, key="data")), label="Data/Byte"
+                ),
             ],
         ),
-        actions=[ft.Button("确定")],
+        actions=[
+            ft.Button(
+                "清空session和client_storage（危险！仅供调试）", on_click=lambda e: DEL
+            ),
+            ft.Button("确定"),
+        ],
     )
 
     # 事件监听
     async def lottery_on_click(e):
-        global lock, lock2, lock3, DATA
+        global lock, lock2, lock3
         nonlocal lottery, lottery_list, page, n
-        if DATA >= 1048576:
+        if Phi.storage(page=page, key="data") >= 1048576:
             if not lock2 and not lock3:  # 防止连抽时点击&连续点击单抽
                 lock3 = True
                 lottery.controls[0].src = "phi0101.webp"
@@ -78,24 +94,24 @@ async def main(page: ft.Page):
                     n=n,
                     lock=lock,
                     lottery_list=lottery_list,
-                    DATA=DATA,
+                    DATA=Phi.storage(page=page, key="data"),
                     datadelta=1048576,
                     datashow=datashow,
                 )
                 lock3 = False
                 page.update()
-        elif DATA < 1048576:
+        elif Phi.storage(page=page, key="data") < 1048576:
             page.snack_bar = ft.SnackBar(ft.Text("余额不足"))
             page.snack_bar.open = True
             page.update()
 
     async def lottery_on_click_multi(e):
-        global lock, lock2, DATA
+        global lock, lock2
         nonlocal lottery, lottery_list
         lock2 = True
         lottery.controls[0].src = " "
         # 连抽
-        if DATA >= 8388608:
+        if Phi.storage(page=page, key="data") >= 8388608:
             for i in range(1, 21):
                 await Phi.PhiLottery.on_click(
                     self=lottery,
@@ -104,14 +120,14 @@ async def main(page: ft.Page):
                     multi=True,
                     lock=lock,
                     lottery_list=lottery_list,
-                    DATA=DATA,
+                    DATA=Phi.storage(page=page, key="data"),
                     datadelta=8388860.8,
                     datashow=datashow,
                 )
             lottery.controls[0].src = "phi0101.webp"
             lock2 = False
             page.update()
-        elif DATA < 8388608:
+        elif Phi.storage(page=page, key="data") < 8388608:
             page.snack_bar = ft.SnackBar(ft.Text("余额不足"))
             page.snack_bar.open = True
             page.update()
@@ -132,26 +148,36 @@ async def main(page: ft.Page):
         # 单抽
         # await phi.PhiLottery.on_click(self=lottery, page=page, n=n)
 
-    def set(e, data, datashow, page=ft.Page):
-        global DATA
+    # noinspection PyArgumentList
+    def set(e, datashow, page=ft.Page):
         nonlocal setting
         # DATA += 102400000
         # print(data)
         # for i in range(102400000):
         #     Phi.PhiData.on_data_change(datashow, Phi.hum_convert(i ** 5), page)
         # # Phi.PhiData.on_data_change(datashow, Phi.hum_convert(262144), page)
-        setting.content.controls[0].value = "当前Data：" + str(DATA) + " Byte"
-        setting.actions[0].on_click = lambda e: setting_on_submit(
-            e, data, datashow, page
+        setting.content.controls[0].value = (
+            "当前Data：" + str(Phi.storage(page=page, key="data")) + " Byte"
         )
+        setting.actions[1].on_click = lambda e: setting_on_submit(e, datashow, page)
         page.open(setting)
 
-    def setting_on_submit(e, data, datashow, page=ft.Page):
-        global DATA
+    def setting_on_submit(e, datashow, page=ft.Page):
         nonlocal setting
-        DATA = float(setting.content.controls[1].value)
-        Phi.PhiData.on_data_change(datashow, Phi.hum_convert(DATA), page=page)
+        Phi.storage(
+            page=page,
+            key="data",
+            value=float(setting.content.controls[1].value),
+            mode="w",
+        )
+        Phi.PhiData.on_data_change(
+            datashow, Phi.hum_convert(Phi.storage(page=page, key="data")), page=page
+        )
         page.close(setting)
+
+    def DEL(e):
+        nonlocal page
+        Phi.storage(page=page, type="DEL")
 
     # 页面组件树
     page.add(
@@ -198,7 +224,7 @@ async def main(page: ft.Page):
                             col=1,
                             alignment=ft.alignment.top_right,
                             margin=ft.margin.only(right=25 * n),
-                            on_click=lambda e: set(e, DATA, datashow, page),
+                            on_click=lambda e: set(e, datashow, page),
                             height=70 * n * 1.25,
                         ),
                     ],
@@ -241,7 +267,9 @@ async def main(page: ft.Page):
             expand=True,
         )
     )
-    Phi.PhiData.on_data_change(datashow, Phi.hum_convert(DATA), page=page)
+    Phi.PhiData.on_data_change(
+        datashow, Phi.hum_convert(Phi.storage(page=page, key="data")), page=page
+    )
     page.update()
 
 

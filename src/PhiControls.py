@@ -111,6 +111,54 @@ def lottery_core(multi=False, DATA=0.0, lottery_list={}):
         return [rd2, "White", "illustration.png"]
 
 
+def storage(
+    page: ft.Page,
+    key: str | None,
+    value: None,
+    type="c",
+    mode="r",
+    prefix="phistore_",
+):
+    """存储数据，默认使用 client_storage 存储，模式为读取，前缀为 phistore_
+    Args:
+        key (str): 键
+        value (_type_): 值
+        type (str, optional): c为持久缓存，s为session缓存，DEL为清空（仅用于调试！），默认c.
+        mode (str, optional): r为读取，w为写入，d为删除，默认r.
+        prefix (str, optional): 前缀.
+    """
+    key = prefix + key
+    if type == "s":
+        if mode == "r":
+            if page.session.contains_key(key):
+                return page.session.get(key)
+            else:
+                raise LookupError("Key not found in session storage")
+        elif mode == "w":
+            page.session.set(key, value)
+        elif mode == "d":
+            if page.session.contains_key(key):
+                page.session.remove(key)
+            else:
+                raise LookupError("Key not found in session storage")
+    elif type == "c":
+        if mode == "r":
+            if page.client_storage.contains_key(key):
+                return page.client_storage.get(key)
+            else:
+                raise LookupError("Key not found in client storage")
+        elif mode == "w":
+            page.client_storage.set(key, value)
+        elif mode == "d":
+            if page.client_storage.contains_key(key):
+                page.client_storage.remove(key)
+            else:
+                raise LookupError("Key not found in client storage")
+    elif type == "DEL":
+        page.client_storage.clear()
+        page.session.clear()
+
+
 class PhiBack(ft.Stack):
     """_summary_: 返回按钮
 
@@ -237,29 +285,34 @@ class PhiData(ft.Stack):
             page (_type_, optional): _description_. Defaults to ft.Page.
             n (float, optional): _description_. Defaults to 0.7.
         """
-        if (
-            page.platform == ft.PagePlatform.ANDROID
-            or page.platform == ft.PagePlatform.IOS
-        ):
-            # 缩放倍数
-            n *= 0.747
+        try:
+            len(data)
+        except TypeError:
+            raise ValueError("Data 数值过大！")
         else:
-            n *= 1.2
-        self.DATA = data
-        # print("Data: ", len(self.DATA))
-        # print("Data: ", self.DATA)
-        # print("DataT: ", self.controls[0].controls[1].controls[1].content.spans[0].text)
-        self.controls[0].controls[1].controls[1].content.spans[0].text = self.DATA
-        self.controls[0].controls[1].controls[1].margin = ft.margin.only(
-            top=(12 + (2 * (len(self.DATA) - 7))) * n * 1.1,
-            right=(19 - (3 * (len(self.DATA) - 7))) * n * 2,
-        )
-        self.controls[0].controls[1].controls[1].content.spans[0].style.size = (
-            (35 - (2.5 * (len(self.DATA) - 7))) * n * 0.92
-        )
-        # print(self.controls[0].controls[1].controls[1].content.spans[0].style.size)
-        # print(self.controls[0].controls[1].controls[1].margin)
-        page.update()
+            if (
+                page.platform == ft.PagePlatform.ANDROID
+                or page.platform == ft.PagePlatform.IOS
+            ):
+                # 缩放倍数
+                n *= 0.747
+            else:
+                n *= 1.2
+            self.DATA = data
+            # print("Data: ", len(self.DATA))
+            # print("Data: ", self.DATA)
+            # print("DataT: ", self.controls[0].controls[1].controls[1].content.spans[0].text)
+            self.controls[0].controls[1].controls[1].content.spans[0].text = self.DATA
+            self.controls[0].controls[1].controls[1].margin = ft.margin.only(
+                top=(12 + (2 * (len(self.DATA) - 7))) * n * 1.1,
+                right=(19 - (3 * (len(self.DATA) - 7))) * n * 2,
+            )
+            self.controls[0].controls[1].controls[1].content.spans[0].style.size = (
+                (35 - (2.5 * (len(self.DATA) - 7))) * n * 0.92
+            )
+            # print(self.controls[0].controls[1].controls[1].content.spans[0].style.size)
+            # print(self.controls[0].controls[1].controls[1].margin)
+            page.update()
 
 
 class PhiLottery(ft.Stack):
@@ -277,6 +330,7 @@ class PhiLottery(ft.Stack):
             n = n * 0.8
         super().__init__()
         textwidth = 100000
+        # noinspection PyTypeChecker
         self.controls = [
             ft.Image(
                 src="phi0101.webp",
@@ -369,6 +423,10 @@ class PhiLottery(ft.Stack):
                 self.controls[1].offset = ft.transform.Offset(0, 0)
                 page.update()
                 # 初始状态 -> 逐渐显示
+                DATA -= datadelta
+                print(DATA)
+                PhiData.on_data_change(datashow, hum_convert(DATA), page=page)
+                page.update()
                 detailText.value = ""
                 # 对接抽奖函数
                 result = lottery_core(multi, DATA, lottery_list)
@@ -395,9 +453,6 @@ class PhiLottery(ft.Stack):
                     await asyncio.sleep(0.05)
                 if multi:
                     await asyncio.sleep(0.25)
-                DATA -= datadelta
-                PhiData.on_data_change(datashow, hum_convert(DATA), page=page)
-                page.update()
             #     TODO: Data扣除
             else:
                 # 逐渐隐藏 -> 初始状态

@@ -1,11 +1,12 @@
 [project]
 name = "PhiStore"
-version = "0.1.0"
+version = "0.5.0"
 description = "PhiStore"
 # readme = "README.md"
 # requires-python = ">=3.8"
 dependencies = [
-  "flet"
+  "flet",
+  "flet-audio"
 ]
 
 
