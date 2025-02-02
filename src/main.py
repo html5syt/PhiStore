@@ -8,6 +8,7 @@ import assets.default_json as default_json
 lock = asyncio.Lock()  # 防止连续点击单抽
 lock2 = False  # 防止连抽时点击单抽
 lock3 = False  # 防止连续点击单抽
+lock4 = False  # 防止连续点击连抽
 # DATA = 104857600.0  # 初始Data
 
 
@@ -84,7 +85,7 @@ async def main(page: ft.Page):
     async def lottery_on_click(e):
         global lock, lock2, lock3
         nonlocal lottery, lottery_list, page, n
-        if Phi.storage(page=page, key="data") >= 1048576:
+        if Phi.storage(page=page, key="data") >= 1048576.0:
             if not lock2 and not lock3:  # 防止连抽时点击&连续点击单抽
                 lock3 = True
                 lottery.controls[0].src = "phi0101.webp"
@@ -100,37 +101,40 @@ async def main(page: ft.Page):
                 )
                 lock3 = False
                 page.update()
-        elif Phi.storage(page=page, key="data") < 1048576:
+        elif Phi.storage(page=page, key="data") < 1048576.0:
             page.snack_bar = ft.SnackBar(ft.Text("余额不足"))
             page.snack_bar.open = True
             page.update()
 
     async def lottery_on_click_multi(e):
-        global lock, lock2
+        global lock, lock2, lock4
         nonlocal lottery, lottery_list
-        lock2 = True
         lottery.controls[0].src = " "
         # 连抽
-        if Phi.storage(page=page, key="data") >= 8388608:
-            for i in range(1, 21):
-                await Phi.PhiLottery.on_click(
-                    self=lottery,
-                    page=page,
-                    n=n,
-                    multi=True,
-                    lock=lock,
-                    lottery_list=lottery_list,
-                    DATA=Phi.storage(page=page, key="data"),
-                    datadelta=8388860.8,
-                    datashow=datashow,
-                )
-            lottery.controls[0].src = "phi0101.webp"
-            lock2 = False
-            page.update()
-        elif Phi.storage(page=page, key="data") < 8388608:
-            page.snack_bar = ft.SnackBar(ft.Text("余额不足"))
-            page.snack_bar.open = True
-            page.update()
+        if not lock4:  # 防止连续点击连抽
+            lock4 = True
+            if Phi.storage(page=page, key="data") >= 8388608.0:
+                lock2 = True
+                for i in range(1, 21):
+                    await Phi.PhiLottery.on_click(
+                        self=lottery,
+                        page=page,
+                        n=n,
+                        multi=True,
+                        lock=lock,
+                        lottery_list=lottery_list,
+                        DATA=Phi.storage(page=page, key="data"),
+                        datadelta=838860.8,
+                        datashow=datashow,
+                    )
+                lottery.controls[0].src = "phi0101.webp"
+                lock2 = False
+                page.update()
+            elif Phi.storage(page=page, key="data") < 8388608.0:
+                page.snack_bar = ft.SnackBar(ft.Text("余额不足"))
+                page.snack_bar.open = True
+                page.update()
+            lock4 = False
         # nonlocal multi0
         # multi0 = [0, 1]
         # # 连抽
