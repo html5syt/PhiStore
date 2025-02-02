@@ -121,7 +121,7 @@ def storage(
     page: ft.Page,
     key: str | None,
     value=None,
-    type="c",
+    type="s",
     mode="r",
     prefix="phistore_",
 ):
