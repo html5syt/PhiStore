@@ -24,7 +24,7 @@ def hum_convert(value, bit=2):
         value = value / size
 
 
-def lottery_core(page: ft.Page,lottery_list={}):
+async def lottery_core(page: ft.Page, lottery_list={}):
     # TODO: 不重复抽奖
     def chance_prize(prize_list):
         """
@@ -91,10 +91,10 @@ def lottery_core(page: ft.Page,lottery_list={}):
             result.append(random.choice(lottery_list["Data"]["Yellow"]))
             result.append("Yellow")
         data = float(result[0])
-        storage(
+        await storage(
             page=page,
             key="data",
-            value=float(storage(page=page, key="data", mode="r")) + data,
+            value=float(await storage(page=page, key="data", mode="r")) + data,
             mode="w",
         )
         result[0] = hum_convert(data, bit=0)
@@ -117,12 +117,11 @@ def lottery_core(page: ft.Page,lottery_list={}):
         return [rd2, "White", "illustration.png"]
 
 
-def storage(
+async def storage(
     page: ft.Page,
     key="",
     value=None,
-    type="s",
-    # TODO: 增加持久化存储
+    type="c",
     mode="r",
     prefix="phistore_",
 ):
@@ -135,7 +134,7 @@ def storage(
         prefix (str, optional): 前缀.
     """
 
-    async def _storage(key, mode, value=None) -> float:
+    async def _storage(key, mode, value=None):
         if mode == "w":
             await page.client_storage.set_async(key, value)
         elif mode == "r":
@@ -158,22 +157,22 @@ def storage(
             else:
                 raise LookupError("Key not found in session storage")
         print(f"[Log]{key}值为: {page.session.get(key)}")
-    # elif type == "c":
-    #     if mode == "r":
-    #         if page.client_storage.contains_key_async(key):
-    #             temp=await page.client_storage.get_async(key)
-    #             return temp
-    #         else:
-    #             raise LookupError("Key not found in client storage")
-    #     elif mode == "w":
-    #         page.client_storage.set_async(key, value)
-    #     elif mode == "d":
-    #         if page.client_storage.contains_key_async(key):
-    #             page.client_storage.remove(key)
-    #         else:
-    #             raise LookupError("Key not found in client storage")
+    elif type == "c":
+        if mode == "r":
+            if await page.client_storage.contains_key_async(key):
+                temp = await page.client_storage.get_async(key)
+                return temp
+            else:
+                raise LookupError("Key not found in client storage")
+        elif mode == "w":
+            await page.client_storage.set_async(key, value)
+        elif mode == "d":
+            if await page.client_storage.contains_key_async(key):
+                page.client_storage.remove(key)
+            else:
+                raise LookupError("Key not found in client storage")
     elif type == "DEL":
-        page.client_storage.clear()
+        await page.client_storage.clear_async()
         page.session.clear()
 
 
@@ -241,7 +240,7 @@ class PhiData(ft.Stack):
     DATA = "0.00 KB"  # 7-9位字符，可能更多，防手欠
 
     # print("Data: ",len(DATA))
-    def __init__(self, on_click=None, n=0.7):
+    def __init__(self, n=0.7):
         super().__init__()
         n *= 1.15
         self.controls = [
@@ -282,7 +281,8 @@ class PhiData(ft.Stack):
                                 ),
                                 col=1.32,
                                 alignment=ft.alignment.top_right,
-                                margin=ft.margin.only(top=12 * n, right=19 * n),
+                                margin=ft.margin.only(
+                                    top=12 * n, right=19 * n),
                                 height=70 * n,
                             ),
                         ],
@@ -442,22 +442,23 @@ class PhiLottery(ft.Stack):
                 page.update()
                 # 初始状态 -> 逐渐显示
                 # DATA -= datadelta
-                storage(
+                await storage(
                     page=page,
                     key="data",
-                    value=float(storage(page=page, key="data", mode="r")) - datadelta,
+                    value=float(await storage(page=page, key="data", mode="r"))
+                    - datadelta,
                     mode="w",
                 )
-                print("[Log]当前Data：",storage(page=page, key="data", mode="r"))
+                print("[Log]当前Data：", await storage(page=page, key="data", mode="r"))
                 PhiData.on_data_change(
                     datashow,
-                    hum_convert(storage(page=page, key="data", mode="r")),
+                    hum_convert(await storage(page=page, key="data", mode="r")),
                     page=page,
                 )
                 detailText.value = ""
                 # 对接抽奖函数
-                result = lottery_core(page=page, lottery_list=lottery_list)
-                print("[Log]抽奖结果：",result)
+                result = await lottery_core(page=page, lottery_list=lottery_list)
+                print("[Log]抽奖结果：", result)
                 text = str(result[0])
                 if result[1] == "White":
                     detailText.color = ft.Colors.WHITE
@@ -470,7 +471,8 @@ class PhiLottery(ft.Stack):
                 detail.content.src = str(result[2])
 
                 for i in range(1, 24):
-                    detail.scale = ft.transform.Scale(scale_x=0.7, scale_y=0.7 / 23 * i)
+                    detail.scale = ft.transform.Scale(
+                        scale_x=0.7, scale_y=0.7 / 23 * i)
                     page.update()
                     await asyncio.sleep(0.016)
                     # scale_x和scale_y无法使用动画，只能用这种方法
@@ -487,13 +489,14 @@ class PhiLottery(ft.Stack):
                 self.controls[1].animate_opacity = 300
                 page.update()
                 self.controls[1].opacity = 0
-                offset_x = -1 * abs((page.width // 4 / (350 * n2) - 1)) * 0.05 - 0.25
+                offset_x = -1 * \
+                    abs((page.width // 4 / (350 * n2) - 1)) * 0.05 - 0.25
                 if offset_x >= -0.15:
                     offset_x -= 0.1
                 if offset_x < -0.3:
                     offset_x += 0.1
                 self.controls[1].offset = ft.transform.Offset(offset_x, 0)
-                print("[Log]Offset：",self.controls[1].offset.x)
+                print("[Log]Offset：", self.controls[1].offset.x)
                 page.update()
                 if multi:
                     await asyncio.sleep(0.1)
