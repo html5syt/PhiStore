@@ -1,7 +1,7 @@
 import asyncio
 import random
 import flet as ft
-import flet_audio as ft_a
+# import flet_audio as ft_a
 import PhiControls as Phi
 import assets.default_json as default_json
 
@@ -52,8 +52,8 @@ async def main(page: ft.Page):
     page.theme = ft.Theme(font_family="Exo")  # 默认应用字体
 
     # 背景音乐
-    audio1 = ft_a.Audio(
-        src="Shop0.wav", autoplay=True, release_mode=ft_a.audio.ReleaseMode.LOOP
+    audio1 = ft.Audio(
+        src="Shop0.wav", autoplay=True, release_mode=ft.audio.ReleaseMode.LOOP
     )
     page.overlay.append(audio1)
 
@@ -75,7 +75,8 @@ async def main(page: ft.Page):
         ),
         actions=[
             ft.Button(
-                "清空session和client_storage（危险！仅供调试）", on_click=lambda e: DEL
+                "清空session和client_storage（危险！仅供调试）",
+                on_click=lambda e: DEL(e, page),
             ),
             ft.Button("确定"),
         ],
@@ -179,9 +180,10 @@ async def main(page: ft.Page):
         )
         page.close(setting)
 
-    def DEL(e):
-        nonlocal page
+    def DEL(e, page=ft.Page):
+        nonlocal setting
         Phi.storage(page=page, type="DEL")
+        page.close(setting)
 
     # 页面组件树
     page.add(
@@ -271,6 +273,7 @@ async def main(page: ft.Page):
             expand=True,
         )
     )
+    # print("[Log]",Phi.storage(page=page, key="data"))
     Phi.PhiData.on_data_change(
         datashow, Phi.hum_convert(Phi.storage(page=page, key="data")), page=page
     )

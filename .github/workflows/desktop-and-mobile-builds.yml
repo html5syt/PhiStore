@@ -19,7 +19,7 @@ env:
 #   # https://flet.dev/docs/publish#versioning
 #   BUILD_NUMBER: 1
 #   BUILD_VERSION: 1.0.0
-  PYTHON_VERSION: 3.12
+  PYTHON_VERSION: 3.13
   FLUTTER_VERSION: 3.24.0
   KEYSTORE_FILE: /home/runner/work/PhiStore/PhiStore/html5syt.jks
   KEYSTORE_ALIAS: html5syt

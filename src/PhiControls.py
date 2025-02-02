@@ -119,13 +119,14 @@ def lottery_core(page: ft.Page,lottery_list={}):
 
 def storage(
     page: ft.Page,
-    key: str | None,
+    key="",
     value=None,
     type="s",
+    # TODO: 增加持久化存储
     mode="r",
     prefix="phistore_",
 ):
-    """存储数据，默认使用 client_storage 存储，模式为读取，前缀为 phistore_
+    """存储数据，默认使用 session 存储，模式为读取，前缀为 phistore_
     Args:
         key (str): 键
         value (_type_): 值
@@ -134,9 +135,11 @@ def storage(
         prefix (str, optional): 前缀.
     """
 
-    async def _storage(key, mode, value=None):
+    async def _storage(key, mode, value=None) -> float:
         if mode == "w":
             await page.client_storage.set_async(key, value)
+        elif mode == "r":
+            return await page.client_storage.get_async(key)
         elif mode == "s":
             return await page.client_storage.contains_key_async(key)
 
@@ -157,14 +160,15 @@ def storage(
         print(f"[Log]{key}值为: {page.session.get(key)}")
     # elif type == "c":
     #     if mode == "r":
-    #         if _storage(key, "s"):
-    #             return page.client_storage.get(key)
+    #         if page.client_storage.contains_key_async(key):
+    #             temp=await page.client_storage.get_async(key)
+    #             return temp
     #         else:
     #             raise LookupError("Key not found in client storage")
     #     elif mode == "w":
-    #         _storage(key, "w", value)
+    #         page.client_storage.set_async(key, value)
     #     elif mode == "d":
-    #         if _storage(key, "s"):
+    #         if page.client_storage.contains_key_async(key):
     #             page.client_storage.remove(key)
     #         else:
     #             raise LookupError("Key not found in client storage")

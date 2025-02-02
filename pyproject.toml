@@ -6,7 +6,7 @@ description = "PhiStore"
 # requires-python = ">=3.8"
 dependencies = [
   "flet",
-  "flet-audio"
+  # "flet-audio"
 ]
 
 
