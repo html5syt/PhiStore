@@ -1,2 +1,2 @@
-flet==0.26.0
+flet==0.25.2
 flet-audio==0.1.0

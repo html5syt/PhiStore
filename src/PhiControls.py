@@ -24,7 +24,7 @@ def hum_convert(value, bit=2):
         value = value / size
 
 
-async def lottery_core(page: ft.Page, lottery_list={}):
+async def lottery_core(datashow,page: ft.Page, lottery_list={}):
     # TODO: 不重复抽奖
     def chance_prize(prize_list):
         """
@@ -97,6 +97,11 @@ async def lottery_core(page: ft.Page, lottery_list={}):
             value=float(await storage(page=page, key="data", mode="r")) + data,
             mode="w",
         )
+        PhiData.on_data_change(
+            datashow,
+            hum_convert(await storage(page=page, key="data")),
+            page=page,
+        )
         result[0] = hum_convert(data, bit=0)
         result.append("dataicon.png")
         return result
@@ -121,7 +126,8 @@ async def storage(
     page: ft.Page,
     key="",
     value=None,
-    type="c",
+    type="s",
+    # TODO: 重新启用持久化存储
     mode="r",
     prefix="phistore_",
 ):
@@ -133,14 +139,6 @@ async def storage(
         mode (str, optional): r为读取，w为写入，d为删除,(s为查询是否存在-仅内部使用)，默认r.
         prefix (str, optional): 前缀.
     """
-
-    async def _storage(key, mode, value=None):
-        if mode == "w":
-            await page.client_storage.set_async(key, value)
-        elif mode == "r":
-            return await page.client_storage.get_async(key)
-        elif mode == "s":
-            return await page.client_storage.contains_key_async(key)
 
     key = prefix + key
     if type == "s":
@@ -340,6 +338,8 @@ class PhiLottery(ft.Stack):
         ft (_type_): _description_
     """
 
+    nodata=False
+
     def __init__(self, n=1, page=ft.Page):
         if (
             page.platform == ft.PagePlatform.ANDROID
@@ -392,27 +392,15 @@ class PhiLottery(ft.Stack):
 
     async def on_click(
         self,
-        e=None,
         page=ft.Page,
         n=0.8,
         multi=False,
-        DATA=0.0,
         lock=asyncio.Lock(),
         lottery_list={},
         datadelta=0.0,
         datashow=PhiData(),
+        datakey="data",
     ):
-        """_summary_: 点击时调用
-
-        Args:
-            e (_type_, optional): _description_. Defaults to None.
-            page (_type_, optional): _description_. Defaults to None.
-            n (float, optional): _description_. Defaults to 0.8.
-            multi (bool, optional): _description_. Defaults to False.
-            DATA (float, optional): 传入以实现抽到Data时增加实际Data。 Defaults to 0.0.
-            lock (_type_, optional): _description_. Defaults to asyncio.Lock().
-            lottery_list (_type_, optional): 奖品列表. Defaults to {}.
-        """
         async with (
             lock
         ):  # 确保只有一个 on_click 在执行，点几次执行几次，无忽略（写不动了
@@ -429,7 +417,6 @@ class PhiLottery(ft.Stack):
             detailText = self.controls[1].controls[1]  # 描述
             detailText.size = 30 * n
             self.controls[0].visible = not self.controls[0].visible  # ?图
-
             self.controls[1].animate_offset = 300
             self.controls[1].animate_opacity = 300
             page.update()
@@ -437,68 +424,80 @@ class PhiLottery(ft.Stack):
                 self.controls[1].animate_offset = 1
                 self.controls[1].animate_opacity = 1
                 detail.animate = 300
-                self.controls[1].opacity = 1
-                self.controls[1].offset = ft.transform.Offset(0, 0)
                 page.update()
-                # 初始状态 -> 逐渐显示
                 # DATA -= datadelta
-                await storage(
-                    page=page,
-                    key="data",
-                    value=float(await storage(page=page, key="data", mode="r"))
-                    - datadelta,
-                    mode="w",
-                )
-                print("[Log]当前Data：", await storage(page=page, key="data", mode="r"))
-                PhiData.on_data_change(
-                    datashow,
-                    hum_convert(await storage(page=page, key="data", mode="r")),
-                    page=page,
-                )
-                detailText.value = ""
-                # 对接抽奖函数
-                result = await lottery_core(page=page, lottery_list=lottery_list)
-                print("[Log]抽奖结果：", result)
-                text = str(result[0])
-                if result[1] == "White":
-                    detailText.color = ft.Colors.WHITE
-                elif result[1] == "Blue":
-                    detailText.color = "#00FFFF"
-                elif result[1] == "Purple":
-                    detailText.color = "#FF00FF"
-                elif result[1] == "Yellow":
-                    detailText.color = "#FCF81F"
-                detail.content.src = str(result[2])
+                if await storage(page=page, key="data") >= datadelta:
+                    self.nodata = False
+                    await storage(
+                        page=page,
+                        key=datakey,
+                        value=float(await storage(page=page, key=datakey, mode="r"))
+                        - datadelta,
+                        mode="w",
+                    )
+                    print("[Log]当前Data：", await storage(page=page, key=datakey, mode="r"))
+                    PhiData.on_data_change(
+                        datashow,
+                        hum_convert(await storage(page=page, key=datakey, mode="r")),
+                        page=page,
+                    )
 
-                for i in range(1, 24):
-                    detail.scale = ft.transform.Scale(
-                        scale_x=0.7, scale_y=0.7 / 23 * i)
+                    # 初始状态 -> 逐渐显示
+                    self.controls[1].opacity = 1
+                    self.controls[1].offset = ft.transform.Offset(0, 0)
+                    detailText.value = ""
+                    # 对接抽奖函数
+                    result = await lottery_core(datashow=datashow,page=page, lottery_list=lottery_list)
+                    print("[Log]抽奖结果：", result)
+                    text = str(result[0])
+                    if result[1] == "White":
+                        detailText.color = ft.Colors.WHITE
+                    elif result[1] == "Blue":
+                        detailText.color = "#00FFFF"
+                    elif result[1] == "Purple":
+                        detailText.color = "#FF00FF"
+                    elif result[1] == "Yellow":
+                        detailText.color = "#FCF81F"
+                    detail.content.src = str(result[2])
+
+                    for i in range(1, 24):
+                        detail.scale = ft.transform.Scale(
+                            scale_x=0.7, scale_y=0.7 / 23 * i)
+                        page.update()
+                        await asyncio.sleep(0.016)
+                        # scale_x和scale_y无法使用动画，只能用这种方法
+                        # TODO: 文字逐渐显示(issue)
+                    for textTemp in text:
+                        detailText.value += textTemp
+                        page.update()
+                        await asyncio.sleep(0.05)
+                    if multi:
+                        await asyncio.sleep(0.25)
+                elif await storage(page=page, key="data") < datadelta:
+                    self.nodata = True
+                    self.controls[0].visible = not self.controls[0].visible  # ?图
+                    print("[Log]余额不足")
+                    # TODO: 前端日志输出失效，待修复
+                    page.snack_bar = ft.SnackBar(ft.Text("余额不足"))
+                    page.snack_bar.open = True
                     page.update()
-                    await asyncio.sleep(0.016)
-                    # scale_x和scale_y无法使用动画，只能用这种方法
-                    # TODO: 文字逐渐显示(issue)
-                for textTemp in text:
-                    detailText.value += textTemp
-                    page.update()
-                    await asyncio.sleep(0.05)
-                if multi:
-                    await asyncio.sleep(0.25)
             else:
-                # 逐渐隐藏 -> 初始状态
-                self.controls[1].animate_offset = 300
-                self.controls[1].animate_opacity = 300
-                page.update()
-                self.controls[1].opacity = 0
-                offset_x = -1 * \
-                    abs((page.width // 4 / (350 * n2) - 1)) * 0.05 - 0.25
-                if offset_x >= -0.15:
-                    offset_x -= 0.1
-                if offset_x < -0.3:
-                    offset_x += 0.1
-                self.controls[1].offset = ft.transform.Offset(offset_x, 0)
-                print("[Log]Offset：", self.controls[1].offset.x)
-                page.update()
-                if multi:
-                    await asyncio.sleep(0.1)
-                else:
-                    await asyncio.sleep(0.5)
+                if not self.nodata:
+                    # 逐渐隐藏 -> 初始状态
+                    self.controls[1].animate_offset = 300
+                    self.controls[1].animate_opacity = 300
+                    page.update()
+                    self.controls[1].opacity = 0
+                    offset_x = -1 * \
+                        abs((page.width // 4 / (350 * n2) - 1)) * 0.05 - 0.25
+                    if offset_x >= -0.15:
+                        offset_x -= 0.1
+                    if offset_x < -0.3:
+                        offset_x += 0.1
+                    self.controls[1].offset = ft.transform.Offset(offset_x, 0)
+                    print("[Log]Offset：", self.controls[1].offset.x)
+                    page.update()
+                    if multi:
+                        await asyncio.sleep(0.1)
+                    else:
+                        await asyncio.sleep(0.5)
