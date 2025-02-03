@@ -5,8 +5,8 @@ description = "PhiStore"
 # readme = "README.md"
 # requires-python = ">=3.8"
 dependencies = [
-  "flet",
-  # "flet-audio"
+  "flet>=0.26.0",
+  "flet-audio"
 ]
 
 

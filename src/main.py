@@ -5,7 +5,7 @@ import flet as ft
 # import flet_audio as ft_a
 # TODO: flet_audio分离
 import PhiControls as Phi
-import assets.default_json as default_json
+import default_json as default_json
 
 lock = asyncio.Lock()  # 防止连续点击单抽
 lock2 = False  # 防止连抽时点击单抽
@@ -288,4 +288,4 @@ async def main(page: ft.Page):
     page.update()
 
 
-ft.app(target=main, view=ft.AppView.FLET_APP_WEB, port=2085)
+ft.app(target=main)
