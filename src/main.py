@@ -27,15 +27,12 @@ async def main(page: ft.Page):
 
     # layout debug
     def on_keyboard(e: ft.KeyboardEvent):
-        # print(e)
         if e.key == "S" and e.ctrl and e.shift:
             page.show_semantics_debugger = not page.show_semantics_debugger
             page.update()
 
     page.on_keyboard_event = on_keyboard
 
-    # page.window.title_bar_hidden = True
-    # page.window.title_bar_buttons_hidden = True
     page.bgcolor = ft.Colors.BLACK
     page.padding = 0
     page.spacing = 0
@@ -73,12 +70,12 @@ async def main(page: ft.Page):
                     value=str(await Phi.storage(page=page, key="data")),
                     label="Data/Byte",
                 ),
+                ft.Text("记得看浏览器控制台！",color=ft.Colors.RED)
             ],
         ),
         actions=[
             ft.Button(
                 "清空session和client_storage（危险！仅供调试）",
-                on_click=lambda e: DEL(e, page),
             ),
             ft.Button("确定"),
         ],
@@ -152,23 +149,18 @@ async def main(page: ft.Page):
         # await phi.PhiLottery.on_click(self=lottery, page=page, n=n)
 
     # noinspection PyArgumentList
-    async def set(datashow, page=ft.Page):
-        nonlocal setting
-        # DATA += 102400000
-        # print(data)
-        # for i in range(102400000):
-        #     Phi.PhiData.on_data_change(datashow, Phi.hum_convert(i ** 5), page)
-        # # Phi.PhiData.on_data_change(datashow, Phi.hum_convert(262144), page)
+    async def set(e):
+        nonlocal setting, datashow, page
         page.open(setting)
         setting.content.controls[0].value = (
             "当前Data：" + str(await Phi.storage(page=page, key="data")) + " Byte"
         )
-        setting.actions[1].on_click = lambda e: setting_on_submit(
-            e, datashow, page)
+        setting.actions[1].on_click = setting_on_submit
+        setting.actions[0].on_click = DEL
         page.open(setting)
 
-    async def setting_on_submit(e, datashow, page=ft.Page):
-        nonlocal setting
+    async def setting_on_submit(e):
+        nonlocal setting, datashow, page
         await Phi.storage(
             page=page,
             key="data",
@@ -182,10 +174,25 @@ async def main(page: ft.Page):
         )
         page.close(setting)
 
-    async def DEL(e, page=ft.Page):
-        nonlocal setting
+    async def DEL(e):
+        nonlocal setting, page
         await Phi.storage(page=page, type="DEL")
-        page.close(setting)
+        # page.close(setting)
+        # 太危险了
+
+    async def reset_data(e):
+        nonlocal page, n
+        await Phi.storage(page=page, key="data", mode="w", value=1073741824.0)
+        datashow.on_data_change(
+            Phi.hum_convert(await Phi.storage(page=page, key="data", mode="r")),
+            page=page,
+            n=n*0.85,
+        )
+        print("[Log]Data reset to 1073741824.0")
+        # TODO: 前端日志输出失效，待修复
+        page.snack_bar = ft.SnackBar(ft.Text("Data已重置至1GB"))
+        page.snack_bar.open = True
+        page.update()
 
     # 页面组件树
     page.add(
@@ -196,13 +203,11 @@ async def main(page: ft.Page):
                     [
                         ft.Image(
                             str(random.randint(1, 119)) + ".webp",
-                            # src="14.png",
                             fit=ft.ImageFit.COVER,
                             expand=True,
                         ),
                         ft.Container(expand=True, blur=3, bgcolor="#A5232323"),
                     ],
-                    # alignment=ft.alignment.center,
                     fit=ft.StackFit.EXPAND,
                     expand=True,
                 ),
@@ -233,12 +238,7 @@ async def main(page: ft.Page):
                             col=1,
                             alignment=ft.alignment.top_right,
                             margin=ft.margin.only(right=25 * n),
-                            on_click=Phi.PhiData.on_data_change(
-                                datashow,
-                                Phi.hum_convert(await Phi.storage(page=page, key="data")),
-                                page=page,
-                            ),
-                            # TODO: 设置问题
+                            on_click=set,
                             height=70 * n * 1.25,
                         ),
                     ],
@@ -269,7 +269,7 @@ async def main(page: ft.Page):
                         ),
                         ft.Button(
                             "RESET DATA",
-                            on_click=await Phi.storage(page=page, key="data", mode="w", value=1073741824.0))
+                            on_click=reset_data)
                     ], expand=True, alignment=ft.MainAxisAlignment.CENTER),
                     padding=ft.padding.all(10),
                     alignment=ft.alignment.top_center,
@@ -281,7 +281,6 @@ async def main(page: ft.Page):
             expand=True,
         )
     )
-    # print("[Log]",Phi.storage(page=page, key="data"))
     Phi.PhiData.on_data_change(
         datashow, Phi.hum_convert(await Phi.storage(page=page, key="data")), page=page
     )

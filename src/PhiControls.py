@@ -126,8 +126,7 @@ async def storage(
     page: ft.Page,
     key="",
     value=None,
-    type="s",
-    # TODO: 重新启用持久化存储
+    type="c",
     mode="r",
     prefix="phistore_",
 ):
@@ -237,7 +236,6 @@ class PhiData(ft.Stack):
 
     DATA = "0.00 KB"  # 7-9位字符，可能更多，防手欠
 
-    # print("Data: ",len(DATA))
     def __init__(self, n=0.7):
         super().__init__()
         n *= 1.15
@@ -293,7 +291,7 @@ class PhiData(ft.Stack):
             )
         ]
 
-    def on_data_change(self, data, page=ft.Page, n=0.7):
+    def on_data_change(self, data:str, page=ft.Page, n=0.7):
         """_summary_: 数据改变时调用
 
         Args:
@@ -315,9 +313,6 @@ class PhiData(ft.Stack):
             else:
                 n *= 1.2
             self.DATA = data
-            # print("Data: ", len(self.DATA))
-            # print("Data: ", self.DATA)
-            # print("DataT: ", self.controls[0].controls[1].controls[1].content.spans[0].text)
             self.controls[0].controls[1].controls[1].content.spans[0].text = self.DATA
             self.controls[0].controls[1].controls[1].margin = ft.margin.only(
                 top=(12 + (2 * (len(self.DATA) - 7))) * n * 1.1,
@@ -326,8 +321,6 @@ class PhiData(ft.Stack):
             self.controls[0].controls[1].controls[1].content.spans[0].style.size = (
                 (35 - (2.5 * (len(self.DATA) - 7))) * n * 0.92
             )
-            # print(self.controls[0].controls[1].controls[1].content.spans[0].style.size)
-            # print(self.controls[0].controls[1].controls[1].margin)
             page.update()
 
 
@@ -355,7 +348,6 @@ class PhiLottery(ft.Stack):
                 width=textwidth * n,
                 height=350 * n,
                 offset=ft.transform.Offset(0, 0),
-                # animate_offset=ft.animation.Animation(100),
             ),
             ft.Column(
                 [
@@ -403,8 +395,7 @@ class PhiLottery(ft.Stack):
     ):
         async with (
             lock
-        ):  # 确保只有一个 on_click 在执行，点几次执行几次，无忽略（写不动了
-            # 注：连抽功能未实现，方法已给出
+        ):  # 确保只有一个 on_click 在执行
             n2 = n
             if page and (
                 page.platform == ft.PagePlatform.ANDROID
@@ -425,7 +416,6 @@ class PhiLottery(ft.Stack):
                 self.controls[1].animate_opacity = 1
                 detail.animate = 300
                 page.update()
-                # DATA -= datadelta
                 if await storage(page=page, key="data") >= datadelta:
                     self.nodata = False
                     await storage(
