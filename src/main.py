@@ -2,7 +2,6 @@ import asyncio
 import random
 import flet as ft
 import datetime
-import flet_audio as ft_a
 import PhiControls as Phi
 import default_json as default_json
 
@@ -50,6 +49,7 @@ async def main(page: ft.Page):
 
     # 背景音乐
     try:
+        import flet_audio as ft_a
         audio1 = ft_a.Audio(
             src="Shop0.wav", autoplay=True, release_mode=ft_a.audio.ReleaseMode.LOOP
         )

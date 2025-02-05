@@ -125,10 +125,10 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements-win.txt
 
-    - name: Setup Flutter ${{ env.FLUTTER_VERSION }}
+    - name: Setup Flutter 3.24.0
       uses: subosito/flutter-action@v2
       with:
-        flutter-version: ${{ env.FLUTTER_VERSION }}
+        flutter-version: 3.24.0
 
     - name: Flet Build Windows
       run: |
