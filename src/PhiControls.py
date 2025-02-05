@@ -2,6 +2,7 @@ import asyncio
 import random
 import flet as ft
 import flet.canvas as cv
+import datetime
 
 
 def hum_convert(value, bit=2):
@@ -24,7 +25,7 @@ def hum_convert(value, bit=2):
         value = value / size
 
 
-async def lottery_core(datashow,page: ft.Page, lottery_list={}):
+async def lottery_core(datashow, page: ft.Page, lottery_list={}):
     # TODO: 不重复抽奖
     def chance_prize(prize_list):
         """
@@ -153,7 +154,7 @@ async def storage(
                 page.session.remove(key)
             else:
                 raise LookupError("Key not found in session storage")
-        print(f"[Log]{key}值为: {page.session.get(key)}")
+        print(f"[log-", datetime.datetime.now(), "]{key}值为: {page.session.get(key)}")
     elif type == "c":
         if mode == "r":
             if await page.client_storage.contains_key_async(key):
@@ -277,8 +278,7 @@ class PhiData(ft.Stack):
                                 ),
                                 col=1.32,
                                 alignment=ft.alignment.top_right,
-                                margin=ft.margin.only(
-                                    top=12 * n, right=19 * n),
+                                margin=ft.margin.only(top=12 * n, right=19 * n),
                                 height=70 * n,
                             ),
                         ],
@@ -291,7 +291,7 @@ class PhiData(ft.Stack):
             )
         ]
 
-    def on_data_change(self, data:str, page=ft.Page, n=0.7):
+    def on_data_change(self, data: str, page=ft.Page, n=0.7):
         """_summary_: 数据改变时调用
 
         Args:
@@ -299,8 +299,9 @@ class PhiData(ft.Stack):
             page (_type_, optional): _description_. Defaults to ft.Page.
             n (float, optional): _description_. Defaults to 0.7.
         """
+        print(f"[log-{datetime.datetime.now()}]获取到的缩放比例：{n}")
         try:
-            len(data)
+            print(f"[log-{datetime.datetime.now()}]当前Data字符串长度：{len(data)}")
         except TypeError:
             raise ValueError("Data 数值过大！")
         else:
@@ -309,19 +310,50 @@ class PhiData(ft.Stack):
                 or page.platform == ft.PagePlatform.IOS
             ):
                 # 缩放倍数
-                n *= 0.747
+                if len(data) == 7:
+                    # 7位数
+                    # SHIT 1GB
+                    n *= 1.1
+                    self.DATA = data
+                    self.controls[0].controls[1].controls[1].content.spans[
+                        0
+                    ].text = self.DATA
+                    self.controls[0].controls[1].controls[1].margin = ft.margin.only(
+                        top=(12 + (2 * (len(self.DATA) - 7))) * n * 1.1,
+                        right=(19 - (3 * (len(self.DATA) - 7))) * n * 2,
+                    )
+                    self.controls[0].controls[1].controls[1].content.spans[
+                        0
+                    ].style.size = ((35 - (2.5 * (len(self.DATA) - 7))) * n * 0.92)
+                    page.update()
+                else:
+                    n *= 0.666
+                    self.DATA = data
+                    self.controls[0].controls[1].controls[1].content.spans[
+                        0
+                    ].text = self.DATA
+                    self.controls[0].controls[1].controls[1].margin = ft.margin.only(
+                        top=(12 + (2 * (len(self.DATA) - 7))) * n * 1.1,
+                        right=(19 - (3 * (len(self.DATA) - 7))) * n * 2,
+                    )
+                    self.controls[0].controls[1].controls[1].content.spans[
+                        0
+                    ].style.size = ((35 - (2.5 * (len(self.DATA) - 7))) * n * 0.92)
+                    page.update()
             else:
-                n *= 1.2
-            self.DATA = data
-            self.controls[0].controls[1].controls[1].content.spans[0].text = self.DATA
-            self.controls[0].controls[1].controls[1].margin = ft.margin.only(
-                top=(12 + (2 * (len(self.DATA) - 7))) * n * 1.1,
-                right=(19 - (3 * (len(self.DATA) - 7))) * n * 2,
-            )
-            self.controls[0].controls[1].controls[1].content.spans[0].style.size = (
-                (35 - (2.5 * (len(self.DATA) - 7))) * n * 0.92
-            )
-            page.update()
+                n *= 1.1
+                self.DATA = data
+                self.controls[0].controls[1].controls[1].content.spans[
+                    0
+                ].text = self.DATA
+                self.controls[0].controls[1].controls[1].margin = ft.margin.only(
+                    top=(12 + (2 * (len(self.DATA) - 7))) * n * 1.1,
+                    right=(19 - (3 * (len(self.DATA) - 7))) * n * 2.2,
+                )
+                self.controls[0].controls[1].controls[1].content.spans[0].style.size = (
+                    (35 - (2.5 * (len(self.DATA) - 7))) * n * 0.92
+                )
+                page.update()
 
 
 class PhiLottery(ft.Stack):
@@ -331,7 +363,7 @@ class PhiLottery(ft.Stack):
         ft (_type_): _description_
     """
 
-    nodata=False
+    nodata = False
 
     def __init__(self, n=1, page=ft.Page):
         if (
@@ -393,9 +425,7 @@ class PhiLottery(ft.Stack):
         datashow=PhiData(),
         datakey="data",
     ):
-        async with (
-            lock
-        ):  # 确保只有一个 on_click 在执行
+        async with lock:  # 确保只有一个 on_click 在执行
             n2 = n
             if page and (
                 page.platform == ft.PagePlatform.ANDROID
@@ -425,7 +455,12 @@ class PhiLottery(ft.Stack):
                         - datadelta,
                         mode="w",
                     )
-                    print("[Log]当前Data：", await storage(page=page, key=datakey, mode="r"))
+                    print(
+                        "[log-",
+                        datetime.datetime.now(),
+                        "]当前Data：",
+                        await storage(page=page, key=datakey, mode="r"),
+                    )
                     PhiData.on_data_change(
                         datashow,
                         hum_convert(await storage(page=page, key=datakey, mode="r")),
@@ -437,8 +472,10 @@ class PhiLottery(ft.Stack):
                     self.controls[1].offset = ft.transform.Offset(0, 0)
                     detailText.value = ""
                     # 对接抽奖函数
-                    result = await lottery_core(datashow=datashow,page=page, lottery_list=lottery_list)
-                    print("[Log]抽奖结果：", result)
+                    result = await lottery_core(
+                        datashow=datashow, page=page, lottery_list=lottery_list
+                    )
+                    print("[log-", datetime.datetime.now(), "]抽奖结果：", result)
                     text = str(result[0])
                     if result[1] == "White":
                         detailText.color = ft.Colors.WHITE
@@ -452,7 +489,8 @@ class PhiLottery(ft.Stack):
 
                     for i in range(1, 24):
                         detail.scale = ft.transform.Scale(
-                            scale_x=0.7, scale_y=0.7 / 23 * i)
+                            scale_x=0.7, scale_y=0.7 / 23 * i
+                        )
                         page.update()
                         await asyncio.sleep(0.016)
                         # scale_x和scale_y无法使用动画，只能用这种方法
@@ -466,7 +504,7 @@ class PhiLottery(ft.Stack):
                 elif await storage(page=page, key="data") < datadelta:
                     self.nodata = True
                     self.controls[0].visible = not self.controls[0].visible  # ?图
-                    print("[Log]余额不足")
+                    print("[log-", datetime.datetime.now(), "]余额不足")
                     # TODO: 前端日志输出失效，待修复
                     page.snack_bar = ft.SnackBar(ft.Text("余额不足"))
                     page.snack_bar.open = True
@@ -478,16 +516,150 @@ class PhiLottery(ft.Stack):
                     self.controls[1].animate_opacity = 300
                     page.update()
                     self.controls[1].opacity = 0
-                    offset_x = -1 * \
-                        abs((page.width // 4 / (350 * n2) - 1)) * 0.05 - 0.25
+                    offset_x = (
+                        -1 * abs((page.width // 4 / (350 * n2) - 1)) * 0.05 - 0.25
+                    )
                     if offset_x >= -0.15:
                         offset_x -= 0.1
                     if offset_x < -0.3:
                         offset_x += 0.1
                     self.controls[1].offset = ft.transform.Offset(offset_x, 0)
-                    print("[Log]Offset：", self.controls[1].offset.x)
+                    print(
+                        "[log-",
+                        datetime.datetime.now(),
+                        "]Offset：",
+                        self.controls[1].offset.x,
+                    )
                     page.update()
                     if multi:
                         await asyncio.sleep(0.1)
                     else:
                         await asyncio.sleep(0.5)
+
+
+class PhiLotteryButton(ft.Stack):
+    """_summary_: 抽奖按钮
+
+    Args:
+        ft (_type_): _description_
+    """
+
+    def __init__(self, n=1):
+        super().__init__()
+        self.controls = [
+            ft.Container(
+                cv.Canvas(
+                    [
+                        cv.Path(
+                            [
+                                cv.Path.MoveTo(25.4551733 * n, 0),
+                                cv.Path.LineTo(472 * n, 0),
+                                cv.Path.LineTo(446.5448267 * n, 90 * n),
+                                cv.Path.LineTo(0, 90 * n),
+                                cv.Path.Close(),
+                            ],
+                            paint=ft.Paint(
+                                style=ft.PaintingStyle.STROKE,
+                                color=ft.Colors.WHITE,
+                                stroke_width=2,
+                            ),
+                        ),
+                        cv.Path(
+                            [
+                                cv.Path.MoveTo(25.4551733 * n, 0),
+                                cv.Path.LineTo(472 * n, 0),
+                                cv.Path.LineTo(446.5448267 * n, 90 * n),
+                                cv.Path.LineTo(0, 90 * n),
+                                cv.Path.Close(),
+                            ],
+                            paint=ft.Paint(
+                                style=ft.PaintingStyle.FILL,
+                                color="#90000000",
+                            ),
+                        ),
+                    ],
+                    width=472 * n,
+                    height=90 * n,
+                    expand=True,
+                ),
+                padding=0,
+            ),
+            ft.Row(
+                controls=[
+                    ft.Image(
+                        "dataicon.png",
+                        width=70 * n,
+                        height=70 * n,
+                        offset=ft.transform.Offset(0, -0.08 * n),
+                    ),
+                    ft.Text(
+                        "1024  KB      ",
+                        color=ft.Colors.WHITE,
+                        size=35 * n,
+                        # text_align=ft.TextAlign.CENTER,
+                    ),
+                ],
+                expand=True,
+                alignment=ft.MainAxisAlignment.SPACE_EVENLY,
+                width=472 * n,
+                height=90 * n,
+                spacing=0,
+            ),
+        ]
+
+
+class PhiLotteryButtonM(ft.Stack):
+    """_summary_: 抽奖按钮-连抽
+
+    Args:
+        ft (_type_): _description_
+    """
+
+    def __init__(self, n=1):
+        super().__init__()
+        self.controls = [
+            ft.Container(
+                cv.Canvas(
+                    [
+                        cv.Path(
+                            [
+                                cv.Path.MoveTo(25.4551733 * n, 0),
+                                cv.Path.LineTo(472 * n, 0),
+                                cv.Path.LineTo(446.5448267 * n, 90 * n),
+                                cv.Path.LineTo(0, 90 * n),
+                                cv.Path.Close(),
+                            ],
+                            paint=ft.Paint(
+                                style=ft.PaintingStyle.FILL,
+                                color="#EEAFB0B1",
+                            ),
+                        ),
+                    ],
+                    width=472 * n,
+                    height=90 * n,
+                    expand=True,
+                ),
+                padding=0,
+            ),
+            ft.Row(
+                controls=[
+                    ft.Image(
+                        "dataicon.png",
+                        width=70 * n,
+                        height=70 * n,
+                        offset=ft.transform.Offset(0, -0.08 * n),
+                    ),
+                    ft.Text(
+                        "8  MB      ",
+                        color=ft.Colors.BLACK,
+                        size=35 * n,
+                        # text_align=ft.TextAlign.CENTER,
+                    ),
+                ],
+                expand=True,
+                alignment=ft.MainAxisAlignment.SPACE_EVENLY,
+                width=472 * n,
+                height=90 * n,
+                spacing=0,
+            ),
+        ]

@@ -1,9 +1,8 @@
 import asyncio
 import random
 import flet as ft
-
-# import flet_audio as ft_a
-# TODO: flet_audio分离
+import datetime
+import flet_audio as ft_a
 import PhiControls as Phi
 import default_json as default_json
 
@@ -41,24 +40,33 @@ async def main(page: ft.Page):
     }
     if page.platform == ft.PagePlatform.ANDROID or page.platform == ft.PagePlatform.IOS:
         # 缩放倍数
-        n = 0.5
+        # nt123 = 0.45
+        await Phi.storage(page=page, key="n", value=0.45, mode="w")
     else:
-        n = 0.8
+        # nt123 = 0.8
+        await Phi.storage(page=page, key="n", value=0.8, mode="w")
 
     page.theme = ft.Theme(font_family="Exo")  # 默认应用字体
 
     # 背景音乐
-    audio1 = ft.Audio(
-        src="Shop0.wav", autoplay=True, release_mode=ft.audio.ReleaseMode.LOOP
-    )
+    try:
+        audio1 = ft_a.Audio(
+            src="Shop0.wav", autoplay=True, release_mode=ft_a.audio.ReleaseMode.LOOP
+        )
+    except:
+        print("[log-", datetime.datetime.now(), "]Audio load failed, use fallback")
+        audio1 = ft.Audio(
+            src="Shop0.wav", autoplay=True, release_mode=ft.audio.ReleaseMode.LOOP
+        )
+    # TODO: flet 0.26 win编译兼容性问题
     page.overlay.append(audio1)
 
     # 独立组件
-    datashow = Phi.PhiData(n=n)
-    lottery = Phi.PhiLottery(n=n, page=page)
+    datashow = Phi.PhiData(n=await Phi.storage(page=page, key="n"))
+    lottery = Phi.PhiLottery(n=await Phi.storage(page=page, key="n"), page=page)
     setting = ft.AlertDialog(
         modal=True,
-        title=ft.Text("设置"),
+        title=ft.Text("设置（当前仅供调试）"),
         content=ft.Column(
             [
                 ft.Text(
@@ -70,8 +78,14 @@ async def main(page: ft.Page):
                     value=str(await Phi.storage(page=page, key="data")),
                     label="Data/Byte",
                 ),
-                ft.Text("记得看浏览器控制台！",color=ft.Colors.RED)
+                ft.Text("当前缩放比例：" + str(await Phi.storage(page=page, key="n"))),
+                ft.TextField(
+                    value=str(await Phi.storage(page=page, key="n")),
+                    label="缩放倍数n（0~1）",
+                ),
+                ft.Text("记得看浏览器控制台！", color=ft.Colors.RED),
             ],
+            scroll=True,
         ),
         actions=[
             ft.Button(
@@ -84,14 +98,14 @@ async def main(page: ft.Page):
     # 事件监听
     async def lottery_on_click(e):
         global lock, lock2, lock3
-        nonlocal lottery, lottery_list, page, n
+        nonlocal lottery, lottery_list, page
         if not lock2 and not lock3:  # 防止连抽时点击&连续点击单抽
             lock3 = True
             lottery.controls[0].src = "phi0101.webp"
             await Phi.PhiLottery.on_click(
                 self=lottery,
                 page=page,
-                n=n,
+                n=await Phi.storage(page=page, key="n"),
                 lock=lock,
                 lottery_list=lottery_list,
                 datadelta=1048576.0,
@@ -113,16 +127,15 @@ async def main(page: ft.Page):
                     await Phi.PhiLottery.on_click(
                         self=lottery,
                         page=page,
-                        n=n,
+                        n=await Phi.storage(page=page, key="n"),
                         multi=True,
                         lock=lock,
                         lottery_list=lottery_list,
                         datadelta=838860.8,
                         datashow=datashow,
-
                     )
             elif await Phi.storage(page=page, key="data") < 8388608.0:
-                print("[Log]余额不足-连抽")
+                print("[log-", datetime.datetime.now(), "]余额不足-连抽")
                 # TODO: 前端日志输出失效，待修复
                 page.snack_bar = ft.SnackBar(ft.Text("余额不足"))
                 page.snack_bar.open = True
@@ -155,6 +168,13 @@ async def main(page: ft.Page):
         setting.content.controls[0].value = (
             "当前Data：" + str(await Phi.storage(page=page, key="data")) + " Byte"
         )
+        setting.content.controls[1].value = str(
+            await Phi.storage(page=page, key="data")
+        )
+        setting.content.controls[2].value = str(
+            "当前缩放比例：" + str(await Phi.storage(page=page, key="n"))
+        )
+        setting.content.controls[3].value = str(await Phi.storage(page=page, key="n"))
         setting.actions[1].on_click = setting_on_submit
         setting.actions[0].on_click = DEL
         page.open(setting)
@@ -167,11 +187,26 @@ async def main(page: ft.Page):
             value=float(setting.content.controls[1].value),
             mode="w",
         )
+        n_before = await Phi.storage(page=page, key="n")
+        await Phi.storage(
+            page=page,
+            key="n",
+            value=float(setting.content.controls[3].value),
+            mode="w",
+        )
         Phi.PhiData.on_data_change(
             datashow,
             Phi.hum_convert(await Phi.storage(page=page, key="data")),
             page=page,
+            n=await Phi.storage(page=page, key="n"),
         )
+        print("[WARNING]控件重构开始，可能导致页面闪烁")
+        if n_before != await Phi.storage(page=page, key="n"):
+            temp = page.controls
+            page.controls = []
+            page.update()
+            page.controls = temp
+            page.update()
         page.close(setting)
 
     async def DEL(e):
@@ -181,14 +216,14 @@ async def main(page: ft.Page):
         # 太危险了
 
     async def reset_data(e):
-        nonlocal page, n
+        nonlocal page
         await Phi.storage(page=page, key="data", mode="w", value=1073741824.0)
         datashow.on_data_change(
             Phi.hum_convert(await Phi.storage(page=page, key="data", mode="r")),
             page=page,
-            n=n*0.85,
+            n=await Phi.storage(page=page, key="n"),
         )
-        print("[Log]Data reset to 1073741824.0")
+        print("[log-", datetime.datetime.now(), "]Data reset to 1073741824.0")
         # TODO: 前端日志输出失效，待修复
         page.snack_bar = ft.SnackBar(ft.Text("Data已重置至1GB"))
         page.snack_bar.open = True
@@ -216,8 +251,12 @@ async def main(page: ft.Page):
                         ft.Container(
                             # 返回
                             Phi.PhiBack(
-                                on_click=lambda e: page.window.close(), n=n),
-                            margin=ft.margin.only(top=8 * n),
+                                on_click=lambda e: page.window.close(),
+                                n=await Phi.storage(page=page, key="n"),
+                            ),
+                            margin=ft.margin.only(
+                                top=8 * await Phi.storage(page=page, key="n")
+                            ),
                             col=1,
                         ),
                         ft.Container(
@@ -225,21 +264,25 @@ async def main(page: ft.Page):
                             ft.Text(
                                 "Data mining",
                                 color=ft.Colors.WHITE,
-                                size=47 * n,
+                                size=47 * await Phi.storage(page=page, key="n"),
                                 expand=True,
                                 text_align=ft.TextAlign.CENTER,
                             ),
                             col=1,
-                            margin=ft.margin.only(top=27 * n),
+                            margin=ft.margin.only(
+                                top=27 * await Phi.storage(page=page, key="n")
+                            ),
                         ),
                         ft.Container(
                             # data
                             datashow,
                             col=1,
                             alignment=ft.alignment.top_right,
-                            margin=ft.margin.only(right=25 * n),
+                            margin=ft.margin.only(
+                                right=25 * await Phi.storage(page=page, key="n")
+                            ),
                             on_click=set,
-                            height=70 * n * 1.25,
+                            height=70 * await Phi.storage(page=page, key="n") * 1.25,
                         ),
                     ],
                     columns=3,
@@ -249,31 +292,66 @@ async def main(page: ft.Page):
                     ft.Divider(thickness=2, color="#EE6E6E6E"),
                     height=1,
                     alignment=ft.alignment.top_center,
-                    margin=ft.margin.only(top=120 * n * 0.9),
+                    margin=ft.margin.only(
+                        top=120 * await Phi.storage(page=page, key="n") * 0.9
+                    ),
                 ),
                 ft.Container(
                     lottery,
-                    margin=ft.margin.only(top=160 * n),
+                    margin=ft.margin.only(
+                        top=175 * await Phi.storage(page=page, key="n")
+                    ),
                     alignment=ft.alignment.top_center,
                     expand=True,
                 ),
+                # ft.Container(
+                #     ft.Row(
+                #         [
+                #             ft.Button(
+                #                 "test",
+                #                 on_click=lottery_on_click,
+                #             ),
+                #             ft.Button(
+                #                 "test multi",
+                #                 on_click=lottery_on_click_multi,
+                #             ),
+                #             ft.TextButton("RESET DATA", on_click=set),
+                #         ],
+                #         expand=True,
+                #         alignment=ft.MainAxisAlignment.CENTER,
+                #     ),
+                #     padding=ft.padding.all(10),
+                #     alignment=ft.alignment.top_center,
+                #     margin=ft.margin.only(
+                #         top=550 * await Phi.storage(page=page, key="n")
+                #     ),
+                # ),
                 ft.Container(
-                    ft.Row([
-                        ft.Button(
-                            "test",
-                            on_click=lottery_on_click,
-                        ),
-                        ft.Button(
-                            "test multi",
-                            on_click=lottery_on_click_multi,
-                        ),
-                        ft.Button(
-                            "RESET DATA",
-                            on_click=reset_data)
-                    ], expand=True, alignment=ft.MainAxisAlignment.CENTER),
-                    padding=ft.padding.all(10),
-                    alignment=ft.alignment.top_center,
-                    margin=ft.margin.only(top=550 * n),
+                    ft.Row(
+                        [
+                            ft.Container(
+                                Phi.PhiLotteryButton(
+                                    n=await Phi.storage(page=page, key="n")
+                                ),
+                                on_click=lottery_on_click,
+                            ),
+                            ft.Container(
+                                Phi.PhiLotteryButtonM(
+                                    n=await Phi.storage(page=page, key="n")
+                                ),
+                                on_click=lottery_on_click_multi,
+                                on_long_press=set,
+                            ),
+                        ],
+                        expand=True,
+                        alignment=ft.MainAxisAlignment.SPACE_EVENLY,
+                    ),
+                    padding=0,
+                    alignment=ft.alignment.bottom_center,
+                    expand=True,
+                    margin=ft.margin.only(
+                        bottom=180 * await Phi.storage(page=page, key="n")
+                    ),
                 ),
             ],
             alignment=ft.alignment.center,
@@ -281,8 +359,23 @@ async def main(page: ft.Page):
             expand=True,
         )
     )
+    print(
+        "[log-",
+        datetime.datetime.now(),
+        "]缩放比例",
+        await Phi.storage(page=page, key="n"),
+    )
     Phi.PhiData.on_data_change(
-        datashow, Phi.hum_convert(await Phi.storage(page=page, key="data")), page=page
+        datashow,
+        Phi.hum_convert(await Phi.storage(page=page, key="data")),
+        page=page,
+        n=await Phi.storage(page=page, key="n"),
+    )
+    Phi.PhiData.on_data_change(
+        datashow,
+        Phi.hum_convert(await Phi.storage(page=page, key="data")),
+        page=page,
+        n=await Phi.storage(page=page, key="n"),
     )
     page.update()
 
