@@ -14,7 +14,10 @@ lock4 = False  # 防止连续点击连抽
 
 # noinspection PyTypeChecker
 async def main(page: ft.Page):
-
+    global lock, lock2, lock3, lock4
+    
+    Phi.storage(page=page, key="is_load_finish",value=False,type="s" , mode="w")  # 读取Data
+    
     # 数据读取
     # 读取抽奖列表,如无自定义则使用默认
     # TODO: 自定义抽奖列表
@@ -43,13 +46,14 @@ async def main(page: ft.Page):
         await Phi.storage(page=page, key="n", value=0.45, mode="w")
     else:
         # nt123 = 0.8
-        await Phi.storage(page=page, key="n", value=0.8, mode="w")
+        await Phi.storage(page=page, key="n", value=0.7, mode="w")
 
     page.theme = ft.Theme(font_family="Exo")  # 默认应用字体
 
     # 背景音乐
     try:
         import flet_audio as ft_a
+
         audio1 = ft_a.Audio(
             src="Shop0.wav", autoplay=True, release_mode=ft_a.audio.ReleaseMode.LOOP
         )
@@ -181,12 +185,14 @@ async def main(page: ft.Page):
 
     async def setting_on_submit(e):
         nonlocal setting, datashow, page
-        await Phi.storage(
-            page=page,
-            key="data",
-            value=float(setting.content.controls[1].value),
-            mode="w",
-        )
+        data_before = await Phi.storage(page=page, key="data")
+        if float(setting.content.controls[1].value) != data_before:
+            await Phi.storage(
+                page=page,
+                key="data",
+                value=float(setting.content.controls[1].value),
+                mode="w",
+            )
         n_before = await Phi.storage(page=page, key="n")
         await Phi.storage(
             page=page,
@@ -281,28 +287,32 @@ async def main(page: ft.Page):
                             margin=ft.margin.only(
                                 right=25 * await Phi.storage(page=page, key="n")
                             ),
-                            on_click=set,
+                            on_long_press=set,
                             height=70 * await Phi.storage(page=page, key="n") * 1.25,
                         ),
                     ],
                     columns=3,
                 ),
-                ft.Container(
-                    # 分割线
-                    ft.Divider(thickness=2, color="#EE6E6E6E"),
-                    height=1,
-                    alignment=ft.alignment.top_center,
-                    margin=ft.margin.only(
-                        top=120 * await Phi.storage(page=page, key="n") * 0.9
-                    ),
+                ft.TransparentPointer(
+                    ft.Container(
+                        # 分割线
+                        ft.Divider(thickness=2, color="#EE6E6E6E"),
+                        height=1,
+                        alignment=ft.alignment.top_center,
+                        margin=ft.margin.only(
+                            top=120 * await Phi.storage(page=page, key="n") * 0.9
+                        ),
+                    )
                 ),
-                ft.Container(
-                    lottery,
-                    margin=ft.margin.only(
-                        top=175 * await Phi.storage(page=page, key="n")
-                    ),
-                    alignment=ft.alignment.top_center,
-                    expand=True,
+                ft.TransparentPointer(
+                    ft.Container(
+                        lottery,
+                        margin=ft.margin.only(
+                            top=175 * await Phi.storage(page=page, key="n")
+                        ),
+                        alignment=ft.alignment.top_center,
+                        expand=True,
+                    )
                 ),
                 # ft.Container(
                 #     ft.Row(
@@ -326,32 +336,39 @@ async def main(page: ft.Page):
                 #         top=550 * await Phi.storage(page=page, key="n")
                 #     ),
                 # ),
-                ft.Container(
-                    ft.Row(
-                        [
-                            ft.Container(
-                                Phi.PhiLotteryButton(
-                                    n=await Phi.storage(page=page, key="n")
+                ft.TransparentPointer(
+                    ft.Container(
+                        ft.Row(
+                            [
+                                ft.Container(
+                                    Phi.PhiLotteryButton(
+                                        n=await Phi.storage(page=page, key="n")
+                                    ),
+                                    on_click=lottery_on_click,
                                 ),
-                                on_click=lottery_on_click,
-                            ),
-                            ft.Container(
-                                Phi.PhiLotteryButtonM(
-                                    n=await Phi.storage(page=page, key="n")
+                                ft.Container(
+                                    Phi.PhiLotteryButtonM(
+                                        n=await Phi.storage(page=page, key="n")
+                                    ),
+                                    on_click=lottery_on_click_multi,
                                 ),
-                                on_click=lottery_on_click_multi,
-                                on_long_press=set,
-                            ),
-                        ],
+                            ],
+                            expand=True,
+                            alignment=ft.MainAxisAlignment.SPACE_EVENLY,
+                        ),
+                        padding=0,
+                        alignment=ft.alignment.bottom_center,
                         expand=True,
-                        alignment=ft.MainAxisAlignment.SPACE_EVENLY,
-                    ),
-                    padding=0,
-                    alignment=ft.alignment.bottom_center,
-                    expand=True,
-                    margin=ft.margin.only(
-                        bottom=180 * await Phi.storage(page=page, key="n")
-                    ),
+                        margin=ft.margin.only(
+                            bottom=220 * await Phi.storage(page=page, key="n")
+                        ),
+                    )
+                ),
+                ft.TransparentPointer(
+                    ft.Container(
+                        Phi.PhiStoreNav(n=await Phi.storage(page=page, key="n"),page=page),
+                        alignment=ft.alignment.bottom_center,
+                    )
                 ),
             ],
             alignment=ft.alignment.center,
@@ -371,13 +388,7 @@ async def main(page: ft.Page):
         page=page,
         n=await Phi.storage(page=page, key="n"),
     )
-    Phi.PhiData.on_data_change(
-        datashow,
-        Phi.hum_convert(await Phi.storage(page=page, key="data")),
-        page=page,
-        n=await Phi.storage(page=page, key="n"),
-    )
     page.update()
-
+    Phi.storage(page=page, key="is_load_finish", value=True,type="s", mode="w")
 
 ft.app(target=main)

@@ -174,6 +174,21 @@ async def storage(
         page.session.clear()
 
 
+def play_key_sound(page: ft.Page):
+    """播放按键声音"""
+    # 背景音乐
+    if storage(page=page, key="is_load_finish",type="s"):
+        try:
+            import flet_audio as ft_a
+
+            audio1 = ft_a.Audio(src="Tap1.wav", autoplay=True)
+        except:
+            print("[log-", datetime.datetime.now(), "]Audio load failed, use fallback")
+            audio1 = ft.Audio(src="Tap1.wav", autoplay=True)
+        # TODO: flet 0.26 win编译兼容性问题
+        page.overlay.append(audio1)
+
+
 class PhiBack(ft.Stack):
     """_summary_: 返回按钮
 
@@ -341,7 +356,7 @@ class PhiData(ft.Stack):
                     ].style.size = ((35 - (2.5 * (len(self.DATA) - 7))) * n * 0.92)
                     page.update()
             else:
-                n *= 1.1
+                n *= 1.05
                 self.DATA = data
                 self.controls[0].controls[1].controls[1].content.spans[
                     0
@@ -397,7 +412,7 @@ class PhiLottery(ft.Stack):
                     ft.Text(
                         "",
                         color=ft.Colors.WHITE,
-                        size=30 * n,
+                        size=32 * n,
                         text_align=ft.TextAlign.CENTER,
                         width=textwidth * n,
                         style=ft.TextStyle(height=1),
@@ -663,3 +678,161 @@ class PhiLotteryButtonM(ft.Stack):
                 spacing=0,
             ),
         ]
+
+
+class PhiStoreNav(ft.Stack):
+    """_summary_: `PhiStore` 导航栏
+
+    Args:
+        ft (_type_): _description_
+    """
+
+    def __init__(
+        self,
+        page: ft.Page,
+        n=1,
+        on_click=[print("click"), print("click2"), print("click3"), print("click4")],
+        lock=False,
+    ):
+        super().__init__()
+        self.n = n
+        self.page = page
+        self.lock = lock
+        self.on_click_list = on_click
+        self.controls = [
+            ft.Container(
+                gradient=ft.LinearGradient(
+                    begin=ft.alignment.top_center,
+                    end=ft.alignment.bottom_center,
+                    colors=["#70000000", "#E0000000"],
+                ),
+                height=120 * n,
+                padding=0,
+            ),
+            ft.Row(
+                [
+                    ft.Container(
+                        ft.Stack(
+                            [
+                                ft.Container(
+                                    bgcolor=ft.Colors.WHITE,
+                                    width=300 * n,
+                                    height=3,
+                                    offset=ft.transform.Offset(
+                                        3, -(120 * n - 3) / 2 / 3
+                                    ),
+                                    animate_offset=ft.animation.Animation(
+                                        duration=400,
+                                        curve=ft.animation.AnimationCurve.EASE_OUT_CUBIC,
+                                    ),
+                                ),
+                                ft.Image(
+                                    src="nav-icon-1.svg",
+                                    width=60 * n,
+                                    height=60 * n,
+                                ),
+                            ],
+                            height=120 * n,
+                            alignment=ft.alignment.center,
+                        ),
+                        data="nav-icon-1",
+                        on_click=self.on_click,
+                    ),
+                    ft.Container(
+                        ft.Stack(
+                            [
+                                ft.Container(
+                                    # bgcolor=ft.Colors.WHITE,
+                                    width=300 * n,
+                                    height=3,
+                                    offset=ft.transform.Offset(
+                                        0, -(120 * n - 3) / 2 / 3
+                                    ),
+                                ),
+                                ft.Image(
+                                    src="nav-icon-2.svg",
+                                    width=60 * n,
+                                    height=60 * n,
+                                ),
+                            ],
+                            height=120 * n,
+                            alignment=ft.alignment.center,
+                        ),
+                        data="nav-icon-2",
+                        on_click=self.on_click,
+                    ),
+                    ft.Container(
+                        ft.Stack(
+                            [
+                                ft.Container(
+                                    # bgcolor=ft.Colors.WHITE,
+                                    width=300 * n,
+                                    height=3,
+                                    offset=ft.transform.Offset(
+                                        0, -(120 * n - 3) / 2 / 3
+                                    ),
+                                ),
+                                ft.Image(
+                                    src="nav-icon-3.svg",
+                                    width=60 * n,
+                                    height=60 * n,
+                                ),
+                            ],
+                            height=120 * n,
+                            alignment=ft.alignment.center,
+                        ),
+                        data="nav-icon-3",
+                        on_click=self.on_click,
+                    ),
+                    ft.Container(
+                        ft.Stack(
+                            [
+                                ft.Container(
+                                    # bgcolor=ft.Colors.WHITE,
+                                    width=300 * n,
+                                    height=3,
+                                    offset=ft.transform.Offset(
+                                        0, -(120 * n - 3) / 2 / 3
+                                    ),
+                                ),
+                                ft.Image(
+                                    src="nav-icon-4.svg",
+                                    width=60 * n,
+                                    height=60 * n,
+                                ),
+                            ],
+                            height=120 * n,
+                            alignment=ft.alignment.center,
+                        ),
+                        data="nav-icon-4",
+                        on_click=self.on_click,
+                    ),
+                ],
+                height=120 * n,
+                expand_loose=True,
+                alignment=ft.MainAxisAlignment.CENTER,
+                vertical_alignment=ft.CrossAxisAlignment.CENTER,
+                spacing=0,
+            ),
+        ]
+
+    def on_click(self, e):
+        if storage(page=self.page, key="is_load_finish"):
+            play_key_sound(self.page)
+            self.controls[1].controls[0].content.controls[0].offset = (
+                ft.transform.Offset(
+                    int(e.control.data[-1]) - 1, -(120 * self.n - 3) / 2 / 3
+                )
+            )
+            self.page.update()
+            if self.on_click_list != [] and self.on_click_list is not None:
+                for i, action in enumerate(self.on_click_list):
+                    if e.control.data[-1] == str(i + 1):
+                        print(
+                            "[log-",
+                            datetime.datetime.now(),
+                            "]执行了第",
+                            i + 1,
+                            "个导航栏动作",
+                        )
+                        # action
