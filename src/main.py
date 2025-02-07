@@ -68,13 +68,14 @@ async def main(page: ft.Page):
         audio1 = ft_a.Audio(
             src="Shop0.wav", autoplay=True, release_mode=ft_a.audio.ReleaseMode.LOOP
         )
+        page.overlay.append(audio1)
     except:
         print("[log-", datetime.datetime.now(), "]Audio load failed, use fallback")
         audio1 = ft.Audio(
             src="Shop0.wav", autoplay=True, release_mode=ft.audio.ReleaseMode.LOOP
         )
+        
     # TODO: flet 0.26 win编译兼容性问题
-    page.overlay.append(audio1)
 
     # 独立组件
     datashow = Phi.PhiData(n=await Phi.storage(page=page, key="n"))
@@ -167,7 +168,7 @@ async def main(page: ft.Page):
         if not lock4:  # 防止连续点击连抽
             lock4 = True
             lock2 = True
-            if await Phi.storage(page=page, key="data") >= 8388608.0:
+            if await Phi.storage(page=page, key="data") >= 8388608.0 or lottery_multi_count!=1:
                 nodata_tip.content.visible = False
                 page.update()
                 if lottery_multi_count == 1:

@@ -820,7 +820,7 @@ class PhiStoreNav(ft.Stack):
 
     async def on_click(self, e):
         if await storage(page=self.page, key="is_load_finish",type="s"):
-            play_key_sound(self.page)
+            await play_key_sound(self.page)
             self.controls[1].controls[0].content.controls[0].offset = (
                 ft.transform.Offset(
                     int(e.control.data[-1]) - 1, -(120 * self.n - 3) / 2 / 3
