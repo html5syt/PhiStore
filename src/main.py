@@ -15,15 +15,21 @@ lock4 = False  # 防止连续点击连抽
 # noinspection PyTypeChecker
 async def main(page: ft.Page):
     global lock, lock2, lock3, lock4
-    
-    Phi.storage(page=page, key="is_load_finish",value=False,type="s" , mode="w")  # 读取Data
-    
+
+    lottery_multi_count = 1  # 连抽次数
+
+    await Phi.storage(
+        page=page, key="is_load_finish", value=False, type="s", mode="w"
+    )  # 读取Data
+
     # 数据读取
     # 读取抽奖列表,如无自定义则使用默认
     # TODO: 自定义抽奖列表
     lottery_list = default_json.default_json()
-    # 读取Data
-    if not await Phi.storage(page=page, key="data", mode="s"):
+
+    try:
+        await Phi.storage(page=page, key="data")
+    except LookupError:
         await Phi.storage(page=page, key="data", value=1073741824.0, mode="w")
 
     # layout debug
@@ -33,7 +39,7 @@ async def main(page: ft.Page):
             page.update()
 
     page.on_keyboard_event = on_keyboard
-
+    page.window.full_screen = True
     page.bgcolor = ft.Colors.BLACK
     page.padding = 0
     page.spacing = 0
@@ -69,8 +75,8 @@ async def main(page: ft.Page):
     datashow = Phi.PhiData(n=await Phi.storage(page=page, key="n"))
     lottery = Phi.PhiLottery(n=await Phi.storage(page=page, key="n"), page=page)
     setting = ft.AlertDialog(
-        modal=True,
-        title=ft.Text("设置（当前仅供调试）"),
+        modal=False,
+        title=ft.Text("设置（点击空白区域退出）"),
         content=ft.Column(
             [
                 ft.Text(
@@ -85,49 +91,81 @@ async def main(page: ft.Page):
                 ft.Text("当前缩放比例：" + str(await Phi.storage(page=page, key="n"))),
                 ft.TextField(
                     value=str(await Phi.storage(page=page, key="n")),
-                    label="缩放倍数n（0~1）",
+                    label="缩放倍数n（0~1）（仅供调试）",
                 ),
-                ft.Text("记得看浏览器控制台！", color=ft.Colors.RED),
+                ft.Text("如有错误记得看浏览器控制台！", color=ft.Colors.RED),
             ],
             scroll=True,
         ),
         actions=[
             ft.Button(
-                "清空session和client_storage（危险！仅供调试）",
+                "清空session和client_storage（危险！长按触发）",
             ),
             ft.Button("确定"),
         ],
+    )
+    nodata_tip = ft.TransparentPointer(
+        ft.Container(
+            ft.Text(
+                "余额不足",
+                color=ft.Colors.WHITE,
+                size=40 * await Phi.storage(page=page, key="n"),
+            ),
+            alignment=ft.alignment.bottom_right,
+            margin=ft.margin.only(
+                bottom=150 * await Phi.storage(page=page, key="n"),
+                right=100 * await Phi.storage(page=page, key="n"),
+            ),
+            visible=False,
+        )
+    )
+    lottery_multi_cover = ft.Container(
+        visible=False,
     )
 
     # 事件监听
     async def lottery_on_click(e):
         global lock, lock2, lock3
-        nonlocal lottery, lottery_list, page
+        nonlocal lottery, lottery_list, page, nodata_tip
+        if await Phi.storage(page=page, key="is_load_finish", type="s"):
+            await Phi.play_key_sound(page)
         if not lock2 and not lock3:  # 防止连抽时点击&连续点击单抽
             lock3 = True
             lottery.controls[0].src = "phi0101.webp"
-            await Phi.PhiLottery.on_click(
-                self=lottery,
-                page=page,
-                n=await Phi.storage(page=page, key="n"),
-                lock=lock,
-                lottery_list=lottery_list,
-                datadelta=1048576.0,
-                datashow=datashow,
-            )
+            if await Phi.storage(page=page, key="data") >= 1048576.0:
+                nodata_tip.content.visible = False
+                page.update()
+                await Phi.PhiLottery.on_click(
+                    self=lottery,
+                    page=page,
+                    n=await Phi.storage(page=page, key="n"),
+                    lock=lock,
+                    lottery_list=lottery_list,
+                    datadelta=1048576.0,
+                    datashow=datashow,
+                )
+            elif await Phi.storage(page=page, key="data") < 1048576.0:
+                nodata_tip.content.visible = True
+                page.update()
+                print("[log-", datetime.datetime.now(), "]余额不足-单抽")
             lock3 = False
             page.update()
 
     async def lottery_on_click_multi(e):
         global lock, lock2, lock4
-        nonlocal lottery, lottery_list
+        nonlocal lottery, lottery_list, nodata_tip, page, lottery_multi_count, lottery_multi_cover
         lottery.controls[0].src = " "
+        if await Phi.storage(page=page, key="is_load_finish", type="s"):
+            await Phi.play_key_sound(page)
         # 连抽
+        lottery_multi_cover.on_click = lottery_on_click_multi
         if not lock4:  # 防止连续点击连抽
-            # lock4 = True
+            lock4 = True
             lock2 = True
             if await Phi.storage(page=page, key="data") >= 8388608.0:
-                for i in range(1, 21):
+                nodata_tip.content.visible = False
+                page.update()
+                if lottery_multi_count == 1:
                     await Phi.PhiLottery.on_click(
                         self=lottery,
                         page=page,
@@ -138,36 +176,70 @@ async def main(page: ft.Page):
                         datadelta=838860.8,
                         datashow=datashow,
                     )
+                    lottery_multi_cover.visible = True
+                    page.update()
+                    lottery_multi_count += 0.5
+                    print("[log-", datetime.datetime.now(), "]连抽开始")
+                elif lottery_multi_count > 1 and lottery_multi_count < 10:
+                    for _ in range(1, 3):
+                        await Phi.PhiLottery.on_click(
+                            self=lottery,
+                            page=page,
+                            n=await Phi.storage(page=page, key="n"),
+                            multi=True,
+                            lock=lock,
+                            lottery_list=lottery_list,
+                            datadelta=838860.8,
+                            datashow=datashow,
+                        )
+                        lottery_multi_count += 0.5
+                    print(
+                        "[log-",
+                        datetime.datetime.now(),
+                        "]连抽中,count:",
+                        lottery_multi_count,
+                    )
+                elif lottery_multi_count == 10:
+                    await Phi.PhiLottery.on_click(
+                        self=lottery,
+                        page=page,
+                        n=await Phi.storage(page=page, key="n"),
+                        multi=True,
+                        lock=lock,
+                        lottery_list=lottery_list,
+                        datadelta=838860.8,
+                        datashow=datashow,
+                    )
+                    lottery_multi_count += 0.5
+                elif lottery_multi_count > 10:
+                    await Phi.PhiLottery.on_click(
+                        self=lottery,
+                        page=page,
+                        n=await Phi.storage(page=page, key="n"),
+                        multi=True,
+                        lock=lock,
+                        lottery_list=lottery_list,
+                        datadelta=838860.8,
+                        datashow=datashow,
+                    )
+                    lottery_multi_cover.visible = False
+                    page.update()
+                    lottery_multi_count = 1
+                    print("[log-", datetime.datetime.now(), "]连抽结束")
             elif await Phi.storage(page=page, key="data") < 8388608.0:
-                print("[log-", datetime.datetime.now(), "]余额不足-连抽")
-                # TODO: 前端日志输出失效，待修复
-                page.snack_bar = ft.SnackBar(ft.Text("余额不足"))
-                page.snack_bar.open = True
+                nodata_tip.content.visible = True
                 page.update()
+                print("[log-", datetime.datetime.now(), "]余额不足-连抽")
             lottery.controls[0].src = "phi0101.webp"
             lock2 = False
             page.update()
-            # lock4 = False
-        # nonlocal multi0
-        # multi0 = [0, 1]
-        # # 连抽
-        # if multi0==[0,1]:
-        #     multi0=[1,1]
-        #     await phi.PhiLottery.on_click(self=lottery, page=page, n=n)
-        #     print(multi0)
-        # elif multi0==[1,1] or multi0[1]<10: #连抽中
-        #     for i in range(1, 3):
-        #         await phi.PhiLottery.on_click(self=lottery, page=page, n=n)
-        #     multi0[1]+=1
-        #     print(multi0)
-        # elif multi0[1]>=10: #连抽结束
-        #     multi0=[0,1]
-        # 单抽
-        # await phi.PhiLottery.on_click(self=lottery, page=page, n=n)
+            lock4 = False
 
     # noinspection PyArgumentList
     async def set(e):
         nonlocal setting, datashow, page
+        if await Phi.storage(page=page, key="is_load_finish", type="s"):
+            await Phi.play_key_sound(page)
         page.open(setting)
         setting.content.controls[0].value = (
             "当前Data：" + str(await Phi.storage(page=page, key="data")) + " Byte"
@@ -180,11 +252,13 @@ async def main(page: ft.Page):
         )
         setting.content.controls[3].value = str(await Phi.storage(page=page, key="n"))
         setting.actions[1].on_click = setting_on_submit
-        setting.actions[0].on_click = DEL
+        setting.actions[0].on_long_press = DEL
         page.open(setting)
 
     async def setting_on_submit(e):
         nonlocal setting, datashow, page
+        if await Phi.storage(page=page, key="is_load_finish", type="s"):
+            await Phi.play_key_sound(page)
         data_before = await Phi.storage(page=page, key="data")
         if float(setting.content.controls[1].value) != data_before:
             await Phi.storage(
@@ -217,23 +291,24 @@ async def main(page: ft.Page):
 
     async def DEL(e):
         nonlocal setting, page
+        if await Phi.storage(page=page, key="is_load_finish", type="s"):
+            await Phi.play_key_sound(page)
         await Phi.storage(page=page, type="DEL")
         # page.close(setting)
         # 太危险了
 
-    async def reset_data(e):
+    async def close(e):
         nonlocal page
-        await Phi.storage(page=page, key="data", mode="w", value=1073741824.0)
-        datashow.on_data_change(
-            Phi.hum_convert(await Phi.storage(page=page, key="data", mode="r")),
-            page=page,
-            n=await Phi.storage(page=page, key="n"),
-        )
-        print("[log-", datetime.datetime.now(), "]Data reset to 1073741824.0")
-        # TODO: 前端日志输出失效，待修复
-        page.snack_bar = ft.SnackBar(ft.Text("Data已重置至1GB"))
-        page.snack_bar.open = True
-        page.update()
+        if await Phi.storage(page=page, key="is_load_finish", type="s"):
+            await Phi.play_key_sound(page)
+        page.window.close()
+
+    async def exit_fullscreen(e):
+        print("[log-", datetime.datetime.now(), "]退出全屏")
+        nonlocal page
+        if await Phi.storage(page=page, key="is_load_finish", type="s"):
+            await Phi.play_key_sound(page)
+        page.window.full_screen = False
 
     # 页面组件树
     page.add(
@@ -257,7 +332,8 @@ async def main(page: ft.Page):
                         ft.Container(
                             # 返回
                             Phi.PhiBack(
-                                on_click=lambda e: page.window.close(),
+                                on_click=close,
+                                on_long_press=exit_fullscreen,
                                 n=await Phi.storage(page=page, key="n"),
                             ),
                             margin=ft.margin.only(
@@ -366,10 +442,14 @@ async def main(page: ft.Page):
                 ),
                 ft.TransparentPointer(
                     ft.Container(
-                        Phi.PhiStoreNav(n=await Phi.storage(page=page, key="n"),page=page),
+                        Phi.PhiStoreNav(
+                            n=await Phi.storage(page=page, key="n"), page=page
+                        ),
                         alignment=ft.alignment.bottom_center,
                     )
                 ),
+                nodata_tip,
+                lottery_multi_cover,
             ],
             alignment=ft.alignment.center,
             fit=ft.StackFit.EXPAND,
@@ -389,6 +469,7 @@ async def main(page: ft.Page):
         n=await Phi.storage(page=page, key="n"),
     )
     page.update()
-    Phi.storage(page=page, key="is_load_finish", value=True,type="s", mode="w")
+    await Phi.storage(page=page, key="is_load_finish", value=True, type="s", mode="w")
+
 
 ft.app(target=main)

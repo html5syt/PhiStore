@@ -25,6 +25,7 @@ company = "Tim & Pigeon Games"
 # copyright text to display in about app dialogs
 copyright = "Copyright (C) 2025 by Tim, Assets from Pigeon Games."
 
+build_number = 2085 # --build-number
 
 [tool.flet.app]
 path = "src"

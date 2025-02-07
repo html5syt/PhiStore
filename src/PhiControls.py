@@ -154,7 +154,7 @@ async def storage(
                 page.session.remove(key)
             else:
                 raise LookupError("Key not found in session storage")
-        print(f"[log-", datetime.datetime.now(), "]{key}值为: {page.session.get(key)}")
+        print(f"[log-{datetime.datetime.now()}]{key}值为: {page.session.get(key)}")
     elif type == "c":
         if mode == "r":
             if await page.client_storage.contains_key_async(key):
@@ -169,15 +169,16 @@ async def storage(
                 page.client_storage.remove(key)
             else:
                 raise LookupError("Key not found in client storage")
+            print(f"[log-{datetime.datetime.now()}]{key}值为: {page.session.get(key)}")
     elif type == "DEL":
         await page.client_storage.clear_async()
         page.session.clear()
 
 
-def play_key_sound(page: ft.Page):
+async def play_key_sound(page: ft.Page):
     """播放按键声音"""
     # 背景音乐
-    if storage(page=page, key="is_load_finish",type="s"):
+    if await storage(page=page, key="is_load_finish",type="s"):
         try:
             import flet_audio as ft_a
 
@@ -196,7 +197,7 @@ class PhiBack(ft.Stack):
         ft (_type_): _description_
     """
 
-    def __init__(self, on_click=None, n=1):
+    def __init__(self, on_click=None,on_long_press=None, n=1):
         super().__init__()
         self.controls = [
             ft.Container(
@@ -232,6 +233,7 @@ class PhiBack(ft.Stack):
                 ),
                 padding=0,
                 on_click=on_click,
+                on_long_press=on_long_press,
             ),
             ft.Container(
                 ft.Image(src="back.svg"),
@@ -514,13 +516,13 @@ class PhiLottery(ft.Stack):
                         detailText.value += textTemp
                         page.update()
                         await asyncio.sleep(0.05)
-                    if multi:
-                        await asyncio.sleep(0.25)
+                    # if multi:
+                    #     await asyncio.sleep(0.25)
                 elif await storage(page=page, key="data") < datadelta:
                     self.nodata = True
                     self.controls[0].visible = not self.controls[0].visible  # ?图
                     print("[log-", datetime.datetime.now(), "]余额不足")
-                    # TODO: 前端日志输出失效，待修复
+                    # 余额不足提示
                     page.snack_bar = ft.SnackBar(ft.Text("余额不足"))
                     page.snack_bar.open = True
                     page.update()
@@ -684,14 +686,14 @@ class PhiStoreNav(ft.Stack):
     """_summary_: `PhiStore` 导航栏
 
     Args:
-        ft (_type_): _description_
+        on_click (list, optional): 导航栏点击事件列表,用字符串包裹事件回调,禁止使用双引号. Defaults to [].
     """
 
     def __init__(
         self,
         page: ft.Page,
         n=1,
-        on_click=[print("click"), print("click2"), print("click3"), print("click4")],
+        on_click=["print('click')", "print('click2')", "print('click3')", "print('click4')"],
         lock=False,
     ):
         super().__init__()
@@ -816,8 +818,8 @@ class PhiStoreNav(ft.Stack):
             ),
         ]
 
-    def on_click(self, e):
-        if storage(page=self.page, key="is_load_finish"):
+    async def on_click(self, e):
+        if await storage(page=self.page, key="is_load_finish",type="s"):
             play_key_sound(self.page)
             self.controls[1].controls[0].content.controls[0].offset = (
                 ft.transform.Offset(
@@ -826,7 +828,7 @@ class PhiStoreNav(ft.Stack):
             )
             self.page.update()
             if self.on_click_list != [] and self.on_click_list is not None:
-                for i, action in enumerate(self.on_click_list):
+                for i in range(0, len(self.on_click_list) - 1):
                     if e.control.data[-1] == str(i + 1):
                         print(
                             "[log-",
@@ -835,4 +837,5 @@ class PhiStoreNav(ft.Stack):
                             i + 1,
                             "个导航栏动作",
                         )
-                        # action
+                        print("[log-", datetime.datetime.now(), "]", self.on_click_list)
+                        exec(self.on_click_list[i])
