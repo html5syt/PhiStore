@@ -3,11 +3,13 @@
 </div>
 <h1 align="center">PhiStore</h1>
 
-尝试使用Flet还原Phigros v1.6.11的商店系统，正在开发中。部分资源（如icon）来自Phigros安装包，**禁止商业及不正当使用。**
+尝试使用Flet还原Phigros v1.6.11的商店系统，V1.0版本已开发完成。部分资源（如icon）来自Phigros安装包，**禁止商业及不正当使用。**
 
 网页版：[https://html5syt.github.io/PhiStore](https://html5syt.github.io/PhiStore)
 
 **您可以在Action的artifact中找到最新的全平台离线安装包。**
+
+# **Release V1.0.0已发布，[链接→](https://github.com/html5syt/PhiStore/releases/tag/v1.0.0)**
 
 # 另记录抽奖相关信息
 

@@ -828,7 +828,7 @@ class PhiStoreNav(ft.Stack):
             )
             self.page.update()
             if self.on_click_list != [] and self.on_click_list is not None:
-                for i in range(0, len(self.on_click_list) - 1):
+                for i in range(0, len(self.on_click_list) + 1):
                     if e.control.data[-1] == str(i + 1):
                         print(
                             "[log-",

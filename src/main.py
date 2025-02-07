@@ -32,14 +32,19 @@ async def main(page: ft.Page):
     except LookupError:
         await Phi.storage(page=page, key="data", value=1073741824.0, mode="w")
 
-    # layout debug
-    def on_keyboard(e: ft.KeyboardEvent):
-        if e.key == "S" and e.ctrl and e.shift:
-            page.show_semantics_debugger = not page.show_semantics_debugger
-            page.update()
+    # # layout debug
+    # def on_keyboard(e: ft.KeyboardEvent):
+    #     if e.key == "S" and e.ctrl and e.shift:
+    #         page.show_semantics_debugger = not page.show_semantics_debugger
+    #         page.update()
 
-    page.on_keyboard_event = on_keyboard
-    page.window.full_screen = True
+    # page.on_keyboard_event = on_keyboard
+    
+    page.window.full_screen = False
+    page.title = "PhiStore"
+    page.window.alignment = ft.alignment.center
+    page.window.icon = "icon.ico"
+    
     page.bgcolor = ft.Colors.BLACK
     page.padding = 0
     page.spacing = 0
