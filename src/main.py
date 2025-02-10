@@ -315,7 +315,7 @@ async def main(page: ft.Page):
         if await Phi.storage(page=page, key="is_load_finish", type="s"):
             await Phi.play_key_sound(page)
         page.window.full_screen = False
-
+    await Phi.storage(page=page, key="is_load_finish", value=True, type="s", mode="w")
     # 页面组件树
     page.add(
         ft.Stack(
@@ -396,28 +396,6 @@ async def main(page: ft.Page):
                         expand=True,
                     )
                 ),
-                # ft.Container(
-                #     ft.Row(
-                #         [
-                #             ft.Button(
-                #                 "test",
-                #                 on_click=lottery_on_click,
-                #             ),
-                #             ft.Button(
-                #                 "test multi",
-                #                 on_click=lottery_on_click_multi,
-                #             ),
-                #             ft.TextButton("RESET DATA", on_click=set),
-                #         ],
-                #         expand=True,
-                #         alignment=ft.MainAxisAlignment.CENTER,
-                #     ),
-                #     padding=ft.padding.all(10),
-                #     alignment=ft.alignment.top_center,
-                #     margin=ft.margin.only(
-                #         top=550 * await Phi.storage(page=page, key="n")
-                #     ),
-                # ),
                 ft.TransparentPointer(
                     ft.Container(
                         ft.Row(
@@ -475,7 +453,6 @@ async def main(page: ft.Page):
         n=await Phi.storage(page=page, key="n"),
     )
     page.update()
-    await Phi.storage(page=page, key="is_load_finish", value=True, type="s", mode="w")
 
 
 ft.app(target=main)
