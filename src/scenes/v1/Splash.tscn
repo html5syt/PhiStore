@@ -1,0 +1,42 @@
+[gd_scene load_steps=4 format=3 uid="uid://cinupnas0lqvh"]
+
+[ext_resource type="Script" uid="uid://r51dph1u8rwf" path="res://scripts/v1/splash.gd" id="1_w01q0"]
+[ext_resource type="Texture2D" uid="uid://c278m7awjiaud" path="res://assets/global/Logopit_1551599744471.png" id="1_wboji"]
+[ext_resource type="PackedScene" uid="uid://kiuugoj7icb3" path="res://addons/fade/TransitionManager.tscn" id="3_odx4k"]
+
+[node name="Splash" type="Node"]
+script = ExtResource("1_w01q0")
+
+[node name="Background" type="ColorRect" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 1)
+metadata/_edit_lock_ = true
+
+[node name="Logo" type="TextureRect" parent="."]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -500.0
+offset_top = -281.0
+offset_right = 499.0
+offset_bottom = 281.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 4
+texture = ExtResource("1_wboji")
+expand_mode = 1
+metadata/_edit_lock_ = true
+
+[node name="ChangeSceneTimer" type="Timer" parent="."]
+wait_time = 3.0
+one_shot = true
+
+[node name="TransitionManager" parent="." instance=ExtResource("3_odx4k")]
+
+[connection signal="timeout" from="ChangeSceneTimer" to="." method="_on_change_scene_timer_timeout"]

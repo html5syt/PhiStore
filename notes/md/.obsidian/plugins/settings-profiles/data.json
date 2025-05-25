@@ -1,0 +1,13 @@
+{
+  "activeProfile": {
+    "name": "Global",
+    "modifiedAt": "2025-04-30T15:10:12.666Z"
+  },
+  "profileUpdate": true,
+  "profileUpdateDelay": 800,
+  "uiUpdate": true,
+  "uiUpdateInterval": 1000,
+  "devices": {
+    "3765e73546d04ff1fd0d96dfae20d2f58d047d3a218ab28ab81de94706e59167": "C:\\Users\\Administrator\\AppData\\Local\\ObsidianPlugins\\Data\\Profiles"
+  }
+}

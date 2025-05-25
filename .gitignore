@@ -165,3 +165,6 @@ storage/
 assets0/
 
 animation/
+
+# Godot
+build/

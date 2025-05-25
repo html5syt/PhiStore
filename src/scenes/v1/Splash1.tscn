@@ -1,0 +1,81 @@
+[gd_scene load_steps=5 format=3 uid="uid://btutpiqr5rxy2"]
+
+[ext_resource type="PackedScene" uid="uid://kiuugoj7icb3" path="res://addons/fade/TransitionManager.tscn" id="1_uj71l"]
+[ext_resource type="Texture2D" uid="uid://jpequleco75k" path="res://assets/v1/bb.png" id="2_aafn5"]
+[ext_resource type="Texture2D" uid="uid://ppmfm0wl1s3u" path="res://assets/屏幕截图 2025-05-18 000316.png" id="2_vqx1g"]
+[ext_resource type="FontFile" uid="uid://dyywuscj3o4xw" path="res://assets/v1/Font/Exo-Regular.otf" id="4_5tqki"]
+
+[node name="Splash1" type="Node"]
+
+[node name="Background" type="ColorRect" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 1)
+
+[node name="屏幕截图2025-05-18000316" type="TextureRect" parent="."]
+visible = false
+modulate = Color(1, 1, 1, 0.564706)
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -800.0
+offset_top = -450.0
+offset_right = 800.0
+offset_bottom = 450.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("2_vqx1g")
+expand_mode = 1
+
+[node name="Logo" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -20.0
+offset_top = -20.0
+offset_right = 20.0
+offset_bottom = 20.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 4
+
+[node name="Bb" type="Sprite2D" parent="Logo"]
+scale = Vector2(0.228404, 0.228404)
+texture = ExtResource("2_aafn5")
+
+[node name="TransitionManager" parent="." instance=ExtResource("1_uj71l")]
+
+[node name="TouchToStart" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -273.0
+offset_top = 141.5
+offset_right = 273.0
+offset_bottom = 176.5
+grow_horizontal = 2
+grow_vertical = 2
+metadata/_edit_use_anchors_ = true
+
+[node name="Label" type="Label" parent="TouchToStart"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 0.971
+anchor_bottom = 1.0
+offset_right = -490.166
+offset_bottom = -12.0
+theme_override_fonts/font = ExtResource("4_5tqki")
+theme_override_font_sizes/font_size = 35
+text = "t   o   u   c   h     t  o     s   t   a   r   t "
+horizontal_alignment = 1
