@@ -1,0 +1,19 @@
+[gd_scene load_steps=3 format=3 uid="uid://c62nlt5v5iy5"]
+
+[ext_resource type="Texture2D" uid="uid://dbfwumj6ofruc" path="res://assets/global/Button_Left.png" id="1_v83xn"]
+[ext_resource type="Texture2D" uid="uid://co0j542hmadou" path="res://assets/global/back.png" id="2_nn0ks"]
+
+[node name="Back" type="TextureButton"]
+offset_right = 190.0
+offset_bottom = 145.0
+scale = Vector2(0.78, 0.78)
+texture_normal = ExtResource("1_v83xn")
+stretch_mode = 6
+
+[node name="arrow" type="TextureRect" parent="."]
+layout_mode = 0
+offset_left = 43.5897
+offset_top = 39.7436
+offset_right = 87.5897
+offset_bottom = 79.7436
+texture = ExtResource("2_nn0ks")

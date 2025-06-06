@@ -1,0 +1,48 @@
+[core]
+	repositoryformatversion = 0
+	filemode = false
+	bare = false
+	logallrefupdates = true
+	ignorecase = true
+[remote "origin"]
+	url = https://github.com/html5syt/PhiStore.git
+	fetch = +refs/heads/*:refs/remotes/origin/*
+[branch "Godot"]
+	remote = origin
+	merge = refs/heads/Godot
+	vscode-merge-base = origin/Godot
+[branch "Flet"]
+	remote = origin
+	merge = refs/heads/Flet
+	vscode-merge-base = origin/Flet
+[submodule "src/assets/pigeon/chart"]
+	url = https://github.com/html5syt/PhiStore.git/src/assets/pigeon/chart
+	active = true
+	shallow = true
+[submodule "src/assets/pigeon/avatar"]
+	url = https://github.com/html5syt/PhiStore.git/src/assets/pigeon/avatar
+	active = true
+	shallow = true
+[submodule "src/assets/pigeon/illustrationBlur"]
+	url = https://github.com/html5syt/PhiStore.git/src/assets/pigeon/illustrationBlur
+	active = true
+	shallow = true
+[submodule "src/assets/pigeon/illustrationLowRes"]
+	url = https://github.com/html5syt/PhiStore.git/src/assets/pigeon/illustrationLowRes
+	active = true
+	shallow = true
+[submodule]
+	recurse = true
+	fetchJobs = 1
+[submodule "src/assets/pigeon/music"]
+	url = https://github.com/html5syt/PhiStore.git/src/assets/pigeon/music
+	active = true
+	shallow = true
+[submodule "src/assets/pigeon/info"]
+	url = https://github.com/html5syt/PhiStore.git/src/assets/pigeon/info
+	active = true
+	shallow = true
+[submodule "src/assets/pigeon/illustration"]
+	url = https://github.com/html5syt/PhiStore.git/src/assets/pigeon/illustration
+	active = true
+	shallow = true

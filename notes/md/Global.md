@@ -13,3 +13,7 @@
 `cd existing_folder`
 
 `git rev-parse --git-dir > .git`
+
+# push 时卡住
+
+去除pre-push hook：`mv .git/hooks/pre-push .git/hooks/pre-push.bak`

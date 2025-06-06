@@ -1,0 +1,53 @@
+[gd_scene load_steps=6 format=3 uid="uid://bqdws2ryc1ioy"]
+
+[ext_resource type="Texture2D" uid="uid://br487ovbanfki" path="res://assets/v1/商店_素材.png" id="1_00cb5"]
+[ext_resource type="FontFile" uid="uid://dyywuscj3o4xw" path="res://assets/v1/Font/Exo-Regular.otf" id="2_ecm73"]
+[ext_resource type="Script" uid="uid://ddc252tqeqyxv" path="res://addons/AutoSizer/AutoSizeLabel.gd" id="3_6p4tx"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_6vrdq"]
+atlas = ExtResource("1_00cb5")
+region = Rect2(417, 0, 695, 150)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_w1d2f"]
+atlas = ExtResource("1_00cb5")
+region = Rect2(148, 49, 140, 100)
+
+[node name="RemainingData" type="TextureButton"]
+clip_contents = true
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -337.0
+offset_right = 358.0
+offset_bottom = 150.0
+grow_horizontal = 0
+scale = Vector2(0.45, 0.45)
+texture_normal = SubResource("AtlasTexture_6vrdq")
+
+[node name="DataIcon" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 4
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_left = 31.1111
+offset_top = -55.0
+offset_right = 171.111
+offset_bottom = 45.0
+grow_vertical = 2
+texture = SubResource("AtlasTexture_w1d2f")
+
+[node name="Data" type="Label" parent="."]
+layout_mode = 0
+offset_left = 206.445
+offset_top = 24.0
+offset_right = 651.445
+offset_bottom = 124.0
+theme_override_fonts/font = ExtResource("2_ecm73")
+theme_override_font_sizes/font_size = 62
+text = "953.77 TB Data"
+horizontal_alignment = 1
+vertical_alignment = 1
+clip_text = true
+script = ExtResource("3_6p4tx")
+min_font_size = 1
+metadata/_custom_type_script = "uid://ddc252tqeqyxv"

@@ -1,8 +1,11 @@
-[gd_scene load_steps=4 format=3 uid="uid://b0b06kbopxi33"]
+[gd_scene load_steps=7 format=3 uid="uid://b0b06kbopxi33"]
 
-[ext_resource type="Texture2D" uid="uid://cnekk4n2imvmi" path="res://icon.svg" id="1_1ia85"]
-[ext_resource type="Script" uid="uid://coo0mhl3sq3co" path="res://scenes/v1/shop/shop.gd" id="1_hv5rk"]
+[ext_resource type="Script" uid="uid://b8yaak7ve8aam" path="res://scripts/v1/shop.gd" id="1_w1d2f"]
 [ext_resource type="PackedScene" uid="uid://kiuugoj7icb3" path="res://addons/fade/TransitionManager.tscn" id="2_bv3dc"]
+[ext_resource type="Texture2D" uid="uid://cgih7urmlsw55" path="res://assets/屏幕截图 2025-05-18 000421.png" id="2_hv5rk"]
+[ext_resource type="AudioStream" uid="uid://dhesx4nkr2fnx" path="res://assets/v1/Shop0.wav" id="2_w1d2f"]
+[ext_resource type="PackedScene" uid="uid://c62nlt5v5iy5" path="res://components/global/BackButton.tscn" id="4_324vs"]
+[ext_resource type="PackedScene" uid="uid://bqdws2ryc1ioy" path="res://components/v1/RemainingData.tscn" id="5_6vrdq"]
 
 [node name="Shop" type="Control"]
 layout_mode = 3
@@ -11,7 +14,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-script = ExtResource("1_hv5rk")
+script = ExtResource("1_w1d2f")
 
 [node name="Background" type="ColorRect" parent="."]
 layout_mode = 1
@@ -22,24 +25,29 @@ grow_horizontal = 2
 grow_vertical = 2
 color = Color(0, 0, 0, 1)
 
-[node name="Icon" type="Sprite2D" parent="."]
-position = Vector2(823, 508)
-texture = ExtResource("1_1ia85")
+[node name="bgMusic" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("2_w1d2f")
+autoplay = true
 
-[node name="Button" type="Button" parent="."]
+[node name="屏幕截图2025-05-18000421" type="TextureRect" parent="."]
+modulate = Color(1, 1, 1, 0.505882)
 layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -422.0
-offset_top = 279.0
-offset_right = -326.0
-offset_bottom = 331.0
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+texture = ExtResource("2_hv5rk")
+expand_mode = 1
+metadata/_edit_lock_ = true
 
 [node name="TransitionManager" parent="." instance=ExtResource("2_bv3dc")]
+visible = false
 
-[connection signal="pressed" from="Button" to="." method="_on_button_pressed"]
+[node name="Back" parent="." instance=ExtResource("4_324vs")]
+layout_mode = 0
+
+[node name="RemainingData" parent="." instance=ExtResource("5_6vrdq")]
+layout_mode = 1
+
+[connection signal="finished" from="bgMusic" to="." method="_on_bg_music_finished"]

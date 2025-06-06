@@ -1,0 +1,21 @@
+#!/bin/sh
+
+# 更新所有子模块到分支最新提交
+echo "更新子模块..."
+git submodule update --remote --merge
+
+# 检查变更并自动提交子模块更新
+changed=$(git diff --name-only | grep .gitmodules)
+for submodule in $(git config --file .gitmodules --get-regexp path | awk '{print $2}'); do
+    if git diff --name-only | grep -q "$submodule"; then
+        echo "检测到 $submodule 变更，提交更新"
+        git add "$submodule"
+        git commit -m "自动更新子模块 $submodule" --no-verify
+    fi
+done
+
+# 检查.gitmodules变更
+if [ -n "$changed" ]; then
+    git add .gitmodules
+    git commit -m "自动更新子模块配置" --no-verify
+fi

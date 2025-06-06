@@ -83,4 +83,11 @@ text = "v2"
 [node name="TransitionManager" parent="." instance=ExtResource("4_8ggrk")]
 next_scene_path = "uid://b0b06kbopxi33"
 
-[connection signal="pressed" from="HBoxContainer/Button" to="." method="_choose_v1_ui"]
+[node name="splashAnimation" type="AnimationPlayer" parent="."]
+libraries = {
+&"": SubResource("AnimationLibrary_187wt")
+}
+autoplay = "splash"
+
+[connection signal="pressed" from="v1orv2/v1" to="." method="_choose_v1_ui"]
+[connection signal="pressed" from="v1orv2/v2" to="." method="_choose_v2_ui"]

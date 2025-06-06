@@ -17,23 +17,24 @@ boot_splash/bg_color=Color(0, 0, 0, 1)
 boot_splash/show_image=false
 boot_splash/fullsize=false
 boot_splash/use_filter=false
-config/icon="res://icon.svg"
+config/icon="uid://bfv2a6rlipcbn"
 
 [autoload]
 
 SceneTransitionRect="*res://addons/fade/TransitionManager.tscn"
+GodotTDS="*res://addons/GodotTDS/GodotTDS.gd"
 
 [display]
 
 window/size/viewport_width=1600
 window/size/viewport_height=900
-window/stretch/mode="canvas_items"
+window/stretch/mode="viewport"
 window/stretch/aspect="expand"
 window/handheld/orientation=4
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/transitions/plugin.cfg")
+enabled=PackedStringArray("res://addons/GodotTDS/plugin.cfg")
 
 [rendering]
 

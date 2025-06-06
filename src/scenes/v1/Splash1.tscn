@@ -1,5 +1,6 @@
 [gd_scene load_steps=5 format=3 uid="uid://btutpiqr5rxy2"]
 
+[ext_resource type="Script" uid="uid://bpbuslf0vf84p" path="res://scripts/v1/splash1.gd" id="1_qr8y8"]
 [ext_resource type="PackedScene" uid="uid://kiuugoj7icb3" path="res://addons/fade/TransitionManager.tscn" id="1_uj71l"]
 [ext_resource type="Texture2D" uid="uid://jpequleco75k" path="res://assets/v1/bb.png" id="2_aafn5"]
 [ext_resource type="Texture2D" uid="uid://ppmfm0wl1s3u" path="res://assets/屏幕截图 2025-05-18 000316.png" id="2_vqx1g"]
