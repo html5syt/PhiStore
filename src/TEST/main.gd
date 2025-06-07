@@ -1,11 +1,13 @@
 extends CanvasLayer
 
+# 正确加载和调用 C# 类的方式
+var pack_save = PackSave.new()  # 创建 C# 类的实例
 
 func _test_get():
-    PackSave.get_save()
+    pack_save.GetSave("user://.save", "user://PhigrosSaves-1.json")
     
 func _test_upload():
-    PackSave.upload_save()
+    pack_save.Upload("user://PhigrosSaves-1.json", "user://.save-1")
     
 func _file():
     $FileDialog.visible=true
