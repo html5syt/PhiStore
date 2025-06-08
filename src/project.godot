@@ -12,7 +12,7 @@ config_version=5
 
 config/name="PhiStore"
 run/main_scene="uid://duhfrp2sobaps"
-config/features=PackedStringArray("4.4", "C#", "Mobile")
+config/features=PackedStringArray("4.4", "Mobile")
 boot_splash/bg_color=Color(0, 0, 0, 1)
 boot_splash/show_image=false
 boot_splash/fullsize=false
@@ -28,7 +28,7 @@ GodotTDS="*res://addons/GodotTDS/GodotTDS.gd"
 
 window/size/viewport_width=1600
 window/size/viewport_height=900
-window/stretch/mode="viewport"
+window/stretch/mode="canvas_items"
 window/stretch/aspect="expand"
 window/handheld/orientation=4
 

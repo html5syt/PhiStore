@@ -1,7 +1,0 @@
-﻿<Project Sdk="Godot.NET.Sdk/4.4.1">
-  <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
-    <EnableDynamicLoading>true</EnableDynamicLoading>
-    <UserSecretsId>dce63f47-ff47-414f-bc8f-312830c1ea05</UserSecretsId>
-  </PropertyGroup>
-</Project>

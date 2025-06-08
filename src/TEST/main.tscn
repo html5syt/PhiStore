@@ -9,9 +9,10 @@ script = ExtResource("1_t6b0v")
 anchors_preset = 5
 anchor_left = 0.5
 anchor_right = 0.5
-offset_left = -11.5
-offset_right = 11.5
-offset_bottom = 55.0
+offset_left = -41.0
+offset_top = 34.0
+offset_right = -18.0
+offset_bottom = 89.0
 grow_horizontal = 2
 theme_override_font_sizes/font_size = 40
 text = "0"
@@ -38,22 +39,22 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -778.0
-offset_top = -155.0
-offset_right = 514.0
-offset_bottom = 400.0
+offset_left = -664.0
+offset_top = -144.0
+offset_right = 628.0
+offset_bottom = 411.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_font_sizes/font_size = 48
 tab_alignment = 1
-current_tab = 0
+current_tab = 1
 
 [node name="TapSDK" type="GridContainer" parent="TabContainer"]
+visible = false
 layout_mode = 2
 theme_override_constants/h_separation = 20
 theme_override_constants/v_separation = 20
 columns = 4
-metadata/_edit_group_ = true
 metadata/_tab_index = 0
 
 [node name="Login" type="Button" parent="TabContainer/TapSDK"]
@@ -65,6 +66,7 @@ theme_override_font_sizes/font_size = 48
 text = "登录"
 
 [node name="Logout" type="Button" parent="TabContainer/TapSDK"]
+visible = false
 custom_minimum_size = Vector2(200, 80)
 layout_mode = 2
 size_flags_horizontal = 3
@@ -79,96 +81,12 @@ focus_mode = 0
 theme_override_font_sizes/font_size = 48
 text = "防沉迷"
 
-[node name="TapMoment" type="Button" parent="TabContainer/TapSDK"]
-custom_minimum_size = Vector2(200, 80)
-layout_mode = 2
-focus_mode = 0
-theme_override_font_sizes/font_size = 48
-text = "内嵌动态"
-
-[node name="ShowEntry" type="Button" parent="TabContainer/TapSDK"]
-custom_minimum_size = Vector2(200, 80)
-layout_mode = 2
-focus_mode = 0
-theme_override_font_sizes/font_size = 48
-text = "显示悬浮窗"
-
-[node name="HideEntry" type="Button" parent="TabContainer/TapSDK"]
-custom_minimum_size = Vector2(200, 80)
-layout_mode = 2
-focus_mode = 0
-theme_override_font_sizes/font_size = 48
-text = "隐藏悬浮窗"
-
 [node name="GetUserProfile" type="Button" parent="TabContainer/TapSDK"]
 custom_minimum_size = Vector2(200, 80)
 layout_mode = 2
 focus_mode = 0
 theme_override_font_sizes/font_size = 48
 text = "用户信息"
-
-[node name="AchievementToast" type="Button" parent="TabContainer/TapSDK"]
-custom_minimum_size = Vector2(200, 80)
-layout_mode = 2
-focus_mode = 0
-theme_override_font_sizes/font_size = 48
-text = "成就弹窗(开)"
-
-[node name="FetchAchievement" type="Button" parent="TabContainer/TapSDK"]
-custom_minimum_size = Vector2(200, 80)
-layout_mode = 2
-focus_mode = 0
-theme_override_font_sizes/font_size = 48
-text = "所有成就"
-
-[node name="AchievementPage" type="Button" parent="TabContainer/TapSDK"]
-custom_minimum_size = Vector2(200, 80)
-layout_mode = 2
-focus_mode = 0
-theme_override_font_sizes/font_size = 48
-text = "成就页面"
-
-[node name="ReachAchievement" type="Button" parent="TabContainer/TapSDK"]
-custom_minimum_size = Vector2(200, 80)
-layout_mode = 2
-focus_mode = 0
-theme_override_font_sizes/font_size = 48
-text = "单步成就"
-
-[node name="GrowAchievement" type="Button" parent="TabContainer/TapSDK"]
-custom_minimum_size = Vector2(200, 80)
-layout_mode = 2
-focus_mode = 0
-theme_override_font_sizes/font_size = 48
-text = "分步成就"
-
-[node name="SubmitGiftCode" type="Button" parent="TabContainer/TapSDK"]
-custom_minimum_size = Vector2(200, 80)
-layout_mode = 2
-focus_mode = 0
-theme_override_font_sizes/font_size = 48
-text = "提交礼品码"
-
-[node name="SubmitLeaderboardScore" type="Button" parent="TabContainer/TapSDK"]
-custom_minimum_size = Vector2(200, 80)
-layout_mode = 2
-focus_mode = 0
-theme_override_font_sizes/font_size = 48
-text = "更新排行榜分数"
-
-[node name="FetchSectionRankings" type="Button" parent="TabContainer/TapSDK"]
-custom_minimum_size = Vector2(200, 80)
-layout_mode = 2
-focus_mode = 0
-theme_override_font_sizes/font_size = 48
-text = "获取区间排行"
-
-[node name="FetchUserRanking" type="Button" parent="TabContainer/TapSDK"]
-custom_minimum_size = Vector2(200, 80)
-layout_mode = 2
-focus_mode = 0
-theme_override_font_sizes/font_size = 48
-text = "获取玩家排行"
 
 [node name="SubmitGameSave" type="Button" parent="TabContainer/TapSDK"]
 custom_minimum_size = Vector2(200, 80)
@@ -196,66 +114,50 @@ focus_mode = 0
 theme_override_font_sizes/font_size = 48
 text = "删除云存档"
 
-[node name="DeepLink" type="Label" parent="."]
-anchors_preset = 7
-anchor_left = 0.5
-anchor_top = 1.0
-anchor_right = 0.5
-anchor_bottom = 1.0
-offset_left = -20.0
-offset_top = -23.0
-offset_right = 20.0
-grow_horizontal = 2
-grow_vertical = 0
+[node name="sync" type="Button" parent="TabContainer/TapSDK"]
+layout_mode = 2
 theme_override_font_sizes/font_size = 40
-text = "DeepLink"
+text = "sync
+"
 
-[node name="Panel" type="Panel" parent="."]
-visible = false
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -343.5
-offset_top = -453.0
-offset_right = 343.5
-offset_bottom = 453.0
-grow_horizontal = 2
-grow_vertical = 2
+[node name="PhiSave" type="GridContainer" parent="TabContainer"]
+layout_mode = 2
+theme_override_constants/h_separation = 20
+theme_override_constants/v_separation = 20
+columns = 4
+metadata/_tab_index = 1
 
-[node name="Label" type="Label" parent="Panel"]
-layout_mode = 0
-offset_left = 66.0
-offset_top = 366.0
-offset_right = 626.0
-offset_bottom = 476.0
-theme_override_font_sizes/font_size = 80
-text = "从深度链接启动"
+[node name="sessiontoken" type="TextEdit" parent="TabContainer/PhiSave"]
+custom_minimum_size = Vector2(700, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 30
+placeholder_text = "sessionToken"
 
-[node name="get" type="Button" parent="."]
-offset_left = 1315.0
-offset_top = 541.0
-offset_right = 1582.0
-offset_bottom = 648.0
+[node name="login" type="Button" parent="TabContainer/PhiSave"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 40
+text = "login"
+
+[node name="get" type="Button" parent="TabContainer/PhiSave"]
+layout_mode = 2
 theme_override_font_sizes/font_size = 40
 text = "get"
 
-[node name="file" type="Button" parent="."]
-offset_left = 1317.0
-offset_top = 736.0
-offset_right = 1584.0
-offset_bottom = 843.0
+[node name="Upload" type="Button" parent="TabContainer/PhiSave"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 40
+text = "upload"
+
+[node name="file" type="Button" parent="TabContainer/PhiSave"]
+layout_mode = 2
 theme_override_font_sizes/font_size = 40
 text = "File"
 
-[node name="Upload" type="Button" parent="."]
-offset_left = 1314.0
-offset_top = 371.0
-offset_right = 1581.0
-offset_bottom = 478.0
+[node name="sync" type="Button" parent="TabContainer/PhiSave"]
+layout_mode = 2
 theme_override_font_sizes/font_size = 40
-text = "upload"
+text = "sync
+"
 
 [node name="FileDialog" type="FileDialog" parent="."]
 title = "Open a File or Directory"
@@ -267,25 +169,16 @@ access = 1
 show_hidden_files = true
 use_native_dialog = true
 
-[connection signal="button_down" from="TabContainer/TapSDK/Login" to="." method="_on_login_button_down"]
+[connection signal="pressed" from="TabContainer/TapSDK/Login" to="." method="_on_TDS_login_pressed"]
 [connection signal="button_down" from="TabContainer/TapSDK/Logout" to="." method="_on_logout_button_down"]
 [connection signal="button_down" from="TabContainer/TapSDK/AntiAddiction" to="." method="_on_anti_addiction_button_down"]
-[connection signal="button_down" from="TabContainer/TapSDK/TapMoment" to="." method="_on_tap_moment_button_down"]
-[connection signal="button_down" from="TabContainer/TapSDK/ShowEntry" to="." method="_on_show_entry_button_down"]
-[connection signal="button_down" from="TabContainer/TapSDK/HideEntry" to="." method="_on_hide_entry_button_down"]
 [connection signal="button_down" from="TabContainer/TapSDK/GetUserProfile" to="." method="_on_get_user_profile_button_down"]
-[connection signal="button_down" from="TabContainer/TapSDK/AchievementToast" to="." method="_on_achievement_toast_button_down"]
-[connection signal="button_down" from="TabContainer/TapSDK/FetchAchievement" to="." method="_on_achievement_button_down"]
-[connection signal="button_down" from="TabContainer/TapSDK/AchievementPage" to="." method="_on_achievement_page_button_down"]
-[connection signal="button_down" from="TabContainer/TapSDK/ReachAchievement" to="." method="_on_reach_achievement_button_down"]
-[connection signal="button_down" from="TabContainer/TapSDK/GrowAchievement" to="." method="_on_grow_achievement_button_down"]
-[connection signal="button_down" from="TabContainer/TapSDK/SubmitGiftCode" to="." method="_on_submit_gift_code_button_down"]
-[connection signal="button_down" from="TabContainer/TapSDK/SubmitLeaderboardScore" to="." method="_on_submit_leaderboard_score_button_down"]
-[connection signal="button_down" from="TabContainer/TapSDK/FetchSectionRankings" to="." method="_on_fetch_section_rankings_button_down"]
-[connection signal="button_down" from="TabContainer/TapSDK/FetchUserRanking" to="." method="_on_fetch_user_ranking_button_down"]
 [connection signal="button_down" from="TabContainer/TapSDK/SubmitGameSave" to="." method="_on_submit_game_save_button_down"]
 [connection signal="button_down" from="TabContainer/TapSDK/FetchGameSaves" to="." method="_on_fetch_game_saves_button_down"]
 [connection signal="button_down" from="TabContainer/TapSDK/DeleteGameSave" to="." method="_on_delete_game_save_button_down"]
-[connection signal="pressed" from="get" to="." method="_test_get"]
-[connection signal="pressed" from="file" to="." method="_file"]
-[connection signal="pressed" from="Upload" to="." method="_test_upload"]
+[connection signal="pressed" from="TabContainer/TapSDK/sync" to="." method="_on_TDS_sync"]
+[connection signal="pressed" from="TabContainer/PhiSave/login" to="." method="_on_sessiontoken_login"]
+[connection signal="pressed" from="TabContainer/PhiSave/get" to="." method="_test_get"]
+[connection signal="pressed" from="TabContainer/PhiSave/Upload" to="." method="_test_upload"]
+[connection signal="pressed" from="TabContainer/PhiSave/file" to="." method="_file"]
+[connection signal="pressed" from="TabContainer/PhiSave/sync" to="." method="_on_sessiontoken_sync"]
