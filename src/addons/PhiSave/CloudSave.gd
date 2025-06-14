@@ -48,6 +48,7 @@ func _request(method: HTTPClient.Method, url: String, custom_headers: Dictionary
         final_headers["Content-Type"] = "application/json"
     
     # 打印调试信息
+    print("——请求信息——")
     print("请求类型: %s" % method)
     print("请求URL: %s" % url)
     print("请求头: ", final_headers)
@@ -84,6 +85,7 @@ func _request(method: HTTPClient.Method, url: String, custom_headers: Dictionary
     var body: PackedByteArray = response[3]
     
     # 处理响应
+    print("——响应信息——")
     print("状态码: %d" % response_code)
     if body.size() == 0:
         print("返回数据: *无返回数据*")

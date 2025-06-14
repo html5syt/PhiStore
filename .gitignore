@@ -168,3 +168,9 @@ animation/
 
 # Godot
 build/
+
+*.import
+
+*.tmp
+
+.obsidian/

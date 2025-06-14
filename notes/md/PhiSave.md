@@ -21,6 +21,10 @@
 
 1. 存档数据类型定义
 
+## PhiSaveTools
+
+1. 存档工具类，提供存档相关的工具函数
+
 # 流程
 
 1. 发起登录请求
@@ -40,6 +44,23 @@
       1. 获取当前存档id并记录
       2. 上传新存档到云端
       3. 使用旧id删除老的云端存档（**成功后删除本地存档**）
+
+# ConfigFile
+
+## 描述
+
+1. 写入于`config.cfg`中，用于保存`sessiontoken`等信息
+2. 读取时，优先读取`config.cfg`，若不存在则创建并写入需要的内容。
+3. 在`PhiSave`中使用`Config`变量进行读取和写入操作。
+
+## 信息注册
+
+1. `Config`
+   1. `sessionToken`：保存登录后获取的`sessiontoken`
+   2. `nickName`：保存登录后的昵称
+   3. `shortId`：保存登录后的短id **（sessiontoken登录取前6位）**
+2. `SaveInfo`
+   1. `updateTime`：保存上次更新云存档的时间戳
 
 # 注意事项
 

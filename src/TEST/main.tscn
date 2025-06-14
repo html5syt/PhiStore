@@ -47,10 +47,9 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_font_sizes/font_size = 48
 tab_alignment = 1
-current_tab = 1
+current_tab = 0
 
 [node name="TapSDK" type="GridContainer" parent="TabContainer"]
-visible = false
 layout_mode = 2
 theme_override_constants/h_separation = 20
 theme_override_constants/v_separation = 20
@@ -120,7 +119,15 @@ theme_override_font_sizes/font_size = 40
 text = "sync
 "
 
+[node name="DeleteGameSave2" type="Button" parent="TabContainer/TapSDK"]
+custom_minimum_size = Vector2(200, 80)
+layout_mode = 2
+focus_mode = 0
+theme_override_font_sizes/font_size = 48
+text = "RKS"
+
 [node name="PhiSave" type="GridContainer" parent="TabContainer"]
+visible = false
 layout_mode = 2
 theme_override_constants/h_separation = 20
 theme_override_constants/v_separation = 20
@@ -177,6 +184,7 @@ use_native_dialog = true
 [connection signal="button_down" from="TabContainer/TapSDK/FetchGameSaves" to="." method="_on_fetch_game_saves_button_down"]
 [connection signal="button_down" from="TabContainer/TapSDK/DeleteGameSave" to="." method="_on_delete_game_save_button_down"]
 [connection signal="pressed" from="TabContainer/TapSDK/sync" to="." method="_on_TDS_sync"]
+[connection signal="pressed" from="TabContainer/TapSDK/DeleteGameSave2" to="." method="_on_delete_game_save_2_pressed"]
 [connection signal="pressed" from="TabContainer/PhiSave/login" to="." method="_on_sessiontoken_login"]
 [connection signal="pressed" from="TabContainer/PhiSave/get" to="." method="_test_get"]
 [connection signal="pressed" from="TabContainer/PhiSave/Upload" to="." method="_test_upload"]

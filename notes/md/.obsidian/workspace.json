@@ -39,12 +39,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "v1/splash.md",
+                "file": "PhiSave.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "splash"
+              "title": "PhiSave"
             }
           }
         ],
@@ -221,6 +221,7 @@
   },
   "active": "20b08f76f607bdff",
   "lastOpenFiles": [
+    "Global.md",
     "Global.md",
     "v1/splash.md",
     "v1/splash",

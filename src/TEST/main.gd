@@ -150,3 +150,7 @@ func _on_sessiontoken_login() -> void:
 
 func _on_sessiontoken_sync() -> void:
     Phi_Save.SessionToken_sync_save()
+
+
+func _on_delete_game_save_2_pressed() -> void:
+    PhiSaveTools.generate_summary()
