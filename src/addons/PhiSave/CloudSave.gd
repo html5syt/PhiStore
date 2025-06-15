@@ -126,7 +126,7 @@ func get_nickname() -> String:
     return response["nickname"]
 
 # 编码summary数据
-func encode_summary(summary: Dictionary) -> String:
+static func encode_summary(summary: Dictionary) -> String:
     # 创建二进制缓冲区
     var buffer = StreamPeerBuffer.new()
     buffer.big_endian = false # 使用小端字节序
@@ -165,7 +165,7 @@ func encode_summary(summary: Dictionary) -> String:
     return Marshalls.raw_to_base64(data)
 
 # 解码summary数据
-func decode_summary(summary_base64: String) -> Dictionary:
+static func decode_summary(summary_base64: String) -> Dictionary:
     # 从base64解码
     var data = Marshalls.base64_to_raw(summary_base64)
     
@@ -261,7 +261,7 @@ func upload_summary(summary: Dictionary, new_file_id: String = ""):
     
     if response == null or !response.has("results") or response["results"].size() == 0:
         push_error("无效的响应格式")
-        return
+        #return
     
     var save_info = response["results"][0]
     var object_id = save_info["objectId"]
@@ -299,6 +299,67 @@ func upload_summary(summary: Dictionary, new_file_id: String = ""):
     
     self.emit_signal("upload_summary_success")
     print("summary更新成功")
+
+# 修改upload_summary函数使用新的编码方法
+func upload_summary_FORCE(summary: Dictionary, new_file_id: String = ""):
+    print("调用函数: upload_summary_FORCE()")
+    
+    # 使用新的编码函数
+    var summary_base64 = encode_summary(summary)
+    
+    # 获取存档信息
+    var url = BASE_URL + "classes/_GameSave?limit=1"
+    var result
+    
+    var json = JSON.new()
+
+    var Config = ConfigFile.new()
+    var load_result = Config.load("user://config.cfg")
+    var uuid = ""
+
+    # 如果文件没有加载，忽略它。
+    if load_result != OK:
+        push_error("config.cfg 加载失败")
+        return
+    else:
+        uuid = Config.get_value("Config", "uuid")
+        if uuid == "" or uuid == null:
+            push_error("config.cfg 未找到 uuid, 请在Android端初始化存档或获取UUID后继续。")
+            return
+
+    
+    var user_id = uuid
+
+    # 更新summary
+    url = BASE_URL + "classes/_GameSave"
+    var data = JSON.stringify({
+        "name": "save",
+        "summary": summary_base64,
+        "modifiedAt": {
+            "__type": "Date",
+            "iso": Time.get_datetime_string_from_system(true) + "Z"
+        },
+        "gameFile": {
+            "__type": "Pointer",
+            "className": "_File",
+            "objectId": new_file_id
+        },
+        "ACL": {user_id: {"read": true, "write": true}},
+        "user": {
+            "__type": "Pointer",
+            "className": "_User",
+            "objectId": user_id
+        }
+    })
+    
+    result = await _request(HTTPClient.METHOD_POST, url, {"Content-Type": "application/json"}, data)
+    
+    if result[0] != HTTPRequest.RESULT_SUCCESS:
+        push_error("上传summary失败")
+        return
+    
+    self.emit_signal("upload_summary_success")
+    print("summary创建成功")
 
 # 获取存档数据并保存到文件
 func get_save(custom_url: String = "", custom_checksum: String = "") -> PackedByteArray:
@@ -464,9 +525,12 @@ func upload_save(file_path: String = "user://.save"):
     json.parse(result[2].get_string_from_utf8())
     var response = json.get_data()
     
-    if response == null or !response.has("results") or response["results"].size() == 0:
+    if response == null or !response.has("results"):
         push_error("无效的响应格式")
         return
+    elif response["results"].size() == 0:
+        # TODO: 创建新存档
+        upload_save_FORCE()
     
     var save_info = response["results"][0]
     var object_id = save_info["objectId"]
@@ -592,6 +656,144 @@ func upload_save(file_path: String = "user://.save"):
     if result[0] != HTTPRequest.RESULT_SUCCESS:
         push_error("删除旧文件失败")
         return
+
+    self.emit_signal("upload_save_success")
+    print("存档上传成功")
+
+
+# 强制上传存档到云端(云存档初始化)
+func upload_save_FORCE(file_path: String = "user://.save"):
+    print("调用函数: upload_save_FORCE()")
+    
+    # 读取本地存档
+    var file = FileAccess.open(file_path, FileAccess.READ)
+    if file == null:
+        push_error("无法打开存档文件: %s" % file_path)
+        return
+    
+    var save_data = file.get_buffer(file.get_length())
+    file.close()
+    
+    # 获取存档信息
+    var url = BASE_URL + "classes/_GameSave?limit=1"
+    var result
+    
+    var json: JSON = JSON.new()
+    
+    var Config = ConfigFile.new()
+    var load_result = Config.load("user://config.cfg")
+    var uuid = ""
+
+    # 如果文件没有加载，忽略它。
+    if load_result != OK:
+        push_error("config.cfg 加载失败")
+        return
+    else:
+        uuid = Config.get_value("Config", "uuid")
+        if uuid == "" or uuid == null:
+            push_error("config.cfg 未找到 uuid, 请在Android端初始化存档或获取UUID后继续。")
+            return
+
+    
+    var user_id = uuid
+    
+    # 验证校验和（使用新的HashingContext方法）
+    var md5_hash = _calculate_md5(save_data)
+
+    
+    # 请求fileToken
+    url = BASE_URL + "fileTokens"
+    var token_data = JSON.stringify({
+        "name": ".save",
+        "__type": "File",
+        "ACL": {user_id: {"read": true, "write": true}},
+        "prefix": "gamesaves",
+        "metaData": {
+            "size": save_data.size(),
+            "_checksum": md5_hash,
+            "prefix": "gamesaves"
+        }
+    })
+    
+    result = await _request(HTTPClient.METHOD_POST, url, {"Content-Type": "application/json"}, token_data)
+    
+    if result[0] != HTTPRequest.RESULT_SUCCESS:
+        push_error("获取fileToken失败")
+        return
+    
+    json.parse(result[2].get_string_from_utf8())
+    var token_response = json.get_data()
+    
+    if token_response == null or !token_response.has("token") or !token_response.has("key") or !token_response.has("objectId"):
+        push_error("无效的token响应")
+        return
+    
+    var token_key = Marshalls.utf8_to_base64(token_response["key"])
+    #var token_key = token_response["key"]
+    var new_file_id = token_response["objectId"]
+    var authorization = "UpToken " + token_response["token"]
+    
+    # 获取uploadId
+    var upload_url = "https://upload.qiniup.com/buckets/rAK3Ffdi/objects/%s/uploads" % token_key
+    result = await _request(HTTPClient.METHOD_POST, upload_url, {"Authorization": authorization})
+    
+    if result[0] != HTTPRequest.RESULT_SUCCESS:
+        push_error("获取uploadId失败")
+        return
+    
+    json.parse(result[2].get_string_from_utf8())
+    var upload_response = json.get_data()
+    
+    if upload_response == null or !upload_response.has("uploadId"):
+        push_error("无效的uploadId响应")
+        return
+    
+    var upload_id = upload_response["uploadId"]
+    
+    # 上传存档
+    upload_url = "https://upload.qiniup.com/buckets/rAK3Ffdi/objects/%s/uploads/%s/1" % [token_key, upload_id]
+    result = await _request(HTTPClient.METHOD_PUT, upload_url, {
+        "Authorization": authorization,
+        "Content-Type": "application/octet-stream"
+    }, save_data)
+    
+    if result[0] != HTTPRequest.RESULT_SUCCESS:
+        push_error("上传存档失败")
+        return
+    
+    json.parse(result[2].get_string_from_utf8())
+    var etag_response = json.get_data()
+    
+    if etag_response == null or !etag_response.has("etag"):
+        push_error("无效的etag响应")
+        return
+    
+    var etag = etag_response["etag"]
+    
+    # 完成上传
+    upload_url = "https://upload.qiniup.com/buckets/rAK3Ffdi/objects/%s/uploads/%s" % [token_key, upload_id]
+    var parts_data = JSON.stringify({"parts": [ {"partNumber": 1, "etag": etag}]})
+    result = await _request(HTTPClient.METHOD_POST, upload_url, {
+        "Authorization": authorization,
+        "Content-Type": "application/json"
+    }, parts_data)
+    
+    if result[0] != HTTPRequest.RESULT_SUCCESS:
+        push_error("完成上传失败")
+        return
+    
+    # 回调验证
+    url = BASE_URL + "fileCallback"
+    var callback_data = JSON.stringify({"result": true, "token": token_key})
+    result = await _request(HTTPClient.METHOD_POST, url, {"Content-Type": "application/json"}, callback_data)
+    
+    if result[0] != HTTPRequest.RESULT_SUCCESS:
+        push_error("回调验证失败")
+        return
+    
+# 创建新summary，保留原数据只修改版本号
+    var new_summary = PhiSaveTools.generate_summary()
+    await upload_summary_FORCE(new_summary, new_file_id)
 
     self.emit_signal("upload_save_success")
     print("存档上传成功")

@@ -40,7 +40,7 @@
               "type": "markdown",
               "state": {
                 "file": "PhiSave.md",
-                "mode": "source",
+                "mode": "preview",
                 "source": false
               },
               "icon": "lucide-file",
@@ -105,7 +105,8 @@
       }
     ],
     "direction": "horizontal",
-    "width": 209.5
+    "width": 209.5,
+    "collapsed": true
   },
   "right": {
     "id": "09d09197c33c91c6",

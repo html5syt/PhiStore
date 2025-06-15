@@ -69,33 +69,34 @@ func _on_get_user_profile_button_down() -> void:
     $Text.text = GodotTDS.get_user_object_id()
 
 func _on_submit_game_save_button_down() -> void:
-    disconnect_all_connections(self,"on_game_save_return")
-    GodotTDS.on_game_save_return.connect(_on_fetch_game_save_return)
-    PackSave.Pack()
-    if OS.has_feature("android"):
-        await GodotTDS.fetch_game_saves()
-    else:
-#        TODO:输入sessiontoken
-        cloud_save.upload_save()
+    Phi_Save.TDS_upload_save(true)
+    #disconnect_all_connections(self,"on_game_save_return")
+    #GodotTDS.on_game_save_return.connect(_on_fetch_game_save_return)
+    #PackSave.Pack()
+    #if OS.has_feature("android"):
+        #await GodotTDS.fetch_game_saves()
+    #else:
+##        TODO:输入sessiontoken
+        #cloud_save.upload_save()
 
-func _on_fetch_game_save_return(code:int,msg:String) -> void:
-    if msg != "{}" and code == 1017:
-        var game_data : GodotTDS.GameSaveData = GodotTDS.GameSaveData.new()
-        var summary : Dictionary = cloud_save.decode_summary(JSON.parse_string(msg)["list"][0]["summary"])
-        old_id = JSON.parse_string(msg)["list"][0]["id"]
-        disconnect_all_connections(self,"on_game_save_return")
-        GodotTDS.on_game_save_return.connect(_on_delete_game_save)
-#        TODO: 冲突检测
-        game_data.save_name = ".save"
-        game_data.summary = cloud_save.encode_summary(summary)
-        game_data.game_file_path = "user://.save"
-        game_data.modified_at = Time.get_unix_time_from_system() as int
-        GodotTDS.submit_game_save(game_data)
+#func _on_fetch_game_save_return(code:int,msg:String) -> void:
+    #if msg != "{}" and code == 1017:
+        #var game_data : GodotTDS.GameSaveData = GodotTDS.GameSaveData.new()
+        #var summary : Dictionary = cloud_save.decode_summary(JSON.parse_string(msg)["list"][0]["summary"])
+        #old_id = JSON.parse_string(msg)["list"][0]["id"]
+        #disconnect_all_connections(self,"on_game_save_return")
+        #GodotTDS.on_game_save_return.connect(_on_delete_game_save)
+##        TODO: 冲突检测
+        #game_data.save_name = ".save"
+        #game_data.summary = cloud_save.encode_summary(summary)
+        #game_data.game_file_path = "user://.save"
+        #game_data.modified_at = Time.get_unix_time_from_system() as int
+        #GodotTDS.submit_game_save(game_data)
 
 
-func _on_delete_game_save(code:int,msg:String) -> void:
-    if msg != "{}" and code == 1017 and (len(msg) == 24 or not msg.contains(" ")):
-        GodotTDS.delete_game_save(old_id)
+#func _on_delete_game_save(code:int,msg:String) -> void:
+    #if msg != "{}" and code == 1017 and (len(msg) == 24 or not msg.contains(" ")):
+        #GodotTDS.delete_game_save(old_id)
 
 func _on_fetch_game_saves_button_down() -> void:
     disconnect_all_connections(self,"on_game_save_return")

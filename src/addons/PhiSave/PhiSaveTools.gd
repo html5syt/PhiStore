@@ -50,22 +50,32 @@ static func download_save_file(url: String, Cloud_Save: CloudSave) -> void:
 
 static func generate_summary():
     var save = JSON.parse_string(FileAccess.open("user://PhigrosSaves.json", FileAccess.READ).get_as_text())
-    print(save)
-    countRks(save["gameRecord"])
-    # var summary = {
-    #     "saveVersion": save_version,
-    #     "challenge": challenge,
-    #     "rks": rks,
-    #     "gameVersion": game_version,
-    #     "avatar": avatar,
-    #     "EZ": ratings.slice(0, 3),
-    #     "HD": ratings.slice(3, 6),
-    #     "IN": ratings.slice(6, 9),
-    #     "AT": ratings.slice(9, 12)
-    # }
-    #return Cloud_Save.encode_summary(summary)
-
-
+    print(countRksAll(save["gameRecord"]))
+    var ratings: Dictionary = {"EZ":[0, 0, 0], "HD":[0, 0, 0], "IN":[0, 0, 0], "AT":[0, 0, 0]}
+    for song in save["gameRecord"]:
+        for diff in save["gameRecord"][song]:
+            # clear
+            if save["gameRecord"][song][diff]["score"] > 0 and save["gameRecord"][song][diff]["acc"] > 0 and save["gameRecord"][song][diff]["fc"] == 0 and save["gameRecord"][song][diff]["score"] < 1000000 and save["gameRecord"][song][diff]["acc"] < 100.0 and save["gameRecord"][song][diff]["fc"] != 1:
+                ratings[diff][0] += 1
+            # full combo
+            if save["gameRecord"][song][diff]["score"] > 0 and save["gameRecord"][song][diff]["fc"] == 1 and save["gameRecord"][song][diff]["score"] < 1000000:
+                ratings[diff][1] += 1
+            # φ
+            if save["gameRecord"][song][diff]["score"] == 1000000 and save["gameRecord"][song][diff]["acc"] == 100.0 and save["gameRecord"][song][diff]["fc"] == 1:
+                ratings[diff][2] += 1
+    var summary = {
+        "saveVersion": ProjectSettings.get_setting("application/ExConfig/SaveVersion"),
+        "challenge": save["gameProgress"]["challengeModeRank"],
+        "rks": countRksAll(save["gameRecord"]),
+        "gameVersion": ProjectSettings.get_setting("application/ExConfig/GameVersionInt"),
+        "avatar": save["user"]["avatar"],
+        "EZ": ratings["EZ"],
+        "HD": ratings["HD"],
+        "IN": ratings["IN"],
+        "AT": ratings["AT"]
+    }
+    return summary
+    
 # 构建难度字典的函数
 static func load_difficulty_data() -> Dictionary:
     var difficulty_dict = {}
@@ -82,7 +92,7 @@ static func load_difficulty_data() -> Dictionary:
             continue
             
         var parts = line.split("\t")
-        if parts.size() < 4:  # 至少包含名称+3个难度
+        if parts.size() < 4: # 至少包含名称+3个难度
             push_warning("无效行: " + line)
             continue
         
@@ -140,4 +150,30 @@ static func countRks(record_data: Dictionary, count_rks: bool = true) -> Diction
     
     return record_data
 
-# func countRksAll(record_data: Dictionary) -> float:
+static func countRksAll(record_data: Dictionary) -> float:
+    var record_data_processed = countRks(record_data, true)
+    var total_rks = 0.0
+    var rks_list = []
+    var rks_phi_list = []
+    
+    for song_name in record_data_processed:
+        var songInfo = record_data_processed[song_name]
+        for diff in songInfo:
+            var rks = songInfo[diff]["rks"]
+            if rks > 0.0:
+                rks_list.append(rks)
+                if songInfo[diff]["acc"] == 100.0 and songInfo[diff]["fc"] == 1.0 and songInfo[diff]["score"] == 1000000.0: # φ
+                    rks_phi_list.append(rks)
+    # 计算RKS
+    rks_list.sort()
+    rks_phi_list.sort()
+    rks_list = rks_list.slice(-1, -28, -1)
+    rks_phi_list = rks_phi_list.slice(-1, -4, -1)
+    var rks = 0.0
+    var rks_phi = 0.0
+    for _rks in rks_list:
+        rks += _rks
+    for _rks in rks_phi_list:
+        rks_phi += _rks
+    total_rks = (rks + rks_phi) / (rks_list.size() + rks_phi_list.size())
+    return round(total_rks * pow(10.0, 2)) / pow(10.0, 2) # 保留两位小数
