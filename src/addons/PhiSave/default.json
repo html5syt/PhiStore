@@ -1,0 +1,76 @@
+{
+	"gameKey": {
+		"camelliaReadKey": "[0, 0, 0, 0, 0, 0, 0, 0]",
+		"keyList": {
+			"Introduction": {
+				"flag": "[1]",
+				"type": "[0, 0, 0, 0, 1]"
+			},
+			"The Mountain Eater": {
+				"flag": "[1]",
+				"type": "[0, 1, 0, 0, 0]"
+			},
+			"alpa": {
+				"flag": "[1]",
+				"type": "[0, 0, 1, 0, 0]"
+			},
+			"shijian0": {
+				"flag": "[1]",
+				"type": "[0, 0, 1, 0, 0]"
+			},
+			"shijian2": {
+				"flag": "[1]",
+				"type": "[0, 0, 1, 0, 0]"
+			}
+		},
+		"lanotaReadKeys": "[0, 0, 0, 0, 0, 0, 0, 0]",
+		"oldScoreClearedV390": 0,
+		"sideStory4BeginReadKey": 0
+	},
+	"gameProgress": {
+		"alreadyShowAutoUnlockINTip": 0,
+		"alreadyShowCollectionTip": 0,
+		"challengeModeRank": 0,
+		"chapter8Passed": 0,
+		"chapter8SongUnlocked": "[0, 0, 0, 0, 0, 0, 0, 0]",
+		"chapter8UnlockBegin": 0,
+		"chapter8UnlockSecondPhase": 0,
+		"completed": "",
+		"flagOfSongRecordKey": "[0, 0, 0, 0, 0, 0, 0, 0]",
+		"flagOfSongRecordKeyTakumi": "[0, 0, 0, 0, 0, 0, 0, 0]",
+		"isFirstRun": 0,
+		"legacyChapterFinished": 0,
+		"money": [
+			0,
+			0,
+			0,
+			0,
+			0
+		],
+		"randomVersionUnlocked": "[0, 0, 0, 0, 0, 0, 0, 0]",
+		"songUpdateInfo": 4,
+		"unlockFlagOfIgallta": "[0, 0, 0, 0, 0, 0, 0, 0]",
+		"unlockFlagOfRrharil": "[0, 0, 0, 0, 0, 0, 0, 0]",
+		"unlockFlagOfSpasmodic": "[0, 0, 0, 0, 0, 0, 0, 0]"
+	},
+	"gameRecord": {},
+	"settings": {
+		"bright": 0.75,
+		"chordSupport": 1,
+		"deviceName": "Phigros",
+		"effectVolume": 1.0,
+		"enableHitSound": 1,
+		"fcAPIndicator": 0,
+		"hitSoundVolume": 1.0,
+		"lowResolutionMode": 0,
+		"musicVolume": 1.0,
+		"noteScale": 1.0,
+		"soundOffset": 0.0
+	},
+	"user": {
+		"avatar": "",
+		"background": "Introduction",
+		"selfIntro": "There is a self-introduction, write something just like:\r\nTwitter: @Phigros_PGS\r\nYouTube: Pigeon Games\r\n\r\nHope you have fun in Phigros.\r\nBest regards,\r\nPigeon Games",
+		"showPlayerId": 0
+	}
+}

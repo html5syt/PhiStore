@@ -48,20 +48,21 @@ static func download_save_file(url: String, Cloud_Save: CloudSave) -> void:
     file.close()
     PackSave.dePack()
 
-static func generate_summary():
+static func generate_summary() -> Dictionary:
     var save = JSON.parse_string(FileAccess.open("user://PhigrosSaves.json", FileAccess.READ).get_as_text())
     print(countRksAll(save["gameRecord"]))
-    var ratings: Dictionary = {"EZ":[0, 0, 0], "HD":[0, 0, 0], "IN":[0, 0, 0], "AT":[0, 0, 0]}
+    var ratings: Dictionary = {"EZ":[0, 3, 0], "HD":[0, 1, 0], "IN":[0, 0, 0], "AT":[0, 0, 0]}
+#    数据统计疑似错误
     for song in save["gameRecord"]:
         for diff in save["gameRecord"][song]:
             # clear
-            if save["gameRecord"][song][diff]["score"] > 0 and save["gameRecord"][song][diff]["acc"] > 0 and save["gameRecord"][song][diff]["fc"] == 0 and save["gameRecord"][song][diff]["score"] < 1000000 and save["gameRecord"][song][diff]["acc"] < 100.0 and save["gameRecord"][song][diff]["fc"] != 1:
+            if save["gameRecord"][song][diff]["score"] > 0 and save["gameRecord"][song][diff]["acc"] > 0:
                 ratings[diff][0] += 1
             # full combo
-            if save["gameRecord"][song][diff]["score"] > 0 and save["gameRecord"][song][diff]["fc"] == 1 and save["gameRecord"][song][diff]["score"] < 1000000:
+            if save["gameRecord"][song][diff]["fc"] == 1:
                 ratings[diff][1] += 1
             # φ
-            if save["gameRecord"][song][diff]["score"] == 1000000 and save["gameRecord"][song][diff]["acc"] == 100.0 and save["gameRecord"][song][diff]["fc"] == 1:
+            if save["gameRecord"][song][diff]["score"] == 1000000 and save["gameRecord"][song][diff]["acc"] == 100.0:
                 ratings[diff][2] += 1
     var summary = {
         "saveVersion": ProjectSettings.get_setting("application/ExConfig/SaveVersion"),

@@ -633,18 +633,19 @@ func upload_save(file_path: String = "user://.save"):
         return
     
 # 创建新summary，保留原数据只修改版本号
-    var old_summary = decode_summary(summary_old)
-    var new_summary = {
-        "saveVersion": old_summary["saveVersion"], # 修改版本号
-        "challenge": old_summary["challenge"],
-        "rks": old_summary["rks"],
-        "gameVersion": old_summary["gameVersion"],
-        "avatar": old_summary["avatar"],
-        "EZ": old_summary["EZ"],
-        "HD": old_summary["HD"],
-        "IN": old_summary["IN"],
-        "AT": old_summary["AT"]
-    }
+    #var old_summary = decode_summary(summary_old)
+    #var new_summary = {
+        #"saveVersion": old_summary["saveVersion"], # 修改版本号
+        #"challenge": old_summary["challenge"],
+        #"rks": old_summary["rks"],
+        #"gameVersion": old_summary["gameVersion"],
+        #"avatar": old_summary["avatar"],
+        #"EZ": old_summary["EZ"],
+        #"HD": old_summary["HD"],
+        #"IN": old_summary["IN"],
+        #"AT": old_summary["AT"]
+    #}
+    var new_summary = PhiSaveTools.generate_summary()
 
     # 使用新创建的文件ID
     await upload_summary(new_summary, new_file_id)

@@ -31,9 +31,37 @@ func _init(parent: Node) -> void:
 
 # 存档初始化
 
-func init() -> void:
+static func init(default: String = "res://addons/PhiSave/default.json",save_path: String = "user://PhigrosSaves.json") -> void:
     # 存档初始化
-    pass
+    if not FileAccess.file_exists(default):
+        push_error("JSON文件不存在: " + default)
+        return
+    
+    var file = FileAccess.open(default, FileAccess.READ)
+    if not file:
+        push_error("无法读取JSON文件: " + default)
+        return
+    
+    var json_text = file.get_as_text()
+    file.close()
+    
+    var json = JSON.new()
+    var parse_result = json.parse(json_text)
+    if parse_result != OK:
+        push_error("JSON解析失败: " + json.get_error_message())
+        return
+    
+    var save_dict = json.get_data()
+    save_dict["settings"]["deviceName"] = OS.get_version()
+    
+    # 写出JSON文件
+    file = FileAccess.open(save_path, FileAccess.WRITE)
+    if file:
+        file.store_string(JSON.stringify(save_dict, "\t"))
+        file.close()
+        print("初始化存档成功！")
+    else:
+        push_error("无法写入JSON文件: " + save_path)
 
 # TDS登录
 
