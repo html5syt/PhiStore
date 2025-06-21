@@ -41,13 +41,12 @@ texture = ExtResource("2_hv5rk")
 expand_mode = 1
 metadata/_edit_lock_ = true
 
-[node name="TransitionManager" parent="." instance=ExtResource("2_bv3dc")]
-visible = false
-
 [node name="Back" parent="." instance=ExtResource("4_324vs")]
 layout_mode = 0
 
 [node name="RemainingData" parent="." instance=ExtResource("5_6vrdq")]
 layout_mode = 1
+
+[node name="TransitionManager" parent="." instance=ExtResource("2_bv3dc")]
 
 [connection signal="finished" from="bgMusic" to="." method="_on_bg_music_finished"]

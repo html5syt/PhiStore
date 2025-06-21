@@ -1,9 +1,123 @@
-[gd_scene load_steps=5 format=3 uid="uid://duhfrp2sobaps"]
+[gd_scene load_steps=10 format=3 uid="uid://duhfrp2sobaps"]
 
 [ext_resource type="Script" uid="uid://32nep4bws3qw" path="res://scripts/global/splash0.gd" id="1_c774y"]
 [ext_resource type="FontFile" uid="uid://bkeun2le5ddao" path="res://assets/v1/Font/Exo-Medium.otf" id="2_187wt"]
 [ext_resource type="Theme" uid="uid://bypw0hvab8qeu" path="res://themes/v1/button.tres" id="3_jt4fe"]
 [ext_resource type="PackedScene" uid="uid://kiuugoj7icb3" path="res://addons/fade/TransitionManager.tscn" id="4_8ggrk"]
+[ext_resource type="Texture2D" uid="uid://bfv2a6rlipcbn" path="res://icon.png" id="4_187wt"]
+[ext_resource type="FontFile" uid="uid://brfyrno5hubv5" path="res://assets/v2/Font/Aldrich-Regular.ttf" id="5_jt4fe"]
+
+[sub_resource type="Animation" id="Animation_jt4fe"]
+length = 0.001
+tracks/0/type = "bezier"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Splash/Icon:position:x")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"handle_modes": PackedInt32Array(0),
+"points": PackedFloat32Array(704, -0.25, 0, 0.25, 0),
+"times": PackedFloat32Array(0)
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Splash/PhiStore:text")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [""]
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("Splash:modulate")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 1)]
+}
+
+[sub_resource type="Animation" id="Animation_c774y"]
+resource_name = "splash"
+length = 4.0
+step = 0.0166667
+tracks/0/type = "bezier"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Splash/Icon:position:x")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"handle_modes": PackedInt32Array(0, 0, 0),
+"points": PackedFloat32Array(472, -0.25, 0, 0.533333, 1.33383, 176, -0.25, 0, 0.148322, -34.3085, 136, -0.25, 0, 0.25, 0),
+"times": PackedFloat32Array(0, 0.785012, 3.52669)
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Splash/PhiStore:text")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0.183333, 0.25, 0.316667, 0.383333, 0.466667, 0.533333, 0.616667, 0.7, 0.783333, 0.883333, 1.23333, 1.58333, 1.93333, 2.28333, 2.63333, 2.95, 3.28333),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1),
+"update": 1,
+"values": ["|", "P  ", "Ph |", "Phi ", "PhiS | ", "PhiSt   ", "PhiSto  |", "PhiStor  ", "PhiStore |", "PhiStore  ", "PhiStore |", "PhiStore  ", "PhiStore |", "PhiStore  ", "PhiStore |", "PhiStore  ", "PhiStore |"]
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("Splash:modulate")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(3, 3.53333, 4),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [Color(1, 1, 1, 1), Color(0, 0, 0, 1), Color(1, 1, 1, 0)]
+}
+tracks/3/type = "method"
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/path = NodePath("Splash/Icon")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/keys = {
+"times": PackedFloat32Array(3.53333),
+"transitions": PackedFloat32Array(1),
+"values": [{
+"args": [],
+"method": &"hide"
+}]
+}
+tracks/4/type = "method"
+tracks/4/imported = false
+tracks/4/enabled = true
+tracks/4/path = NodePath("Splash/PhiStore")
+tracks/4/interp = 1
+tracks/4/loop_wrap = true
+tracks/4/keys = {
+"times": PackedFloat32Array(3.53333),
+"transitions": PackedFloat32Array(1),
+"values": [{
+"args": [],
+"method": &"hide"
+}]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_187wt"]
+_data = {
+&"RESET": SubResource("Animation_jt4fe"),
+&"splash": SubResource("Animation_c774y")
+}
 
 [node name="Splash0" type="Control"]
 layout_mode = 3
@@ -14,7 +128,7 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_c774y")
 
-[node name="ColorRect" type="ColorRect" parent="."]
+[node name="bg" type="ColorRect" parent="."]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -22,24 +136,6 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 color = Color(0, 0, 0, 1)
-
-[node name="Label" type="Label" parent="."]
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -238.0
-offset_top = -24.0
-offset_right = 234.0
-offset_bottom = 79.0
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_fonts/font = ExtResource("2_187wt")
-theme_override_font_sizes/font_size = 80
-text = "请选择UI版本"
-horizontal_alignment = 1
 
 [node name="Label2" type="Label" parent="."]
 layout_mode = 1
@@ -61,20 +157,46 @@ text = "Warn：in dev
 Remake by Tim"
 horizontal_alignment = 1
 
-[node name="HBoxContainer" type="HBoxContainer" parent="."]
-layout_mode = 0
-offset_left = 124.0
-offset_top = 647.0
-offset_right = 1454.0
-offset_bottom = 777.0
+[node name="UiVersion" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -238.0
+offset_top = -24.0
+offset_right = 234.0
+offset_bottom = 79.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_fonts/font = ExtResource("2_187wt")
+theme_override_font_sizes/font_size = 80
+text = "请选择UI版本"
+horizontal_alignment = 1
 
-[node name="Button" type="Button" parent="HBoxContainer"]
+[node name="v1orv2" type="HBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.5
+anchor_top = 0.775556
+anchor_right = 0.5
+anchor_bottom = 0.775556
+offset_left = -665.0
+offset_top = -65.0
+offset_right = 665.0
+offset_bottom = 65.0
+grow_horizontal = 2
+grow_vertical = 2
+metadata/_edit_use_anchors_ = true
+
+[node name="v1" type="Button" parent="v1orv2"]
 layout_mode = 2
 size_flags_horizontal = 3
 theme = ExtResource("3_jt4fe")
 text = "v1"
 
-[node name="Button2" type="Button" parent="HBoxContainer"]
+[node name="v2" type="Button" parent="v1orv2"]
 layout_mode = 2
 size_flags_horizontal = 3
 theme = ExtResource("3_jt4fe")
@@ -97,12 +219,14 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -401.862
-offset_top = -96.0
-offset_right = -209.862
-offset_bottom = 96.0
+offset_left = -96.0
+offset_top = -328.0
+offset_right = 564.0
+offset_bottom = 329.0
 grow_horizontal = 2
 grow_vertical = 2
+scale = Vector2(0.4, 0.4)
+pivot_offset = Vector2(327.2, 327)
 size_flags_horizontal = 4
 size_flags_vertical = 4
 texture = ExtResource("4_187wt")
@@ -126,6 +250,7 @@ theme_override_font_sizes/font_size = 120
 horizontal_alignment = 1
 
 [node name="TransitionManager" parent="." instance=ExtResource("4_8ggrk")]
+visible = false
 next_scene_path = "uid://b0b06kbopxi33"
 
 [node name="splashAnimation" type="AnimationPlayer" parent="."]

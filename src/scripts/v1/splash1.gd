@@ -27,7 +27,7 @@ func get_random_file_from_directory(directory_path: String) -> String:
     if file_list.is_empty():
         push_warning("目录中没有文件: " + directory_path)
         #return ""
-        return get_random_file_from_directory(^"res://assets/pigeon-default/illustration/")
+        return get_random_file_from_directory("res://assets/pigeon-default/illustration/")
     
     # 随机选择并返回完整路径
     var random_index = randi() % file_list.size()
@@ -51,7 +51,7 @@ func _on_bg_loop_play_finished() -> void:
 
 func _on_load_complete() -> void:
     $bgPic/AnimationPlayer.play(&"fade_in")
-    $TouchToStart/Label.text = "t   o   u   c   h     t  o     s   t   a   r   t "
+    $TouchToStart/Label.text = "touch to start"
     $START.visible = true
 
 

@@ -2,7 +2,7 @@
 class_name DataType
 
 # 抽象基类
-abstract class DataTypeAbstract:
+class DataTypeAbstract:
     static func read(data: PackedByteArray, pos: int): pass
     static func write(data: Array, value): pass
 
