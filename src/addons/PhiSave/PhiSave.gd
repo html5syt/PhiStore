@@ -6,6 +6,7 @@ var Config: ConfigFile
 var sessiontoken: String
 var old_id: String = ""
 var Cloud_Save: CloudSave
+var uuid: String
 
 signal on_TDS_login_success
 signal on_TDS_sync_success
@@ -19,12 +20,18 @@ func _init(parent: Node) -> void:
     var load_result = Config.load("user://config.cfg")
 
     # 如果文件没有加载，忽略它。
-    if load_result != OK:
+    if load_result != OK or Config.get_value("Config", "sessionToken") == "":
         push_warning("config.cfg 加载失败")
         Config = ConfigFile.new()
         sessiontoken = ""
+        #uuid = Time.get_datetime_dict_from_system()
+        uuid = str(Time.get_unix_time_from_system())
+        Config.set_value("Config", "uuid", uuid)
+        Config.set_value("Config", "sessiontoken", sessiontoken)
+        Config.save("user://config.cfg")
     else:
         sessiontoken = Config.get_value("Config", "sessionToken")
+        uuid = Config.get_value("Config", "uuid")
         Cloud_Save.headers["X-LC-Session"] = sessiontoken
         Cloud_Save.session_token = sessiontoken
 
@@ -33,6 +40,18 @@ func _init(parent: Node) -> void:
 
 static func init(default: String = "res://addons/PhiSave/default.json",save_path: String = "user://PhigrosSaves.json") -> void:
     # 存档初始化
+    var ConfigUUID = ConfigFile.new()
+    var load_result = ConfigUUID.load("user://config.cfg")
+    var uuid = str(Time.get_unix_time_from_system())
+
+    # 如果文件没有加载，忽略它。
+    if load_result != OK:
+        push_warning("config.cfg 加载失败")
+        ConfigUUID = ConfigFile.new()
+    ConfigUUID.set_value("Config", "uuid", uuid)
+    ConfigUUID.save("user://config.cfg")
+    
+
     if not FileAccess.file_exists(default):
         push_error("JSON文件不存在: " + default)
         return
@@ -83,10 +102,11 @@ func _on_TDS_login_return(code: int, msg: String) -> void:
             Config.set_value("Config", "uuid", uuid)
             # Config.set_value("SaveInfo", "updateTime", 0)
             Config.save("user://config.cfg")
+            Cloud_Save.session_token = sessiontoken
             print("TDS登录成功!")
             on_TDS_login_success.emit()
             # TDS_sync_save()
-            SessionToken_login(sessiontoken)
+            SessionToken_sync_save()
         36869:
             print("TDS登录失败: 签名不匹配!")
             require_sessiontoken.emit()
@@ -188,6 +208,13 @@ func TDS_upload_save(Force = false,msg: String = "") -> void:
 
 # TDS下载存档
 
+# TDS退出登录
+func TDS_logout() -> void:
+    GodotTDS.logout()
+    SessionToken_logout()
+
+    
+
 # sessiontoken登录
 
 func SessionToken_login(session_token: String) -> void:
@@ -198,6 +225,7 @@ func SessionToken_login(session_token: String) -> void:
     Config.set_value("Config", "shortId", "session")
     Config.set_value("Config", "nickName", nickName)
     Config.save("user://config.cfg")
+    Cloud_Save.session_token = sessiontoken
     SessionToken_sync_save()
     on_sessiontoken_login_success.emit()
 
@@ -222,3 +250,23 @@ func SessionToken_sync_save() -> void:
     Config.set_value("SaveInfo", "updateTime", Time.get_unix_time_from_system() as int)
     Config.save("user://config.cfg")
     on_sessiontoken_sync_success.emit()
+    
+# sessiontoken退出登录
+func SessionToken_logout() -> void:
+    Config.clear()
+    Config.set_value("Config", "uuid", uuid)
+    Config.set_value("Config", "sessionToken", "")
+    Config.save("user://config.cfg")
+    
+func anti_addition():
+#    实名认证
+    uuid = Config.get_value("Config", "uuid")
+    GodotTDS.on_anti_addiction_return.connect(func(code: int, msg: String):
+        if code != GodotTDS.StateCode.ANTI_ADDITION_SUCCESS:
+            push_warning("实名认证失败")
+            GodotTDS.anti_addiction(uuid)
+        else:
+            Config.set_value("Config", "uuid", GodotTDS.get_user_object_id() if GodotTDS.get_user_object_id() != "null" else uuid)
+            Config.save("user://config.cfg")
+            )
+    GodotTDS.anti_addiction(uuid)

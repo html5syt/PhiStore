@@ -40,15 +40,19 @@ func _file():
 
 func _ready() -> void:
     GodotTDS.on_login_return.connect(_on_test_return)
-    GodotTDS.on_anti_addiction_return.connect(_on_test_return)
+    GodotTDS.on_anti_addiction_return.connect(_on_anti_test_return)
     
     
 func _on_test_return(code : int, msg : String) -> void:
     $Code.text = str(code)
     $Text.text = msg
     push_warning(code,"-",msg)
-    if code == GodotTDS.StateCode.AD_SPLASH_TIME_OVER:
-        GodotTDS.dispose_splash_ad()
+func _on_anti_test_return(code : int, msg : String) -> void:
+    $Code.text = str(code)
+    $Text.text = msg if code != 500 else "实名认证成功"
+    push_warning(code,"-",msg)
+    
+
         
         
 func _on_login_button_down() -> void:
@@ -56,7 +60,8 @@ func _on_login_button_down() -> void:
     
 
 func _on_anti_addiction_button_down() -> void:
-    GodotTDS.anti_addiction()
+    #GodotTDS.anti_addiction()
+    Phi_Save.anti_addition()
 
 
 
@@ -155,3 +160,12 @@ func _on_sessiontoken_sync() -> void:
 
 func _on_delete_game_save_2_pressed() -> void:
     PhiSaveTools.generate_summary()
+
+
+func _on_TDS_logout_pressed() -> void:
+     # Replace with function body.
+    Phi_Save.TDS_logout()
+
+
+func _on_sessiontoken_logout_pressed() -> void:
+    Phi_Save.SessionToken_logout() # Replace with function body.

@@ -7,8 +7,8 @@ func get_random_file_from_directory(directory_path: String) -> String:
     var dir = DirAccess.open(directory_path)
     if not dir:
         push_error("无法打开目录: " + directory_path)
-        #return ""
-        return get_random_file_from_directory("res://assets/pigeon-default/illustration/")
+        return "res://assets/pigeon-default/illustration/LeaveAllBehind.rider.png"
+        #return get_random_file_from_directory("res://assets/pigeon-default/illustration/")
     
     # 获取目录中的所有文件
     var file_list: PackedStringArray = []
@@ -26,8 +26,8 @@ func get_random_file_from_directory(directory_path: String) -> String:
     # 检查是否找到文件
     if file_list.is_empty():
         push_warning("目录中没有文件: " + directory_path)
-        #return ""
-        return get_random_file_from_directory("res://assets/pigeon-default/illustration/")
+        return "res://assets/pigeon-default/illustration/LeaveAllBehind.rider.png"
+        #return get_random_file_from_directory("res://assets/pigeon-default/illustration/")
     
     # 随机选择并返回完整路径
     var random_index = randi() % file_list.size()
@@ -44,6 +44,7 @@ func loading() -> void:
         PhiSave.init()
     await get_tree().create_timer(2.0).timeout
     $bgPic.texture = load(bg)
+    PhiSave.new($".").anti_addition()
     load_complete.emit()
 
 func _on_bg_loop_play_finished() -> void:
