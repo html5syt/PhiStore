@@ -178,3 +178,68 @@ static func countRksAll(record_data: Dictionary) -> float:
         rks_phi += _rks
     total_rks = (rks + rks_phi) / (rks_list.size() + rks_phi_list.size())
     return round(total_rks * pow(10.0, 2)) / pow(10.0, 2) # 保留两位小数
+
+static func parse_tsv_data(column_names: Array, file_path: String) -> Dictionary:
+    var result = {}
+    var file = FileAccess.open(file_path, FileAccess.READ)
+    
+    if not file:
+        push_error("Failed to open file: " + file_path)
+        return result
+    
+    # 跳过BOM（如果存在）
+    if file.get_position() == 0 and file.get_8() == 0xEF:
+        file.get_16()  # 跳过完整的BOM (EF BB BF)
+    else:
+        file.seek(0)  # 重置到文件开头
+    
+    while not file.eof_reached():
+        var line = file.get_line().strip_edges()
+        if line == "":
+            continue
+        
+        var columns = line.split("\t")
+        if columns.size() < 1:
+            continue
+        
+        var song_id = columns[0]
+        var song_data = {}
+        
+        # 为每个列名填充数据（跳过songID列）
+        for col_idx in range(1, column_names.size()):
+            var col_name = column_names[col_idx]
+            # 检查数据是否存在，否则用空字符串填充
+            song_data[col_name] = columns[col_idx] if col_idx < columns.size() else null
+        
+        if "," in song_id:
+            continue  # 跳过第一行标题行
+        result[song_id] = song_data
+    
+    file.close()
+    return result
+
+static func parse_list_string(list_str: String) -> Array:
+    list_str = list_str.substr(1, list_str.length() - 2)  # 去掉首尾的括号
+    return list_str.strip_edges().replace(" ", "").split(",")
+
+static func concat_flag_and_type(flag,type) -> Array:
+    var output = []
+    var flagi = 0
+    for i in type:
+        if int(i) == 1:
+            output.append(flag[flagi])
+            flagi += 1
+        else:
+            output.append(0)
+    return output
+
+static func split_flag_and_type(output) -> Array:
+    var flag = []
+    var type = []
+    for i in output:
+        if int(i) >= 1:
+            flag.append(i)
+            type.append(1)
+        else:
+            type.append(0)
+    return [flag, type]

@@ -1,43 +1,14 @@
-[gd_scene load_steps=17 format=3 uid="uid://b0b06kbopxi33"]
+[gd_scene load_steps=10 format=3 uid="uid://b0b06kbopxi33"]
 
-[ext_resource type="Script" uid="uid://b8yaak7ve8aam" path="res://scripts/v1/shop.gd" id="1_w1d2f"]
+[ext_resource type="Script" uid="uid://b8yaak7ve8aam" path="res://scripts/v1/shop/shop.gd" id="1_w1d2f"]
 [ext_resource type="PackedScene" uid="uid://kiuugoj7icb3" path="res://addons/fade/TransitionManager.tscn" id="2_bv3dc"]
-[ext_resource type="Texture2D" uid="uid://cgih7urmlsw55" path="res://assets/屏幕截图 2025-05-18 000421.png" id="2_hv5rk"]
 [ext_resource type="AudioStream" uid="uid://dhesx4nkr2fnx" path="res://assets/v1/Shop0.wav" id="2_w1d2f"]
+[ext_resource type="Texture2D" uid="uid://1dvmorpbpjkn" path="res://assets/v1/SingleChapterCoverBlur.png" id="3_u6xri"]
 [ext_resource type="PackedScene" uid="uid://c62nlt5v5iy5" path="res://components/global/BackButton.tscn" id="4_324vs"]
+[ext_resource type="Texture2D" uid="uid://dw8rysno18dy0" path="res://assets/屏幕截图 2025-05-18 000530.png" id="4_kwhjx"]
 [ext_resource type="PackedScene" uid="uid://bqdws2ryc1ioy" path="res://components/v1/RemainingData.tscn" id="5_6vrdq"]
-[ext_resource type="Texture2D" uid="uid://br487ovbanfki" path="res://assets/v1/商店_素材.png" id="7_ljq3v"]
-[ext_resource type="Texture2D" uid="uid://ns236b8pq30r" path="res://assets/v1/icon-shop_dataMining.png" id="8_k4pe5"]
-
-[sub_resource type="Gradient" id="Gradient_k4pe5"]
-colors = PackedColorArray(0, 0, 0, 0.788235, 0, 0, 0, 0.14902)
-
-[sub_resource type="GradientTexture2D" id="GradientTexture2D_u6xri"]
-gradient = SubResource("Gradient_k4pe5")
-fill_from = Vector2(0, 1)
-fill_to = Vector2(0, 0)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_ljq3v"]
-atlas = ExtResource("7_ljq3v")
-region = Rect2(262, 860, 115, 194)
-
-[sub_resource type="CompressedTexture2D" id="CompressedTexture2D_u6xri"]
-load_path = "res://.godot/imported/商店_素材.png-70b15738ab931353a08126e8cae05906.ctex"
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_ll415"]
-atlas = SubResource("CompressedTexture2D_u6xri")
-region = Rect2(110, 870, 112, 192)
-
-[sub_resource type="CompressedTexture2D" id="CompressedTexture2D_kwhjx"]
-load_path = "res://.godot/imported/商店_素材.png-70b15738ab931353a08126e8cae05906.ctex"
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_kl62y"]
-atlas = SubResource("CompressedTexture2D_kwhjx")
-region = Rect2(427, 878, 101, 172)
-
-[sub_resource type="AtlasTexture" id="AtlasTexture_k4pe5"]
-atlas = ExtResource("8_k4pe5")
-region = Rect2(-27, -17, 111, 96)
+[ext_resource type="Script" uid="uid://bk1mfflmcv3a4" path="res://scripts/v1/shop/shop_songs.gd" id="5_u6xri"]
+[ext_resource type="PackedScene" uid="uid://d10eslrpyunpq" path="res://components/v1/ShopBar.tscn" id="7_ljq3v"]
 
 [node name="Shop" type="Control"]
 layout_mode = 3
@@ -56,89 +27,75 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 color = Color(0, 0, 0, 1)
+metadata/_edit_lock_ = true
 
 [node name="bgMusic" type="AudioStreamPlayer" parent="."]
 stream = ExtResource("2_w1d2f")
 autoplay = true
 
-[node name="屏幕截图2025-05-18000421" type="TextureRect" parent="."]
-modulate = Color(1, 1, 1, 0.505882)
+[node name="BgPic" type="TextureRect" parent="."]
+modulate = Color(0.475216, 0.475215, 0.475215, 1)
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-texture = ExtResource("2_hv5rk")
+texture = ExtResource("3_u6xri")
+stretch_mode = 6
+
+[node name="屏幕截图2025-05-18000421" type="TextureRect" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("4_kwhjx")
 expand_mode = 1
+
+[node name="ShopSongs" type="ScrollContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+horizontal_scroll_mode = 0
+vertical_scroll_mode = 3
+script = ExtResource("5_u6xri")
 metadata/_edit_lock_ = true
+metadata/_edit_group_ = true
+
+[node name="MarginContainer" type="MarginContainer" parent="ShopSongs"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/margin_top = 111
+theme_override_constants/margin_bottom = 170
+
+[node name="FlowContainer" type="FlowContainer" parent="ShopSongs/MarginContainer"]
+layout_mode = 2
+theme_override_constants/v_separation = 80
+alignment = 1
+last_wrap_alignment = 1
 
 [node name="Back" parent="." instance=ExtResource("4_324vs")]
 layout_mode = 0
+metadata/_edit_lock_ = true
 
 [node name="RemainingData" parent="." instance=ExtResource("5_6vrdq")]
+z_index = 1
 layout_mode = 1
+metadata/_edit_lock_ = true
+
+[node name="ShopBar" parent="." instance=ExtResource("7_ljq3v")]
+z_index = 1
+layout_mode = 1
+metadata/_edit_lock_ = true
 
 [node name="TransitionManager" parent="." instance=ExtResource("2_bv3dc")]
 visible = false
-
-[node name="ShopBar" type="Control" parent="."]
-layout_mode = 1
-anchors_preset = 12
-anchor_top = 1.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_top = -104.0
-grow_horizontal = 2
-grow_vertical = 0
-
-[node name="ColorRect" type="TextureRect" parent="ShopBar"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-texture = SubResource("GradientTexture2D_u6xri")
-
-[node name="ShopButton" type="HBoxContainer" parent="ShopBar"]
-layout_mode = 1
-anchors_preset = 7
-anchor_left = 0.5
-anchor_top = 1.0
-anchor_right = 0.5
-anchor_bottom = 1.0
-offset_left = -800.0
-offset_top = -87.0
-offset_right = 2836.0
-offset_bottom = 107.0
-grow_horizontal = 2
-grow_vertical = 0
-scale = Vector2(0.44, 0.44)
-theme_override_constants/separation = 525
-alignment = 1
-metadata/_edit_group_ = true
-
-[node name="TextureButton" type="TextureButton" parent="ShopBar/ShopButton"]
-layout_mode = 2
-texture_normal = SubResource("AtlasTexture_ljq3v")
-stretch_mode = 6
-
-[node name="TextureButton2" type="TextureButton" parent="ShopBar/ShopButton"]
-clip_contents = true
-custom_minimum_size = Vector2(106, 0)
-layout_mode = 2
-texture_normal = SubResource("AtlasTexture_ll415")
-stretch_mode = 6
-
-[node name="TextureButton3" type="TextureButton" parent="ShopBar/ShopButton"]
-layout_mode = 2
-texture_normal = SubResource("AtlasTexture_kl62y")
-stretch_mode = 6
-
-[node name="TextureButton4" type="TextureButton" parent="ShopBar/ShopButton"]
-layout_mode = 2
-texture_normal = SubResource("AtlasTexture_k4pe5")
-stretch_mode = 6
 
 [connection signal="finished" from="bgMusic" to="." method="_on_bg_music_finished"]

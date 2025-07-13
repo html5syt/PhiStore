@@ -1,11 +1,11 @@
 [gd_scene load_steps=4 format=3 uid="uid://cinupnas0lqvh"]
 
-[ext_resource type="Script" uid="uid://r51dph1u8rwf" path="res://scripts/v1/splash.gd" id="1_w01q0"]
-[ext_resource type="Texture2D" uid="uid://c278m7awjiaud" path="res://assets/global/Logopit_1551599744471.png" id="1_wboji"]
-[ext_resource type="PackedScene" uid="uid://kiuugoj7icb3" path="res://addons/fade/TransitionManager.tscn" id="3_odx4k"]
+[ext_resource type="Script" uid="uid://r51dph1u8rwf" path="res://scripts/v1/splash/splash.gd" id="1_qpxvr"]
+[ext_resource type="Texture2D" uid="uid://c278m7awjiaud" path="res://assets/global/Logopit_1551599744471.png" id="2_vcwdo"]
+[ext_resource type="PackedScene" uid="uid://kiuugoj7icb3" path="res://addons/fade/TransitionManager.tscn" id="3_eii85"]
 
 [node name="Splash" type="Node"]
-script = ExtResource("1_w01q0")
+script = ExtResource("1_qpxvr")
 
 [node name="Background" type="ColorRect" parent="."]
 anchors_preset = 15
@@ -29,7 +29,7 @@ offset_bottom = 281.0
 grow_horizontal = 2
 grow_vertical = 2
 size_flags_horizontal = 4
-texture = ExtResource("1_wboji")
+texture = ExtResource("2_vcwdo")
 expand_mode = 1
 metadata/_edit_lock_ = true
 
@@ -37,6 +37,6 @@ metadata/_edit_lock_ = true
 wait_time = 3.0
 one_shot = true
 
-[node name="TransitionManager" parent="." instance=ExtResource("3_odx4k")]
+[node name="TransitionManager" parent="." instance=ExtResource("3_eii85")]
 
 [connection signal="timeout" from="ChangeSceneTimer" to="." method="_on_change_scene_timer_timeout"]

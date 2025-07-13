@@ -6,4 +6,4 @@ func _ready() -> void:
 
 
 func _on_change_scene_timer_timeout() -> void:
-    $TransitionManager.transition_to("res://scenes/v1/Splash1.tscn")
+    $TransitionManager.transition_to("res://scenes/v1/splash/Splash1.tscn")

@@ -1,5 +1,5 @@
 <div align=center>
-<img src="https://github.com/html5syt/PhiStore/blob/master/src/assets/icon.png" >
+<img src="https://github.com/html5syt/PhiStore/blob/Flet/src/assets/icon.png" >
 </div>
 <h1 align="center">PhiStore</h1>
 
@@ -22,11 +22,11 @@
 
 | 序号 | 名称               | 类型图标                                                                                                                                                          |
 |----|------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| 1  | File（剧情文件）       | ![https://github.com/html5syt/PhiStore/blob/master/src/assets/file.png](https://github.com/html5syt/PhiStore/blob/master/src/assets/file.png)                 |
-| 2  | Data             | ![https://github.com/html5syt/PhiStore/blob/master/src/assets/dataicon.png](https://github.com/html5syt/PhiStore/blob/master/src/assets/dataicon.png)         |
-| 3  | NULL（x）          | ![https://github.com/html5syt/PhiStore/blob/master/src/assets/null.png](https://github.com/html5syt/PhiStore/blob/master/src/assets/null.png)                 |
-| 4  | Avatar（头像）       | ![https://github.com/html5syt/PhiStore/blob/master/src/assets/avatar.png](https://github.com/html5syt/PhiStore/blob/master/src/assets/avatar.png)             |
-| 5  | Illustration（曲绘） | ![https://github.com/html5syt/PhiStore/blob/master/src/assets/illustration.png](https://github.com/html5syt/PhiStore/blob/master/src/assets/illustration.png) |
+| 1  | File（剧情文件）       | ![https://github.com/html5syt/PhiStore/blob/Flet/src/assets/file.png](https://github.com/html5syt/PhiStore/blob/Flet/src/assets/file.png)                 |
+| 2  | Data             | ![https://github.com/html5syt/PhiStore/blob/Flet/src/assets/dataicon.png](https://github.com/html5syt/PhiStore/blob/Flet/src/assets/dataicon.png)         |
+| 3  | NULL（x）          | ![https://github.com/html5syt/PhiStore/blob/Flet/src/assets/null.png](https://github.com/html5syt/PhiStore/blob/Flet/src/assets/null.png)                 |
+| 4  | Avatar（头像）       | ![https://github.com/html5syt/PhiStore/blob/Flet/src/assets/avatar.png](https://github.com/html5syt/PhiStore/blob/Flet/src/assets/avatar.png)             |
+| 5  | Illustration（曲绘） | ![https://github.com/html5syt/PhiStore/blob/Flet/src/assets/illustration.png](https://github.com/html5syt/PhiStore/blob/Flet/src/assets/illustration.png) |
 
 ## 2. 奖品描述颜色与爆率
 

@@ -540,7 +540,7 @@ static func dePack(source: String = "user://.save", output: String = "user://Phi
     # 写出JSON文件
     var file = FileAccess.open(output, FileAccess.WRITE)
     if file:
-        file.store_string(JSON.stringify(save_dict, "\t"))
+        file.store_string(JSON.stringify(save_dict, "\t" if OS.has_feature("debug") else null))
         file.close()
         print("序列化存档成功！")
     else:

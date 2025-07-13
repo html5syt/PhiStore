@@ -20,7 +20,7 @@ boot_splash/fullsize=false
 boot_splash/use_filter=false
 config/icon="uid://bfv2a6rlipcbn"
 config/macos_native_icon="uid://bfv2a6rlipcbn"
-config/windows_native_icon="uid://bfv2a6rlipcbn"
+config/windows_native_icon="res://icon.ico"
 ExConfig/SaveVersion=6
 ExConfig/GameVersionInt=128
 

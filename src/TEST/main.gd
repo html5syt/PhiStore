@@ -4,6 +4,7 @@ extends CanvasLayer
 #var pack_save = PackSave.new()  # 创建 C# 类的实例
 #var cloud_save = await CloudSave.new("nvbrl980tinzrv2cqv0wf936k",$"../")
 var Phi_Save=PhiSave.new($".")
+var Save_Worker = SaveWorker.new()
 var cloud_save = Phi_Save.Cloud_Save
 var old_id : String 
 
@@ -169,3 +170,10 @@ func _on_TDS_logout_pressed() -> void:
 
 func _on_sessiontoken_logout_pressed() -> void:
     Phi_Save.SessionToken_logout() # Replace with function body.
+
+
+func _on_get_paided_songs_pressed() -> void:
+    var a = Save_Worker.Songs.new().getPaidedSongs()
+    print(a[0])
+    print("——————————————————————————————")
+    print(a[1])

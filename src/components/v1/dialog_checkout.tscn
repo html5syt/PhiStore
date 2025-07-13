@@ -1,0 +1,708 @@
+[gd_scene load_steps=18 format=3 uid="uid://bb0mxwl4pxk81"]
+
+[ext_resource type="Script" uid="uid://dk4rjvjbbrot4" path="res://scripts/v1/shop/dialog_checkout.gd" id="1_5uyn0"]
+[ext_resource type="FontFile" uid="uid://dyywuscj3o4xw" path="res://assets/v1/Font/Exo-Regular.otf" id="1_7o227"]
+[ext_resource type="Script" uid="uid://ddc252tqeqyxv" path="res://addons/AutoSizer/AutoSizeLabel.gd" id="2_5uyn0"]
+
+[sub_resource type="CanvasTexture" id="CanvasTexture_byunv"]
+
+[sub_resource type="FontVariation" id="FontVariation_kwhjx"]
+fallbacks = Array[Font]([null])
+base_font = ExtResource("1_7o227")
+spacing_glyph = 4
+
+[sub_resource type="FontVariation" id="FontVariation_ll415"]
+base_font = ExtResource("1_7o227")
+spacing_glyph = 4
+
+[sub_resource type="FontVariation" id="FontVariation_kl62y"]
+base_font = ExtResource("1_7o227")
+
+[sub_resource type="FontVariation" id="FontVariation_71x6n"]
+base_font = ExtResource("1_7o227")
+spacing_glyph = 2
+
+[sub_resource type="FontVariation" id="FontVariation_7o227"]
+base_font = ExtResource("1_7o227")
+
+[sub_resource type="FontVariation" id="FontVariation_rituo"]
+base_font = ExtResource("1_7o227")
+
+[sub_resource type="FontVariation" id="FontVariation_p5sui"]
+base_font = ExtResource("1_7o227")
+spacing_glyph = 2
+
+[sub_resource type="FontVariation" id="FontVariation_kwke5"]
+base_font = ExtResource("1_7o227")
+spacing_glyph = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_h8dhx"]
+bg_color = Color(0, 0, 0, 0)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(1, 1, 1, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_7o227"]
+bg_color = Color(0, 0, 0, 0)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.770878, 0.770878, 0.770878, 1)
+
+[sub_resource type="Animation" id="Animation_byunv"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Dialog/Bg:scale")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector2(0, 4076.92)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Dialog/Description/Title:modulate")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 0)]
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("Dialog/Description/Label:modulate")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 0)]
+}
+tracks/3/type = "value"
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/path = NodePath("Dialog/Description/Label2:modulate")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 0)]
+}
+tracks/4/type = "value"
+tracks/4/imported = false
+tracks/4/enabled = true
+tracks/4/path = NodePath("Dialog/Description/Label3:modulate")
+tracks/4/interp = 1
+tracks/4/loop_wrap = true
+tracks/4/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 0)]
+}
+tracks/5/type = "value"
+tracks/5/imported = false
+tracks/5/enabled = true
+tracks/5/path = NodePath("Dialog/Description/Label4:modulate")
+tracks/5/interp = 1
+tracks/5/loop_wrap = true
+tracks/5/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 0)]
+}
+tracks/6/type = "value"
+tracks/6/imported = false
+tracks/6/enabled = true
+tracks/6/path = NodePath("Dialog/Description/Date:modulate")
+tracks/6/interp = 1
+tracks/6/loop_wrap = true
+tracks/6/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 0)]
+}
+tracks/7/type = "value"
+tracks/7/imported = false
+tracks/7/enabled = true
+tracks/7/path = NodePath("Dialog/Description/cheapData:modulate")
+tracks/7/interp = 1
+tracks/7/loop_wrap = true
+tracks/7/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 0)]
+}
+tracks/8/type = "value"
+tracks/8/imported = false
+tracks/8/enabled = true
+tracks/8/path = NodePath("Dialog/Description/amountData:modulate")
+tracks/8/interp = 1
+tracks/8/loop_wrap = true
+tracks/8/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 0)]
+}
+tracks/9/type = "value"
+tracks/9/imported = false
+tracks/9/enabled = true
+tracks/9/path = NodePath("Dialog/Description/ServiceFee:modulate")
+tracks/9/interp = 1
+tracks/9/loop_wrap = true
+tracks/9/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 0)]
+}
+tracks/10/type = "value"
+tracks/10/imported = false
+tracks/10/enabled = true
+tracks/10/path = NodePath("Dialog/Description/Name:modulate")
+tracks/10/interp = 1
+tracks/10/loop_wrap = true
+tracks/10/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 0)]
+}
+tracks/11/type = "value"
+tracks/11/imported = false
+tracks/11/enabled = true
+tracks/11/path = NodePath("Dialog/Ok:modulate")
+tracks/11/interp = 1
+tracks/11/loop_wrap = true
+tracks/11/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 0)]
+}
+tracks/12/type = "value"
+tracks/12/imported = false
+tracks/12/enabled = true
+tracks/12/path = NodePath("Dialog/Description/split2:scale")
+tracks/12/interp = 1
+tracks/12/loop_wrap = true
+tracks/12/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector2(1e-05, 1)]
+}
+tracks/13/type = "value"
+tracks/13/imported = false
+tracks/13/enabled = true
+tracks/13/path = NodePath("Dialog/Description/split:scale")
+tracks/13/interp = 1
+tracks/13/loop_wrap = true
+tracks/13/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector2(1e-05, 1)]
+}
+
+[sub_resource type="Animation" id="Animation_5uyn0"]
+resource_name = "in"
+length = 0.5
+step = 0.0166667
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Dialog/Bg:scale")
+tracks/0/interp = 2
+tracks/0/loop_wrap = false
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.5),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Vector2(0, 4074.56), Vector2(1034.77, 4074.56)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Dialog/Description/Title:modulate")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0.3, 0.5),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Color(1, 1, 1, 0), Color(1, 1, 1, 1)]
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("Dialog/Description/Label:modulate")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0.3, 0.5),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Color(1, 1, 1, 0), Color(1, 1, 1, 1)]
+}
+tracks/3/type = "value"
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/path = NodePath("Dialog/Description/Label2:modulate")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/keys = {
+"times": PackedFloat32Array(0.3, 0.5),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Color(1, 1, 1, 0), Color(1, 1, 1, 1)]
+}
+tracks/4/type = "value"
+tracks/4/imported = false
+tracks/4/enabled = true
+tracks/4/path = NodePath("Dialog/Description/Label3:modulate")
+tracks/4/interp = 1
+tracks/4/loop_wrap = true
+tracks/4/keys = {
+"times": PackedFloat32Array(0.3, 0.5),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Color(1, 1, 1, 0), Color(1, 1, 1, 1)]
+}
+tracks/5/type = "value"
+tracks/5/imported = false
+tracks/5/enabled = true
+tracks/5/path = NodePath("Dialog/Description/Label4:modulate")
+tracks/5/interp = 1
+tracks/5/loop_wrap = true
+tracks/5/keys = {
+"times": PackedFloat32Array(0.3, 0.5),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Color(1, 1, 1, 0), Color(1, 1, 1, 1)]
+}
+tracks/6/type = "value"
+tracks/6/imported = false
+tracks/6/enabled = true
+tracks/6/path = NodePath("Dialog/Description/Date:modulate")
+tracks/6/interp = 1
+tracks/6/loop_wrap = true
+tracks/6/keys = {
+"times": PackedFloat32Array(0.3, 0.5),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Color(1, 1, 1, 0), Color(1, 1, 1, 1)]
+}
+tracks/7/type = "value"
+tracks/7/imported = false
+tracks/7/enabled = true
+tracks/7/path = NodePath("Dialog/Description/cheapData:modulate")
+tracks/7/interp = 1
+tracks/7/loop_wrap = true
+tracks/7/keys = {
+"times": PackedFloat32Array(0.3, 0.5),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Color(1, 1, 1, 0), Color(1, 1, 1, 1)]
+}
+tracks/8/type = "value"
+tracks/8/imported = false
+tracks/8/enabled = true
+tracks/8/path = NodePath("Dialog/Description/amountData:modulate")
+tracks/8/interp = 1
+tracks/8/loop_wrap = true
+tracks/8/keys = {
+"times": PackedFloat32Array(0.3, 0.5),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Color(1, 1, 1, 0), Color(1, 1, 1, 1)]
+}
+tracks/9/type = "value"
+tracks/9/imported = false
+tracks/9/enabled = true
+tracks/9/path = NodePath("Dialog/Description/ServiceFee:modulate")
+tracks/9/interp = 1
+tracks/9/loop_wrap = true
+tracks/9/keys = {
+"times": PackedFloat32Array(0.3, 0.5),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Color(1, 1, 1, 0), Color(1, 1, 1, 1)]
+}
+tracks/10/type = "value"
+tracks/10/imported = false
+tracks/10/enabled = true
+tracks/10/path = NodePath("Dialog/Description/Name:modulate")
+tracks/10/interp = 1
+tracks/10/loop_wrap = true
+tracks/10/keys = {
+"times": PackedFloat32Array(0.3, 0.5),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Color(1, 1, 1, 0), Color(1, 1, 1, 1)]
+}
+tracks/11/type = "value"
+tracks/11/imported = false
+tracks/11/enabled = true
+tracks/11/path = NodePath("Dialog/Ok:modulate")
+tracks/11/interp = 1
+tracks/11/loop_wrap = true
+tracks/11/keys = {
+"times": PackedFloat32Array(0.3, 0.5),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Color(1, 1, 1, 0), Color(1, 1, 1, 1)]
+}
+tracks/12/type = "value"
+tracks/12/imported = false
+tracks/12/enabled = true
+tracks/12/path = NodePath("Dialog/Description/split2:scale")
+tracks/12/interp = 2
+tracks/12/loop_wrap = true
+tracks/12/keys = {
+"times": PackedFloat32Array(0, 0.5),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Vector2(1e-05, 1), Vector2(-0.5, 1)]
+}
+tracks/13/type = "value"
+tracks/13/imported = false
+tracks/13/enabled = true
+tracks/13/path = NodePath("Dialog/Description/split:scale")
+tracks/13/interp = 2
+tracks/13/loop_wrap = true
+tracks/13/keys = {
+"times": PackedFloat32Array(0, 0.5),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Vector2(1e-05, 1), Vector2(0.5, 1)]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_jkmts"]
+_data = {
+&"RESET": SubResource("Animation_byunv"),
+&"in": SubResource("Animation_5uyn0")
+}
+
+[node name="Dialog_checkout" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_5uyn0")
+date = "2097-5-18  0:05"
+itemType = "Song"
+itemName = "杂鱼杂鱼杂鱼杂鱼杂鱼杂鱼"
+amountData = "11.05 MB"
+
+[node name="Bg" type="TextureButton" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Dialog" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -652.0
+offset_top = -451.0
+offset_right = 652.0
+offset_bottom = 451.0
+grow_horizontal = 2
+grow_vertical = 2
+pivot_offset = Vector2(650, 426)
+
+[node name="Bg" type="Sprite2D" parent="Dialog"]
+modulate = Color(0, 0, 0, 0.796078)
+position = Vector2(652.349, 451)
+scale = Vector2(1e-05, 4076.92)
+skew = 0.261799
+texture = SubResource("CanvasTexture_byunv")
+
+[node name="Description" type="Control" parent="Dialog"]
+layout_mode = 1
+anchor_left = 0.067
+anchor_top = 0.123
+anchor_right = 0.929
+anchor_bottom = 0.739
+offset_left = -0.368004
+offset_top = 0.0539932
+offset_right = -0.416016
+offset_bottom = 0.421997
+
+[node name="Title" type="Label" parent="Dialog/Description"]
+modulate = Color(1, 1, 1, 0)
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.199
+anchor_right = 0.373
+anchor_bottom = 0.103
+offset_left = -0.47702
+offset_top = -4.0
+offset_right = 0.120941
+offset_bottom = 0.271297
+theme_override_fonts/font = SubResource("FontVariation_kwhjx")
+theme_override_font_sizes/font_size = 46
+text = "订单确认"
+
+[node name="split2" type="Line2D" parent="Dialog/Description"]
+position = Vector2(639.53, 92)
+scale = Vector2(1e-05, 1)
+points = PackedVector2Array(-1, -3, 946, -3)
+width = 2.0
+
+[node name="split" type="Line2D" parent="Dialog/Description"]
+position = Vector2(633, 92)
+scale = Vector2(1e-05, 1)
+points = PackedVector2Array(-1, -3, 946, -3)
+width = 2.0
+
+[node name="Label" type="Label" parent="Dialog/Description"]
+modulate = Color(1, 1, 1, 0)
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.165
+anchor_top = 0.245
+anchor_right = 0.299
+anchor_bottom = 0.31
+offset_left = -0.295013
+offset_top = 0.270004
+offset_right = 0.222961
+offset_bottom = 0.259995
+theme_override_fonts/font = SubResource("FontVariation_ll415")
+theme_override_font_sizes/font_size = 27
+text = "创建日期："
+
+[node name="Label2" type="Label" parent="Dialog/Description"]
+modulate = Color(1, 1, 1, 0)
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.133
+anchor_top = 0.471
+anchor_right = 0.267
+anchor_bottom = 0.536
+offset_left = -0.359009
+offset_top = 0.065979
+offset_right = 0.158966
+offset_bottom = 0.0559998
+theme_override_fonts/font = SubResource("FontVariation_ll415")
+theme_override_font_sizes/font_size = 27
+text = "商品总价："
+
+[node name="Label3" type="Label" parent="Dialog/Description"]
+modulate = Color(1, 1, 1, 0)
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.102
+anchor_top = 0.695
+anchor_right = 0.237
+anchor_bottom = 0.76
+offset_left = 0.453995
+offset_top = -0.0300293
+offset_right = -0.151031
+offset_bottom = -0.0400391
+theme_override_fonts/font = SubResource("FontVariation_ll415")
+theme_override_font_sizes/font_size = 27
+text = "服务费："
+
+[node name="Label4" type="Label" parent="Dialog/Description"]
+modulate = Color(1, 1, 1, 0)
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.069
+anchor_top = 0.922
+anchor_right = 0.204
+anchor_bottom = 0.987
+offset_left = 0.512993
+offset_top = 0.211975
+offset_right = -0.0920105
+offset_bottom = 0.201965
+theme_override_fonts/font = SubResource("FontVariation_ll415")
+theme_override_font_sizes/font_size = 27
+text = "商品名："
+
+[node name="Date" type="Label" parent="Dialog/Description"]
+modulate = Color(1, 1, 1, 0)
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.758
+anchor_top = 0.26
+anchor_right = 0.948
+anchor_bottom = 0.325
+offset_left = -0.234009
+offset_top = -0.0400085
+offset_right = 0.395874
+offset_bottom = -0.0500031
+theme_override_fonts/font = SubResource("FontVariation_kl62y")
+theme_override_font_sizes/font_size = 27
+text = "2097-5-18  0:05"
+
+[node name="amountData" type="Label" parent="Dialog/Description"]
+modulate = Color(1, 1, 1, 0)
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.779
+anchor_top = 0.477
+anchor_right = 0.914
+anchor_bottom = 0.542
+offset_left = 0.182922
+offset_top = -0.258026
+offset_right = -0.421997
+offset_bottom = -0.268036
+theme_override_fonts/font = SubResource("FontVariation_71x6n")
+theme_override_font_sizes/font_size = 27
+text = "5.38 MB"
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="cheapData" type="RichTextLabel" parent="Dialog/Description"]
+visible = false
+modulate = Color(1, 1, 1, 0)
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.779
+anchor_top = 0.428
+anchor_right = 0.914
+anchor_bottom = 0.561
+offset_left = 0.403931
+offset_top = 0.0319824
+offset_right = -0.33606
+offset_bottom = 0.0839844
+theme_override_fonts/normal_font = SubResource("FontVariation_7o227")
+theme_override_fonts/bold_font = SubResource("FontVariation_7o227")
+theme_override_font_sizes/normal_font_size = 28
+theme_override_font_sizes/bold_font_size = 0
+bbcode_enabled = true
+text = "[b][s]6.06 MB[/s][/b]
+1.82 MB"
+fit_content = true
+scroll_active = false
+autowrap_mode = 0
+shortcut_keys_enabled = false
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="ServiceFee" type="Label" parent="Dialog/Description"]
+modulate = Color(1, 1, 1, 0)
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.744
+anchor_top = 0.709
+anchor_right = 0.881
+anchor_bottom = 0.76
+offset_left = -0.512024
+offset_top = 0.213959
+offset_right = -0.363037
+offset_bottom = -0.0400391
+theme_override_fonts/font = SubResource("FontVariation_rituo")
+theme_override_font_sizes/font_size = 27
+text = "512.000  KB"
+
+[node name="Name" type="Label" parent="Dialog/Description"]
+modulate = Color(1, 1, 1, 0)
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.217
+anchor_top = 0.93
+anchor_right = 0.85
+anchor_bottom = 0.995
+offset_left = 0.30899
+offset_top = -0.220032
+offset_right = -0.550049
+offset_bottom = -0.230042
+theme_override_fonts/font = SubResource("FontVariation_p5sui")
+theme_override_font_sizes/font_size = 27
+text = "xxenergy trixx (New Song)"
+horizontal_alignment = 2
+vertical_alignment = 1
+clip_text = true
+script = ExtResource("2_5uyn0")
+min_font_size = 27
+max_font_size = 27
+
+[node name="Ok" type="Control" parent="Dialog"]
+modulate = Color(1, 1, 1, 0)
+layout_mode = 1
+anchor_left = 0.429
+anchor_top = 0.778
+anchor_right = 0.78
+anchor_bottom = 0.882
+offset_left = -0.416016
+offset_top = 0.243958
+offset_right = -0.120056
+offset_bottom = 0.435974
+
+[node name="Text" type="Label" parent="Dialog/Ok"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.31
+anchor_top = 0.298
+anchor_right = 0.692
+anchor_bottom = 0.794
+offset_left = 0.0200043
+offset_top = -0.012001
+offset_right = 0.0639954
+offset_bottom = 0.0309906
+theme_override_fonts/font = SubResource("FontVariation_kwke5")
+theme_override_font_sizes/font_size = 31
+text = "确认并购买"
+
+[node name="Sprite2D" type="Sprite2D" parent="Dialog/Ok"]
+skew = 0.261799
+
+[node name="Button" type="Button" parent="Dialog/Ok/Sprite2D"]
+anchors_preset = -1
+anchor_left = 25.259
+anchor_top = 1.0
+anchor_right = 455.082
+anchor_bottom = 97.316
+offset_left = -0.259062
+offset_top = -1.0
+offset_right = -0.0820923
+offset_bottom = -0.316002
+theme_override_font_sizes/font_size = 34
+theme_override_styles/focus = SubResource("StyleBoxFlat_h8dhx")
+theme_override_styles/disabled_mirrored = SubResource("StyleBoxFlat_h8dhx")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_h8dhx")
+theme_override_styles/hover_pressed_mirrored = SubResource("StyleBoxFlat_7o227")
+theme_override_styles/hover_pressed = SubResource("StyleBoxFlat_7o227")
+theme_override_styles/hover_mirrored = SubResource("StyleBoxFlat_7o227")
+theme_override_styles/hover = SubResource("StyleBoxFlat_7o227")
+theme_override_styles/pressed_mirrored = SubResource("StyleBoxFlat_7o227")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_7o227")
+theme_override_styles/normal_mirrored = SubResource("StyleBoxFlat_h8dhx")
+theme_override_styles/normal = SubResource("StyleBoxFlat_h8dhx")
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+libraries = {
+&"": SubResource("AnimationLibrary_jkmts")
+}
+
+[connection signal="pressed" from="Bg" to="." method="_on_bg_cancelled"]
+[connection signal="pressed" from="Dialog/Ok/Sprite2D/Button" to="." method="_on_confirmed"]

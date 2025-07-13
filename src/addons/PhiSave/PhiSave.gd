@@ -31,9 +31,9 @@ func _init(parent: Node) -> void:
         Config.save("user://config.cfg")
     else:
         sessiontoken = Config.get_value("Config", "sessionToken")
-        uuid = Config.get_value("Config", "uuid")
         Cloud_Save.headers["X-LC-Session"] = sessiontoken
         Cloud_Save.session_token = sessiontoken
+        uuid = Config.get_value("Config", "uuid")
 
 
 # 存档初始化
