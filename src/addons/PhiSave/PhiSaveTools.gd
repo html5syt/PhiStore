@@ -243,3 +243,67 @@ static func split_flag_and_type(output) -> Array:
         else:
             type.append(0)
     return [flag, type]
+
+class DataSizeConverter:
+        # 单位定义
+    const UNITS = ["KB", "MB", "GB", "TB", "PB"]
+    const UNIT_FACTORS = [1, 1024, 1048576, 1073741824, 1099511627776]  # 1024^0, 1024^1, 1024^2, 1024^3, 1024^4
+
+
+    # 将数组转换为最高单位表示法
+    static func convert_to_highest(sizes: Array) -> Array:
+        # 1. 计算总KB数
+        var total_kb = convert_to_kb(sizes)
+        
+        # 2. 特殊情况处理
+        if total_kb == 0:
+            return [0.00, "KB"]
+        
+        # 3. 自动选择最佳单位
+        var value = float(total_kb)
+        var unit_index = 0
+        var max_unit_index = UNITS.size() - 1
+        
+        while value >= 1024.00 and unit_index < max_unit_index:
+            value /= 1024.00
+            unit_index += 1
+        
+        # 4. 格式化结果
+        return [round(value * 100) / 100.00, UNITS[unit_index]]
+
+    # 将KB整数转换回数组形式 [KB, MB, GB, TB, PB]
+    static func convert_from_kb(total_kb: int) -> Array:
+        var result = [0, 0, 0, 0, 0]  # 初始化结果数组
+        
+        # 从最高单位(PB)开始向下计算
+        for i in range(4, -1, -1):
+            if UNIT_FACTORS[i] <= total_kb:
+                result[i] = total_kb / UNIT_FACTORS[i]
+                total_kb = total_kb % UNIT_FACTORS[i]
+        
+        return result
+
+    # 将数组转换为KB整数
+    static func convert_to_kb(sizes: Array) -> int:
+        var total_kb = 0
+        for i in range(sizes.size()):
+            total_kb += sizes[i] * pow(1024, i)
+        return int(total_kb)
+
+    static func convert_from_highest(highest_data: String) -> Array:
+        # highest_data格式：[数值, 单位]
+        highest_data = highest_data.strip_edges().replace(" ", "")
+        var value = highest_data.substr(0, highest_data.length()-2).to_float()
+        var unit = highest_data.substr(highest_data.length()-2)
+        
+        # 获取单位索引
+        var unit_index = UNITS.find(unit)
+        if unit_index == -1:
+            push_error("无效单位: " + unit)
+            return [0, 0, 0, 0, 0]
+        
+        # 将值转换为KB
+        var total_kb = int(round(value * pow(1024, unit_index)))
+        
+        # 使用现有的转换方法
+        return convert_from_kb(total_kb)

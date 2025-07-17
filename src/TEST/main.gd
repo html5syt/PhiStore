@@ -7,6 +7,7 @@ var Phi_Save=PhiSave.new($".")
 var Save_Worker = SaveWorker.new()
 var cloud_save = Phi_Save.Cloud_Save
 var old_id : String 
+var tap_login : TapLogin
 
 # 断开指定对象上某个信号的所有连接
 func disconnect_all_connections(object: Object, signal_name: String) -> void:
@@ -29,7 +30,7 @@ func _test_get():
     cloud_save.get_save()
     cloud_save.get_save_success.connect(_on_test_get_success)
     
-func _on_test_get_success(data):
+func _on_test_get_success(_data):
     PackSave.dePack("user://.save", "user://PhigrosSaves.json")
     
 func _test_upload():
@@ -42,7 +43,17 @@ func _file():
 func _ready() -> void:
     GodotTDS.on_login_return.connect(_on_test_return)
     GodotTDS.on_anti_addiction_return.connect(_on_anti_test_return)
+    tap_login = TapLogin.new()
+    add_child(tap_login)
+
     
+    # 连接信号
+    tap_login.connect("device_flow_qr_ready", _on_qr_ready)
+    tap_login.connect("auth_flow_completed", _on_auth_completed)
+    tap_login.connect("user_info_received", _on_user_info)
+    tap_login.connect("cloud_user_created", _on_cloud_user)
+    
+
     
 func _on_test_return(code : int, msg : String) -> void:
     $Code.text = str(code)
@@ -177,3 +188,48 @@ func _on_get_paided_songs_pressed() -> void:
     print(a[0])
     print("——————————————————————————————")
     print(a[1])
+
+
+func _on_data_size_converter_pressed() -> void:
+    var sizes = [512, 32, 1, 0, 0]
+
+    print("\n原始大小: ", sizes)
+    
+    # 转换为KB整数
+    var kb_total = PhiSaveTools.DataSizeConverter.convert_to_kb(sizes)
+    print("总KB数: ", kb_total)
+    
+    # 转换回数组形式
+    var sizes_array = PhiSaveTools.DataSizeConverter.convert_from_kb(kb_total)
+    print("数组形式: ", sizes_array)  # 应接近原始数组 [525, 180, 1023, 1023, 8]
+
+    # 转换为最高单位
+    var highest = PhiSaveTools.DataSizeConverter.convert_to_highest(sizes)
+    print("最高单位: ", highest[0], " ", highest[1])
+
+func _on_qr_ready(qr_url):
+    # 显示二维码给用户
+    print("\nQR URL: ", qr_url)
+
+func _on_auth_completed(token_data):
+    print("\nLogin successful! Token data: ", token_data)
+
+func _on_user_info(user_data):
+    print("\nUser info received: ", user_data)
+
+func _on_cloud_user(cloud_data):
+    print("\nCloud user Getted: ", cloud_data)
+    print("\nSessiontoken: ", cloud_data["sessionToken"])
+    $Text.text = cloud_data["sessionToken"]
+
+
+func _on_browser_login_pressed() -> void:
+    tap_login.start_browser_auth_flow() # Replace with function body.
+
+
+func _on_qr_login_pressed() -> void:
+    tap_login.start_QR_code_flow() # Replace with function body.
+
+
+func _on_code_input_changed() -> void:
+    tap_login.exchange_code_for_token($TabContainer/PhiSaveTools/TextEdit.text) # Replace with function body.

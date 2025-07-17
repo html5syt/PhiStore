@@ -31,7 +31,6 @@ metadata/_edit_lock_ = true
 
 [node name="bgMusic" type="AudioStreamPlayer" parent="."]
 stream = ExtResource("2_w1d2f")
-autoplay = true
 
 [node name="BgPic" type="TextureRect" parent="."]
 modulate = Color(0.475216, 0.475215, 0.475215, 1)

@@ -26,13 +26,17 @@ func _ready() -> void:
 func _on_bg_cancelled() -> void:
     $AnimationPlayer.play_backwards(&"in")
     await get_tree().create_timer(0.6).timeout
-    checkout_cancelled.emit()
+    checkout_cancelled.emit(itemType)
     if self.is_inside_tree():
         self.queue_free()
 
 func _on_confirmed() -> void:
+    if SaveWorker.Data.new().getData() < PhiSaveTools.DataSizeConverter.convert_to_kb(PhiSaveTools.DataSizeConverter.convert_from_highest(cheapData if cheapData else amountData)):
+        push_warning("No enough money")
+        $Dialog/NoEnoughMoney.visible = true
+        return
     $AnimationPlayer.play_backwards(&"in")
     await get_tree().create_timer(0.6).timeout
-    checkout_confirmed.emit()
+    checkout_confirmed.emit(itemType,cheapData if cheapData else amountData)
     if self.is_inside_tree():
         self.queue_free()

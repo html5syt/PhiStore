@@ -194,7 +194,28 @@ metadata/_tab_index = 2
 [node name="getPaidedSongs" type="Button" parent="TabContainer/PhiSaveTools"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 40
-text = "login"
+text = "getPaidedSongs"
+
+[node name="DataSizeConverter" type="Button" parent="TabContainer/PhiSaveTools"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 40
+text = "DataSizeConverter"
+
+[node name="BrowserLogin" type="Button" parent="TabContainer/PhiSaveTools"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 40
+text = "BrowserLogin"
+
+[node name="QRLogin" type="Button" parent="TabContainer/PhiSaveTools"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 40
+text = "QRLogin"
+
+[node name="TextEdit" type="TextEdit" parent="TabContainer/PhiSaveTools"]
+custom_minimum_size = Vector2(468, 57)
+layout_mode = 2
+theme_override_font_sizes/font_size = 26
+placeholder_text = "回调code input"
 
 [node name="FileDialog" type="FileDialog" parent="."]
 title = "Open a File or Directory"
@@ -223,3 +244,7 @@ use_native_dialog = true
 [connection signal="pressed" from="TabContainer/PhiSave/sync" to="." method="_on_sessiontoken_sync"]
 [connection signal="pressed" from="TabContainer/PhiSave/Login2" to="." method="_on_sessiontoken_logout_pressed"]
 [connection signal="pressed" from="TabContainer/PhiSaveTools/getPaidedSongs" to="." method="_on_get_paided_songs_pressed"]
+[connection signal="pressed" from="TabContainer/PhiSaveTools/DataSizeConverter" to="." method="_on_data_size_converter_pressed"]
+[connection signal="pressed" from="TabContainer/PhiSaveTools/BrowserLogin" to="." method="_on_browser_login_pressed"]
+[connection signal="pressed" from="TabContainer/PhiSaveTools/QRLogin" to="." method="_on_qr_login_pressed"]
+[connection signal="text_changed" from="TabContainer/PhiSaveTools/TextEdit" to="." method="_on_code_input_changed"]
