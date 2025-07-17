@@ -210,6 +210,7 @@ func _on_data_size_converter_pressed() -> void:
 func _on_qr_ready(qr_url):
     # 显示二维码给用户
     print("\nQR URL: ", qr_url)
+    $TabContainer/PhiSaveTools/QRCodeRect.data = qr_url
 
 func _on_auth_completed(token_data):
     print("\nLogin successful! Token data: ", token_data)

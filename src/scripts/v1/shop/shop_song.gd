@@ -107,7 +107,10 @@ func _on_checkout_cancelled(type : String ):
     push_warning("%s Checkout cancelled" % type)
     
 func _on_checkout_confirmed(type : String ,Data : String):
-    SaveWorker.Songs.new().setPaidedSong(itemName)
+    if not isIllustration:
+        SaveWorker.Songs.new().setPaidedSong(itemName)
+    else:
+        SaveWorker.Illustrations.new().setPaidedIllustration(itemName)
     SaveWorker.Data.new().setData(Data,true)
     push_warning("%s Checkout confirmed" % type)
     isSoldOut = true

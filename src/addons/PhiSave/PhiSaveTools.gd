@@ -238,8 +238,8 @@ static func split_flag_and_type(output) -> Array:
     var type = []
     for i in output:
         if int(i) >= 1:
-            flag.append(i)
-            type.append(1)
+            flag.append(int(i))
+            type.append(int(i))
         else:
             type.append(0)
     return [flag, type]

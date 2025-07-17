@@ -7,7 +7,7 @@
 [ext_resource type="PackedScene" uid="uid://c62nlt5v5iy5" path="res://components/global/BackButton.tscn" id="4_324vs"]
 [ext_resource type="Texture2D" uid="uid://dw8rysno18dy0" path="res://assets/屏幕截图 2025-05-18 000530.png" id="4_kwhjx"]
 [ext_resource type="PackedScene" uid="uid://bqdws2ryc1ioy" path="res://components/v1/RemainingData.tscn" id="5_6vrdq"]
-[ext_resource type="Script" uid="uid://bk1mfflmcv3a4" path="res://scripts/v1/shop/shop_songs.gd" id="5_u6xri"]
+[ext_resource type="PackedScene" uid="uid://co6h6i0cctl7q" path="res://components/v1/shop_songs.tscn" id="5_u6xri"]
 [ext_resource type="PackedScene" uid="uid://d10eslrpyunpq" path="res://components/v1/ShopBar.tscn" id="7_ljq3v"]
 
 [node name="Shop" type="Control"]
@@ -54,31 +54,8 @@ grow_vertical = 2
 texture = ExtResource("4_kwhjx")
 expand_mode = 1
 
-[node name="ShopSongs" type="ScrollContainer" parent="."]
+[node name="ShopSongs" parent="." instance=ExtResource("5_u6xri")]
 layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-horizontal_scroll_mode = 0
-vertical_scroll_mode = 3
-script = ExtResource("5_u6xri")
-metadata/_edit_lock_ = true
-metadata/_edit_group_ = true
-
-[node name="MarginContainer" type="MarginContainer" parent="ShopSongs"]
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 3
-theme_override_constants/margin_top = 111
-theme_override_constants/margin_bottom = 170
-
-[node name="FlowContainer" type="FlowContainer" parent="ShopSongs/MarginContainer"]
-layout_mode = 2
-theme_override_constants/v_separation = 80
-alignment = 1
-last_wrap_alignment = 1
 
 [node name="Back" parent="." instance=ExtResource("4_324vs")]
 layout_mode = 0

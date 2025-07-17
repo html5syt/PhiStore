@@ -4,9 +4,11 @@ extends ScrollContainer
 @export var dataOffPrecent: float = 0.8
 @export var batch_size: int = 5  # 每批加载数量
 @export var load_delay: float = 0.01  # 批处理间隔秒数
+@export var is_illustration: bool = false
 
 var ShopSong = preload("res://components/v1/ShopSong.tscn")
 var songIDs = {}
+var illustrations = []  # 用于存储插图名
 var songs_to_load = []  # 待加载的歌曲数据队列
 var loading_in_progress = false
 var placeholder_texture = preload("res://assets/v1/SingleChapterCoverBlur.png")
@@ -30,21 +32,44 @@ func _thread_load_song_data(thread: Thread) -> void:
         "songID", "songName", "songArtist", "illustrator",
         "EZ", "HD", "IN", "AT", "SP"
     ], tsv_path)
-    
+    var illustrationsT = FileAccess.open("res://assets/pigeon/info/illustration.txt", FileAccess.READ)
+    if illustrationsT:
+        illustrationsT = illustrationsT.get_as_text().split("\r\n")
+        for song in songIDs:
+            for illustration in illustrationsT:
+                if songIDs[song]["songName"] == illustration:
+                    illustrations.append(song)
+                    break
+    else:
+        assert(illustrationsT)
+        push_error("Get illustrations FAILED")
+        illustrations = []
+
+
     # 数据准备好后回调到主线程
     call_deferred("_on_song_data_loaded", thread)
 
 func _on_song_data_loaded(thread: Thread) -> void:
     thread.wait_to_finish()
     
-    var paidSongs = SaveWorker.Songs.new().getPaidedSongs()
+    var paidSongs
+    var paidIllustrations
     var songs = [{}, {}]
-    
-    for songID in songIDs:
-        if songID in paidSongs[0]:
-            songs[0][songID] = songIDs[songID]
-        elif songID in paidSongs[1]:
-            songs[1][songID] = songIDs[songID]
+
+    if not is_illustration:
+        paidSongs = SaveWorker.Songs.new().getPaidedSongs()
+        for songID in songIDs:
+            if songID in paidSongs[0]:
+                songs[0][songID] = songIDs[songID]
+            elif songID in paidSongs[1]:
+                songs[1][songID] = songIDs[songID]
+    else:
+        paidIllustrations = SaveWorker.Illustrations.new().getPaidedIllustrations()
+        for songID in illustrations:
+            if songID in paidIllustrations[0]:
+                songs[0][songID] = songIDs[songID]
+            elif songID in paidIllustrations[1]:
+                songs[1][songID] = songIDs[songID]
     
     var offSongs = []
     for i in range(dataOffCount):
@@ -59,12 +84,12 @@ func _on_song_data_loaded(thread: Thread) -> void:
         var illustration = "res://assets/pigeon/illustrationLowRes/%s.png" % song
         
         songs_to_load.push_back({
-            "type": "unpaid",
             "itemName": songItem["songName"],
             "data": "%.2f MB" % data,
             "dataOff": "%.2f MB" % (int(data * dataOffPrecentRand * 100) / 100.0) if song in offSongs else "",
             "dataOffPrecent": dataOffPrecentRand if song in offSongs else 0.0,
             "illustration": illustration,
+            "isIllustration": is_illustration,
             "isSoldOut": false
         })
     
@@ -75,12 +100,12 @@ func _on_song_data_loaded(thread: Thread) -> void:
         var illustration = "res://assets/pigeon/illustrationLowRes/%s.png" % song
         
         songs_to_load.push_back({
-            "type": "paid",
             "itemName": songItem["songName"],
             "data": "%.2f MB" % data,
             "dataOff": "",
             "dataOffPrecent": 0.0,
             "illustration": illustration,
+            "isIllustration": is_illustration,
             "isSoldOut": true
         })
     
@@ -110,6 +135,7 @@ func _create_song_item(song_data: Dictionary) -> void:
     songContainer.data = song_data["data"]
     songContainer.dataOff = song_data["dataOff"]
     songContainer.dataOffPrecent = song_data["dataOffPrecent"]
+    songContainer.isIllustration = song_data["isIllustration"]
     songContainer.isSoldOut = song_data["isSoldOut"]
     
     # 设置图片（使用占位符异步加载）

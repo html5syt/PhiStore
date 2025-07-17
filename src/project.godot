@@ -44,7 +44,7 @@ project/assembly_name="PhiStore"
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/GodotTDS/plugin.cfg")
+enabled=PackedStringArray("res://addons/GodotTDS/plugin.cfg", "res://addons/qr_code/plugin.cfg")
 
 [gui]
 
