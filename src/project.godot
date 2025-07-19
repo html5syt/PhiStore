@@ -12,6 +12,7 @@ config_version=5
 
 config/name="PhiStore"
 config/version="3.14.0"
+config/tags=PackedStringArray("project")
 run/main_scene="uid://duhfrp2sobaps"
 config/features=PackedStringArray("4.4", "Mobile")
 boot_splash/bg_color=Color(0, 0, 0, 1)
@@ -24,6 +25,7 @@ config/windows_native_icon="res://icon.ico"
 ExConfig/SaveVersion=6
 ExConfig/GameVersionInt=128
 run/main_scene.web="uid://b5n862gour2ie"
+run/main_scene.web_full="uid://duhfrp2sobaps"
 
 [autoload]
 

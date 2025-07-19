@@ -222,6 +222,7 @@ func _on_cloud_user(cloud_data):
     print("\nCloud user Getted: ", cloud_data)
     print("\nSessiontoken: ", cloud_data["sessionToken"])
     $Text.text = cloud_data["sessionToken"]
+    PhiSave.new($".").SessionToken_login(cloud_data["sessionToken"],cloud_data)
 
 
 func _on_browser_login_pressed() -> void:

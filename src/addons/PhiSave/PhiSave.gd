@@ -215,15 +215,19 @@ func TDS_logout() -> void:
 
     
 
-# sessiontoken登录
+# sessiontoken登录（新登录方式）
 
-func SessionToken_login(session_token: String) -> void:
+func SessionToken_login(session_token: String, response: Dictionary = {}) -> void:
     Cloud_Save.session_token = session_token
     Cloud_Save.headers["X-LC-Session"] = session_token
-    var nickName = await Cloud_Save.get_nickname()
     Config.set_value("Config", "sessionToken", session_token)
-    Config.set_value("Config", "shortId", "session")
-    Config.set_value("Config", "nickName", nickName)
+    if response.size() == 0:
+        var nickName = await Cloud_Save.get_nickname()
+        Config.set_value("Config", "shortId", "session")
+        Config.set_value("Config", "nickName", nickName)
+    else:
+        Config.set_value("Config", "shortId", response["shortId"])
+        Config.set_value("Config", "nickName", response["nickname"])
     Config.save("user://config.cfg")
     Cloud_Save.session_token = sessiontoken
     SessionToken_sync_save()

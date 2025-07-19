@@ -146,6 +146,71 @@ class Illustrations:
         Phi_Save.store_string(JSON.stringify(Phi_SaveD, "\t" if OS.has_feature("debug") else ""))
 
 
+class Avatars:
+    func getAllPaidAvatars() -> Array:
+        var avatars = FileAccess.open("res://assets/pigeon/info/avatar.txt", FileAccess.READ)
+        if avatars:
+            avatars = avatars.get_as_text().split("\r\n")
+            return avatars
+        else:
+            assert(avatars)
+            push_error("Get All Paid Avatars FAILED")
+            return []
+
+    func getPaidedAvatars() -> Array:
+        var Phi_Save = FileAccess.open("user://PhigrosSaves.json", FileAccess.READ)
+        if Phi_Save:
+            Phi_Save = JSON.parse_string(Phi_Save.get_as_text())
+        else:
+            assert(Phi_Save)
+            push_error("Save File Not Found")
+            Phi_Save = {}
+
+        var allPaidAvatars = getAllPaidAvatars()
+        var paidAvatars = []
+        var unpaidAvatars = []
+        for avatar in allPaidAvatars:
+            if Phi_Save["gameKey"]["keyList"].has(avatar):
+                var game_key = Phi_Save["gameKey"]["keyList"][avatar]
+                if PhiSaveTools.parse_list_string(game_key["type"])[4] == "1":
+                    paidAvatars.append(avatar)
+                else:
+                    unpaidAvatars.append(avatar)
+            else:
+                unpaidAvatars.append(avatar)
+        if paidAvatars == []:
+            push_warning("No Paid Avatars Found")
+        return [paidAvatars, unpaidAvatars]
+
+    func setPaidedAvatar(avatarName: String):
+        var Phi_Save = FileAccess.open("user://PhigrosSaves.json", FileAccess.READ)
+        if Phi_Save:
+            Phi_Save = JSON.parse_string(Phi_Save.get_as_text())
+        else:
+            assert(Phi_Save)
+            push_error("Save File Not Found")
+            Phi_Save = {}
+
+        if not Phi_Save.has("gameKey"):
+            Phi_Save["gameKey"] = {"keyList": {}}
+
+        if not Phi_Save["gameKey"]["keyList"].has(avatarName):
+            Phi_Save["gameKey"]["keyList"][avatarName] = {"flag": str([1]), "type": str([0, 0, 0, 0, 1])}
+        else:
+            var flag = PhiSaveTools.parse_list_string(Phi_Save["gameKey"]["keyList"][avatarName]["flag"])
+            var type = PhiSaveTools.parse_list_string(Phi_Save["gameKey"]["keyList"][avatarName]["type"])
+            var list = PhiSaveTools.concat_flag_and_type(flag, type)
+            list[4] = 1
+            flag = PhiSaveTools.split_flag_and_type(list)[0]
+            type = PhiSaveTools.split_flag_and_type(list)[1]
+            Phi_Save["gameKey"]["keyList"][avatarName] = {"flag": str(flag), "type": str(type)}
+
+        var Phi_SaveD = Phi_Save.duplicate()
+        Phi_Save = FileAccess.open("user://PhigrosSaves.json", FileAccess.WRITE)
+        Phi_Save.store_string(JSON.stringify(Phi_SaveD, "\t" if OS.has_feature("debug") else ""))
+
+
+
 class Data:
     var Phi_Save
 

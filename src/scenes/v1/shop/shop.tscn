@@ -5,9 +5,9 @@
 [ext_resource type="AudioStream" uid="uid://dhesx4nkr2fnx" path="res://assets/v1/Shop0.wav" id="2_w1d2f"]
 [ext_resource type="Texture2D" uid="uid://1dvmorpbpjkn" path="res://assets/v1/SingleChapterCoverBlur.png" id="3_u6xri"]
 [ext_resource type="PackedScene" uid="uid://c62nlt5v5iy5" path="res://components/global/BackButton.tscn" id="4_324vs"]
-[ext_resource type="Texture2D" uid="uid://dw8rysno18dy0" path="res://assets/屏幕截图 2025-05-18 000530.png" id="4_kwhjx"]
+[ext_resource type="Texture2D" uid="uid://mchcby3s2fdt" path="res://assets/屏幕截图 2025-05-18 000602.png" id="4_u6xri"]
 [ext_resource type="PackedScene" uid="uid://bqdws2ryc1ioy" path="res://components/v1/RemainingData.tscn" id="5_6vrdq"]
-[ext_resource type="PackedScene" uid="uid://co6h6i0cctl7q" path="res://components/v1/shop_songs.tscn" id="5_u6xri"]
+[ext_resource type="PackedScene" uid="uid://co6h6i0cctl7q" path="res://components/v1/ShopSongs.tscn" id="5_u6xri"]
 [ext_resource type="PackedScene" uid="uid://d10eslrpyunpq" path="res://components/v1/ShopBar.tscn" id="7_ljq3v"]
 
 [node name="Shop" type="Control"]
@@ -51,10 +51,18 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-texture = ExtResource("4_kwhjx")
+texture = ExtResource("4_u6xri")
 expand_mode = 1
 
-[node name="ShopSongs" parent="." instance=ExtResource("5_u6xri")]
+[node name="Pages" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="ShopSongs" parent="Pages" instance=ExtResource("5_u6xri")]
 layout_mode = 1
 
 [node name="Back" parent="." instance=ExtResource("4_324vs")]
@@ -75,3 +83,5 @@ metadata/_edit_lock_ = true
 visible = false
 
 [connection signal="finished" from="bgMusic" to="." method="_on_bg_music_finished"]
+[connection signal="pressed" from="Back" to="." method="_on_button_pressed"]
+[connection signal="shop_bar_button_pressed" from="ShopBar" to="." method="_on_shop_bar_button_pressed"]

@@ -5,7 +5,12 @@ extends MarginContainer
 @export var illustration: CompressedTexture2D
 @export var dataOff : String = ""
 @export var dataOffPrecent: float = 0
-@export var isIllustration: bool = false
+@export var pageType: page_type = page_type.Song  # 页面类型
+enum page_type {
+    Song,
+    Illustration,
+    Avatar
+}
 @export var isSoldOut: bool = false
 
 var dialog: Control
@@ -15,10 +20,14 @@ func _ready() -> void:
     $ShopSong/itemNameLabel.text = itemName
     $ShopSong/Data/Data.text = data if dataOffPrecent == 0 else dataOff
     $ShopSong/DataOff.visible = dataOffPrecent != 0
+    $ShopSong/SoldOut.visible = isSoldOut
     $ShopSong/DataOff/DataOff.text = "%s  OFF" % (str(int(dataOffPrecent*100))+"%") if dataOffPrecent!= 0 else ""
     $ShopSong/Illustration.texture = illustration
-    $ShopSong/Type.texture = preload("res://assets/v1/ShopSong.tres") if not isIllustration else preload("res://assets/v1/ShopIllustration.tres")
-    $ShopSong/SoldOut.visible = isSoldOut
+    match pageType:
+        page_type.Song:
+            $ShopSong/Type.texture = preload("res://assets/v1/ShopSong.tres")
+        page_type.Illustration:
+            $ShopSong/Type.texture = preload("res://assets/v1/ShopIllustration.tres")
 
 
 func _on_button_pressed() -> void:
@@ -34,7 +43,7 @@ func _on_button_pressed() -> void:
     datetime["hour"],
     datetime["minute"]
 ]
-    dialog.itemType = "Song" if not isIllustration else "Illustration"
+    dialog.itemType = pageType
     dialog.itemName = itemName
     dialog.amountData = data
     dialog.cheapData = dataOff if dataOffPrecent != 0  and dataOff != "" else ""
@@ -106,11 +115,14 @@ var placeholder_texture = preload("res://assets/v1/SingleChapterCoverBlur.png")
 func _on_checkout_cancelled(type : String ):
     push_warning("%s Checkout cancelled" % type)
     
-func _on_checkout_confirmed(type : String ,Data : String):
-    if not isIllustration:
-        SaveWorker.Songs.new().setPaidedSong(itemName)
-    else:
-        SaveWorker.Illustrations.new().setPaidedIllustration(itemName)
+func _on_checkout_confirmed(type : int ,Data : String):
+    match pageType:
+        page_type.Song:
+            SaveWorker.Songs.new().setPaidedSong(itemName)
+        page_type.Illustration:
+            SaveWorker.Illustrations.new().setPaidedIllustration(itemName)
+        page_type.Avatar:
+            SaveWorker.Avatars.new().setPaidedAvatar(itemName)
     SaveWorker.Data.new().setData(Data,true)
     push_warning("%s Checkout confirmed" % type)
     isSoldOut = true
