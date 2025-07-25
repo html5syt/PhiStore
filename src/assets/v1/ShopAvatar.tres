@@ -1,7 +1,8 @@
 [gd_resource type="AtlasTexture" load_steps=2 format=3 uid="uid://ckbmhbjmtffg2"]
 
-[ext_resource type="Texture2D" uid="uid://br487ovbanfki" path="res://assets/v1/商店_素材.png" id="1_cepqj"]
+[sub_resource type="CompressedTexture2D" id="CompressedTexture2D_kl62y"]
+load_path = "res://.godot/imported/商店_素材.png-70b15738ab931353a08126e8cae05906.ctex"
 
 [resource]
-atlas = ExtResource("1_cepqj")
+atlas = SubResource("CompressedTexture2D_kl62y")
 region = Rect2(432, 914, 92, 92)
