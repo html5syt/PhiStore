@@ -31,7 +31,9 @@ var state = ""
 var redirect_uri = ""
 var current_token_data = null # 存储获取到的token数据
 
-# 设备码流程：获取二维码和设备码
+
+# 入口
+# 开始QR码流程：获取二维码和设备码
 func start_QR_code_flow():
     var body = {
         "client_id": client_id,
@@ -47,6 +49,39 @@ func start_QR_code_flow():
     add_child(http_request)
     http_request.request(DEVICE_CODE_URL, headers, HTTPClient.METHOD_POST, _encode_form(body))
     http_request.connect("request_completed", _on_device_code_response)
+
+# 开始授权码流程
+func start_browser_auth_flow():
+    # 生成安全参数
+    code_verifier = _generate_code_verifier(128)
+    state = _generate_random_string(32, "abcdefghijklmnopqrstuvwxyz0123456789")
+    
+    # 启动本地HTTP服务器
+    if not OS.has_feature("web"):
+        _start_local_server()
+    else:
+        push_warning("Browser auth TCPServer not supported on web platform")
+        # 打开浏览器进行授权
+        auth_flow_need_code.emit()
+        redirect_uri = "https://127.0.0.1:14514/authorize"
+        _open_browser_for_auth()
+
+# 手动用授权码（回调链接内code参数）交换令牌
+func exchange_code_for_token(auth_code):
+    var body = {
+        "client_id": client_id,
+        "grant_type": "authorization_code",
+        "secret_type": "hmac-sha-1",
+        "code": auth_code,
+        "redirect_uri": redirect_uri,
+        "code_verifier": code_verifier
+    }
+    
+    var headers = ["Content-Type: application/x-www-form-urlencoded"]
+    var http_request = HTTPRequest.new()
+    add_child(http_request)
+    http_request.request(TOKEN_URL, headers, HTTPClient.METHOD_POST, _encode_form(body))
+    http_request.connect("request_completed", _on_token_response)
 
 # 处理设备码响应
 func _on_device_code_response(result, response_code, headers, body):
@@ -124,22 +159,6 @@ func _cleanup_polling():
         polling_timer.queue_free()
         polling_timer = null
     device_code = ""
-
-# 开始授权码流程
-func start_browser_auth_flow():
-    # 生成安全参数
-    code_verifier = _generate_code_verifier(128)
-    state = _generate_random_string(32, "abcdefghijklmnopqrstuvwxyz0123456789")
-    
-    # 启动本地HTTP服务器
-    if not OS.has_feature("web"):
-        _start_local_server()
-    else:
-        push_warning("Browser auth TCPServer not supported on web platform")
-        # 打开浏览器进行授权
-        auth_flow_need_code.emit()
-        redirect_uri = "https://127.0.0.1:14514/authorize"
-        _open_browser_for_auth()
 
 # 生成128位code_verifier
 func _generate_code_verifier(length):
@@ -336,22 +355,6 @@ func _handle_authorize_callback(query: String, client: StreamPeerTCP):
     # 用授权码交换令牌
     exchange_code_for_token(auth_code)
 
-# 用授权码交换令牌
-func exchange_code_for_token(auth_code):
-    var body = {
-        "client_id": client_id,
-        "grant_type": "authorization_code",
-        "secret_type": "hmac-sha-1",
-        "code": auth_code,
-        "redirect_uri": redirect_uri,
-        "code_verifier": code_verifier
-    }
-    
-    var headers = ["Content-Type: application/x-www-form-urlencoded"]
-    var http_request = HTTPRequest.new()
-    add_child(http_request)
-    http_request.request(TOKEN_URL, headers, HTTPClient.METHOD_POST, _encode_form(body))
-    http_request.connect("request_completed", _on_token_response)
 
 # 处理令牌响应
 func _on_token_response(result, response_code, headers, body):
@@ -413,7 +416,12 @@ func _request_user_info(token_data: Dictionary):
     # 准备请求头
     var headers = [
         "Authorization: " + mac_token,
-        "Content-Type: application/json"
+        "Content-Type: application/x-www-form-urlencoded",
+        "User-Agent: TapTapUnitySDK/1.2.0 UnityPlayer/2019.4.40f1c1",
+        "Accept: */*",
+        "Accept-Encoding: deflate, gzip",
+        "Host: open.tapapis.cn",
+        "X-Unity-Version: 2019.4.40f1c1"
     ]
     
     # 创建HTTP请求
