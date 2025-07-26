@@ -3,6 +3,7 @@ extends Control
 @onready var ShopSongs = preload("res://components/v1/ShopSongs.tscn").instantiate()
 @onready var ShopIllustrations = preload("res://components/v1/ShopSongs.tscn").instantiate()
 @onready var ShopAvatar = preload("res://components/v1/ShopSongs.tscn").instantiate()
+@onready var DataMining = preload("res://components/v1/DataMining.tscn").instantiate()
 
 func queue_free_all() -> void:
     if $Pages/ShopSongs:
@@ -13,6 +14,8 @@ func queue_free_all() -> void:
         $Pages.remove_child(ShopIllustrations)
     if ShopAvatar.is_inside_tree():
         $Pages.remove_child(ShopAvatar)
+    if DataMining.is_inside_tree():
+        $Pages.remove_child(DataMining)
 
 func _ready() -> void:
     var remainingData = PhiSaveTools.DataSizeConverter.convert_to_highest((PhiSaveTools.DataSizeConverter.convert_from_kb(SaveWorker.Data.new().getData())))
@@ -39,5 +42,7 @@ func _on_shop_bar_button_pressed(n) -> void:
             $Pages.add_child(ShopIllustrations)
         3:
             $Pages.add_child(ShopAvatar)
+        4:
+            $Pages.add_child(DataMining)
         _:
             print(n) # Replace with function body.

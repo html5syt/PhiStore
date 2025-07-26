@@ -228,6 +228,7 @@ func SessionToken_login(session_token: String, response: Dictionary = {}) -> voi
     else:
         Config.set_value("Config", "shortId", response["shortId"])
         Config.set_value("Config", "nickName", response["nickname"])
+        Config.set_value("Config", "uuid", response["objectId"])
     Config.save("user://config.cfg")
     Cloud_Save.session_token = sessiontoken
     SessionToken_sync_save()

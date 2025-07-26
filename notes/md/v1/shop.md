@@ -8,7 +8,7 @@
 
 # Data Mining
 
-1. 资源不唯一化可联动修改，label文本内容不支持（出入动画
+~~1. 资源不唯一化可联动修改，label文本内容不支持（出入动画~~
 2. 动画：
    1. in→out
    2. in→during×n→out
