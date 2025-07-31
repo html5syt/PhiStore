@@ -80,8 +80,9 @@ func exchange_code_for_token(auth_code):
     var headers = ["Content-Type: application/x-www-form-urlencoded"]
     var http_request = HTTPRequest.new()
     add_child(http_request)
-    http_request.request(TOKEN_URL, headers, HTTPClient.METHOD_POST, _encode_form(body))
-    http_request.connect("request_completed", _on_token_response)
+    var base_url = "" if not OS.has_feature("web") else "https://open-tapapis.bravely.pp.ua/?url="
+    http_request.request_completed.connect(_on_token_response)
+    http_request.request(base_url + TOKEN_URL, headers, HTTPClient.METHOD_POST, _encode_form(body))
 
 # 处理设备码响应
 func _on_device_code_response(result, response_code, headers, body):
@@ -358,12 +359,12 @@ func _handle_authorize_callback(query: String, client: StreamPeerTCP):
 
 # 处理令牌响应
 func _on_token_response(result, response_code, headers, body):
-    if result != HTTPRequest.RESULT_SUCCESS or response_code != 200:
+    if response_code != 200:
         var error = "Token request failed: %d" % response_code
         push_error(error)
         emit_signal("auth_flow_failed", error)
         return
-    
+    print(body)
     var json = JSON.parse_string(body.get_string_from_utf8())
     if json == null:
         var error = "Invalid JSON response"
@@ -427,7 +428,9 @@ func _request_user_info(token_data: Dictionary):
     # 创建HTTP请求
     var http_request = HTTPRequest.new()
     add_child(http_request)
-    http_request.request("https://" + host + request_url, headers, HTTPClient.METHOD_GET)
+#    CORS代理
+    var base_url = "https://" if not OS.has_feature("web") else "https://open-tapapis.bravely.pp.ua/?url=https://"
+    http_request.request(base_url + host + request_url, headers, HTTPClient.METHOD_GET)
     http_request.connect("request_completed", _on_user_info_response.bind(token_data))
 
 # 处理用户信息响应

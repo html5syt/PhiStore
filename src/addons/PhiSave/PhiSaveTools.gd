@@ -220,7 +220,11 @@ static func parse_tsv_data(column_names: Array, file_path: String) -> Dictionary
 
 static func parse_list_string(list_str: String) -> Array:
     list_str = list_str.substr(1, list_str.length() - 2)  # 去掉首尾的括号
-    return list_str.strip_edges().replace(" ", "").split(",")
+    var listO = list_str.strip_edges().replace(" ", "").split(",")
+    var list = []
+    for i in range(listO.size()):
+        list.append(int(listO[i]))
+    return list
 
 static func concat_flag_and_type(flag,type) -> Array:
     var output = []
@@ -307,3 +311,38 @@ class DataSizeConverter:
         
         # 使用现有的转换方法
         return convert_from_kb(total_kb)
+
+static func weighted_random(weights: Dictionary):
+    # 计算总权重
+    # ep
+    # {
+    #     "普通剑": 60.0,
+    #     "魔法杖": 30.0,
+    #     "传奇武器": 9.8,
+    #     "神器": 0.2
+    # }
+    var total_weight: float = 0.0
+    for item in weights:
+        var w = weights[item]
+        if w < 0:
+            push_error("权重值不能为负数: " + str(item))
+            return null
+        total_weight += w
+    
+    # 处理总权重为0的情况
+    if total_weight <= 0:
+        push_error("总权重必须大于0")
+        return null
+    
+    # 生成随机数 (0 ~ total_weight)
+    var rnd = randf_range(0.0, total_weight)
+    
+    # 遍历选择元素
+    var cumulative = 0.0
+    for item in weights:
+        cumulative += weights[item]
+        if rnd <= cumulative:
+            return item
+    
+    # 理论上不会执行到这里
+    return null

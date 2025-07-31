@@ -38,7 +38,7 @@ func _ready() -> void:
     loading()
 
 func loading() -> void:
-    var bg := get_random_file_from_directory("res://assets/pigeon/illustration/")
+    var bg := get_random_file_from_directory("res://assets/pigeon/illustration/" if not OS.has_feature("web") else "res://assets/pigeon/illustrationLowRes/")
     # 检查存档文件是否存在
     if not FileAccess.file_exists("user://PhigrosSaves.json"):
         PhiSave.init()

@@ -435,7 +435,6 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_5uyn0")
 date = "2097-5-18  0:05"
-itemType = "Song"
 itemName = "杂鱼杂鱼杂鱼杂鱼杂鱼杂鱼"
 amountData = "11.05 MB"
 

@@ -1,11 +1,16 @@
-[gd_scene load_steps=10 format=3 uid="uid://duhfrp2sobaps"]
+[gd_scene load_steps=12 format=3 uid="uid://duhfrp2sobaps"]
 
 [ext_resource type="Script" uid="uid://32nep4bws3qw" path="res://scripts/global/splash0.gd" id="1_c774y"]
 [ext_resource type="FontFile" uid="uid://bkeun2le5ddao" path="res://assets/v1/Font/Exo-Medium.otf" id="2_187wt"]
+[ext_resource type="FontFile" uid="uid://t7yp607ed1es" path="res://assets/v2/Font/SourceHanSansCN_&_SairaCondensed_Hybrid_Medium.ttf" id="3_8ggrk"]
 [ext_resource type="Theme" uid="uid://bypw0hvab8qeu" path="res://themes/v1/button.tres" id="3_jt4fe"]
 [ext_resource type="PackedScene" uid="uid://kiuugoj7icb3" path="res://addons/fade/TransitionManager.tscn" id="4_8ggrk"]
 [ext_resource type="Texture2D" uid="uid://bfv2a6rlipcbn" path="res://icon.png" id="4_187wt"]
 [ext_resource type="FontFile" uid="uid://brfyrno5hubv5" path="res://assets/v2/Font/Aldrich-Regular.ttf" id="5_jt4fe"]
+
+[sub_resource type="FontVariation" id="FontVariation_jt4fe"]
+fallbacks = Array[Font]([ExtResource("3_8ggrk")])
+base_font = ExtResource("2_187wt")
 
 [sub_resource type="Animation" id="Animation_jt4fe"]
 length = 0.001
@@ -150,7 +155,7 @@ offset_right = 284.0
 offset_bottom = -118.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_fonts/font = ExtResource("2_187wt")
+theme_override_fonts/font = SubResource("FontVariation_jt4fe")
 theme_override_font_sizes/font_size = 40
 text = "Warn：in dev
 ©Pigeon Games
@@ -170,7 +175,7 @@ offset_right = 234.0
 offset_bottom = 79.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_fonts/font = ExtResource("2_187wt")
+theme_override_fonts/font = SubResource("FontVariation_jt4fe")
 theme_override_font_sizes/font_size = 80
 text = "请选择UI版本"
 horizontal_alignment = 1

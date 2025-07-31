@@ -1,0 +1,259 @@
+[gd_scene load_steps=8 format=3 uid="uid://dtuuc0ml4qcs6"]
+
+[ext_resource type="FontFile" uid="uid://dyywuscj3o4xw" path="res://assets/v1/Font/Exo-Regular.otf" id="1_gkmww"]
+
+[sub_resource type="GDScript" id="GDScript_gkmww"]
+script/source = "extends Control
+
+
+func _on_bg_button_pressed() -> void:
+    $AnimationPlayer.play_backwards(&\"in\")
+    await get_tree().create_timer(0.5).timeout
+    if self.is_inside_tree():
+        self.queue_free()
+"
+
+[sub_resource type="Animation" id="Animation_rituo"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Label:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 0)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Label2:modulate")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 0)]
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("Bg:position")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector2(49.546, 155.5)]
+}
+tracks/3/type = "value"
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/path = NodePath("Bg:scale")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector2(0.20172, 292.983)]
+}
+tracks/4/type = "value"
+tracks/4/imported = false
+tracks/4/enabled = true
+tracks/4/path = NodePath("../TextureRect:modulate")
+tracks/4/interp = 1
+tracks/4/loop_wrap = true
+tracks/4/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 0)]
+}
+
+[sub_resource type="Animation" id="Animation_kl62y"]
+resource_name = "in"
+length = 0.5
+step = 0.0166667
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Label:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0.3, 0.5),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Color(1, 1, 1, 0), Color(1, 1, 1, 1)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Label2:modulate")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0.3, 0.5),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Color(1, 1, 1, 0), Color(1, 1, 1, 1)]
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("Bg:position")
+tracks/2/interp = 2
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0, 0.35),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Vector2(49.546, 155.5), Vector2(432.046, 155.5)]
+}
+tracks/3/type = "value"
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/path = NodePath("Bg:scale")
+tracks/3/interp = 2
+tracks/3/loop_wrap = true
+tracks/3/keys = {
+"times": PackedFloat32Array(0, 0.35),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Vector2(0.20172, 292.983), Vector2(765.202, 292.983)]
+}
+tracks/4/type = "value"
+tracks/4/imported = false
+tracks/4/enabled = true
+tracks/4/path = NodePath("../TextureRect:modulate")
+tracks/4/interp = 1
+tracks/4/loop_wrap = true
+tracks/4/keys = {
+"times": PackedFloat32Array(0, 0.5),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Color(1, 1, 1, 0), Color(1, 1, 1, 1)]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_rituo"]
+_data = {
+&"RESET": SubResource("Animation_rituo"),
+&"in": SubResource("Animation_kl62y")
+}
+
+[sub_resource type="CanvasTexture" id="CanvasTexture_k4pe5"]
+
+[sub_resource type="FontVariation" id="FontVariation_kwhjx"]
+base_font = ExtResource("1_gkmww")
+spacing_top = 10
+spacing_bottom = 6
+
+[node name="DataDialog" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = SubResource("GDScript_gkmww")
+
+[node name="TextureRect" type="ColorRect" parent="."]
+modulate = Color(1, 1, 1, 0)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.105882)
+
+[node name="BgButton" type="TextureButton" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+root_node = NodePath("../DataDialog")
+libraries = {
+&"": SubResource("AnimationLibrary_rituo")
+}
+autoplay = "in"
+
+[node name="DataDialog" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -427.0
+offset_top = -155.0
+offset_right = 427.0
+offset_bottom = 155.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Bg" type="Sprite2D" parent="DataDialog"]
+modulate = Color(0, 0, 0, 0.607843)
+position = Vector2(49.546, 155.5)
+scale = Vector2(0.20172, 292.983)
+skew = 0.261799
+texture = SubResource("CanvasTexture_k4pe5")
+
+[node name="White" type="Polygon2D" parent="DataDialog"]
+position = Vector2(283, 175.518)
+scale = Vector2(1, 2.22628)
+polygon = PackedVector2Array(-204, -73, -280, 54.5672, -271, 54.5672, -196, -73)
+uv = PackedVector2Array(-200, -64, -232, 48, -176, 64, -144, -72)
+
+[node name="Label" type="Label" parent="DataDialog"]
+modulate = Color(1, 1, 1, 0)
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.111
+anchor_top = 0.252
+anchor_right = 0.889
+anchor_bottom = 0.748
+offset_left = 0.205994
+offset_top = -0.120003
+offset_right = -0.206055
+offset_bottom = 0.119995
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_fonts/font = SubResource("FontVariation_kwhjx")
+theme_override_font_sizes/font_size = 30
+text = "本游戏没有任何充值途径。持续游即可获得 Data。如果你认为歌曲太少，不妨去试解锁主线章节
+！"
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 1
+
+[node name="Label2" type="Label" parent="DataDialog"]
+modulate = Color(1, 1, 1, 0)
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.194
+anchor_top = 0.819
+anchor_right = 0.806
+anchor_bottom = 1.0
+offset_left = 0.32399
+offset_top = 0.109985
+offset_right = -0.324036
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_colors/font_color = Color(0.398036, 0.398036, 0.398036, 1)
+theme_override_fonts/font = ExtResource("1_gkmww")
+text = "Tips：长按右上角可打开登陆界面"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[connection signal="pressed" from="BgButton" to="." method="_on_bg_button_pressed"]

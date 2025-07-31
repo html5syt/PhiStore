@@ -653,7 +653,7 @@ length = 0.001
 tracks/0/type = "value"
 tracks/0/imported = false
 tracks/0/enabled = true
-tracks/0/path = NodePath("Question:visible")
+tracks/0/path = NodePath("Question/Question:visible")
 tracks/0/interp = 1
 tracks/0/loop_wrap = true
 tracks/0/keys = {
@@ -732,7 +732,7 @@ tracks/6/keys = {
 "times": PackedFloat32Array(0),
 "transitions": PackedFloat32Array(1),
 "update": 0,
-"values": [Vector2(-36, 92)]
+"values": [Vector2(0, 92)]
 }
 tracks/7/type = "value"
 tracks/7/imported = false
@@ -833,7 +833,7 @@ tracks/3/keys = {
 "times": PackedFloat32Array(0, 0.5),
 "transitions": PackedFloat32Array(1, 1),
 "update": 0,
-"values": [Vector2(-36, 92), Vector2(-428, 92)]
+"values": [Vector2(0, 92), Vector2(-392, 92)]
 }
 tracks/4/type = "value"
 tracks/4/imported = false
@@ -891,7 +891,7 @@ step = 0.0166667
 tracks/0/type = "value"
 tracks/0/imported = false
 tracks/0/enabled = true
-tracks/0/path = NodePath("Question:visible")
+tracks/0/path = NodePath("Question/Question:visible")
 tracks/0/interp = 1
 tracks/0/loop_wrap = true
 tracks/0/keys = {
@@ -956,7 +956,7 @@ step = 0.0166667
 tracks/0/type = "value"
 tracks/0/imported = false
 tracks/0/enabled = true
-tracks/0/path = NodePath("Question:visible")
+tracks/0/path = NodePath("Question/Question:visible")
 tracks/0/interp = 1
 tracks/0/loop_wrap = true
 tracks/0/keys = {
@@ -1023,7 +1023,7 @@ tracks/5/keys = {
 "times": PackedFloat32Array(0, 0.5),
 "transitions": PackedFloat32Array(1, 1),
 "update": 0,
-"values": [Vector2(-36, 92), Vector2(-428, 92)]
+"values": [Vector2(0, 92), Vector2(-384, 92)]
 }
 tracks/6/type = "value"
 tracks/6/imported = false
@@ -1114,17 +1114,25 @@ color = Color(0.748694, 0.748694, 0.748694, 1)
 
 [node name="Question" type="Control" parent="."]
 layout_mode = 1
-anchor_left = 0.5
 anchor_top = 0.193
-anchor_right = 0.5
+anchor_right = 1.0
 anchor_bottom = 0.193
-offset_left = -201.0
+offset_left = 1.0
 offset_top = 0.300003
-offset_right = 202.0
 offset_bottom = 371.3
 
-[node name="Question" type="AnimatedSprite2D" parent="Question"]
-position = Vector2(201, 188)
+[node name="Question" type="AspectRatioContainer" parent="Question"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -207.5
+offset_right = 208.5
+offset_bottom = 391.0
+metadata/_edit_group_ = true
+
+[node name="Question" type="AnimatedSprite2D" parent="Question/Question"]
+position = Vector2(205, 201)
 scale = Vector2(0.767107, 0.767107)
 sprite_frames = SubResource("SpriteFrames_u6xri")
 autoplay = "default"
@@ -1133,13 +1141,13 @@ frame_progress = 0.875596
 [node name="Icon" type="AspectRatioContainer" parent="Question"]
 layout_mode = 1
 anchors_preset = -1
-anchor_left = -0.089
+anchor_left = 0.418
 anchor_top = 0.248
-anchor_right = 1.087
+anchor_right = 0.581
 anchor_bottom = 0.76
-offset_left = -0.132999
-offset_top = -0.00799561
-offset_right = -0.0610046
+offset_left = 0.617981
+offset_top = -0.00800323
+offset_right = -0.019043
 offset_bottom = 0.039978
 scale = Vector2(1, 1e-05)
 pivot_offset = Vector2(236, 90)
@@ -1157,8 +1165,10 @@ anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
 offset_top = -62.0
+offset_right = 1.0
 grow_horizontal = 2
 grow_vertical = 0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_fonts/font = ExtResource("1_qdrm6")
 theme_override_font_sizes/font_size = 35
 text = "2 MB杂鱼@￥#%……&*（*&……%￥%……&*&（*）&……%￥"
@@ -1171,13 +1181,13 @@ visible_ratio = 0.0
 visible = false
 layout_mode = 1
 anchors_preset = -1
-anchor_left = -0.089
+anchor_left = -0.001
 anchor_top = 0.248
-anchor_right = 1.087
+anchor_right = 0.999
 anchor_bottom = 0.76
-offset_left = -0.132999
-offset_top = -0.00799561
-offset_right = -0.0610046
+offset_left = 1.599
+offset_top = -0.00800323
+offset_right = 2.59888
 offset_bottom = 0.039978
 pivot_offset = Vector2(236, 90)
 metadata/_edit_group_ = true
@@ -1195,6 +1205,7 @@ anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
 offset_top = -62.0
+offset_right = 1.0
 grow_horizontal = 2
 grow_vertical = 0
 theme_override_fonts/font = ExtResource("1_qdrm6")
@@ -1355,3 +1366,35 @@ offset_left = 0.200035
 offset_top = -0.173981
 offset_right = 3.05176e-05
 offset_bottom = -0.00402832
+
+[node name="NoEnoughMoney" type="Label" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.871
+anchor_top = 0.736
+anchor_right = 0.871
+anchor_bottom = 0.736
+offset_left = -94.6001
+offset_top = -28.4
+offset_right = 93.3999
+offset_bottom = 28.6
+theme_override_fonts/font = ExtResource("1_qdrm6")
+theme_override_font_sizes/font_size = 35
+text = "余额不足"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="MBoverlay" type="Button" parent="."]
+visible = false
+modulate = Color(1, 1, 1, 0)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[connection signal="pressed" from="1024KB/Button" to="." method="single"]
+[connection signal="pressed" from="8MB/Button" to="." method="ten"]
+[connection signal="pressed" from="MBoverlay" to="." method="ten"]

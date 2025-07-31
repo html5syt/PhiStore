@@ -46,3 +46,8 @@ func _on_shop_bar_button_pressed(n) -> void:
             $Pages.add_child(DataMining)
         _:
             print(n) # Replace with function body.
+
+
+func _on_remaining_data_pressed() -> void:
+    var DataDialog = preload("res://components/v1/DataDialog.tscn").instantiate()
+    add_child(DataDialog)
