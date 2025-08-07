@@ -50,7 +50,6 @@ static func download_save_file(url: String, Cloud_Save: CloudSave) -> void:
 
 static func generate_summary() -> Dictionary:
     var save = JSON.parse_string(FileAccess.open("user://PhigrosSaves.json", FileAccess.READ).get_as_text())
-    print(countRksAll(save["gameRecord"]))
     var ratings: Dictionary = {"EZ":[0, 3, 0], "HD":[0, 1, 0], "IN":[0, 0, 0], "AT":[0, 0, 0]}
 #    数据统计疑似错误
     for song in save["gameRecord"]:
@@ -346,3 +345,13 @@ static func weighted_random(weights: Dictionary):
     
     # 理论上不会执行到这里
     return null
+
+static func get_avatar_path(avatarName:String) -> String:
+    if avatarName == "":
+        avatarName = "Introduction"
+    var avatarPath = "res://assets/pigeon/avatar/%s.png" % avatarName if OS.has_feature("editor") else "res://assets/pigeon/avatar/%s.png.import" % avatarName
+    # fuck special name
+    match avatarName:
+        "Cipher : /2&//<|0":
+            avatarPath = "res://assets/pigeon/avatar/%s.png" % "Cipher1" if OS.has_feature("editor") else "res://assets/pigeon/avatar/%s.png.import" % "Cipher1"
+    return avatarPath

@@ -1,9 +1,8 @@
-[gd_scene load_steps=12 format=3 uid="uid://duhfrp2sobaps"]
+[gd_scene load_steps=11 format=3 uid="uid://duhfrp2sobaps"]
 
 [ext_resource type="Script" uid="uid://32nep4bws3qw" path="res://scripts/global/splash0.gd" id="1_c774y"]
 [ext_resource type="FontFile" uid="uid://bkeun2le5ddao" path="res://assets/v1/Font/Exo-Medium.otf" id="2_187wt"]
 [ext_resource type="FontFile" uid="uid://t7yp607ed1es" path="res://assets/v2/Font/SourceHanSansCN_&_SairaCondensed_Hybrid_Medium.ttf" id="3_8ggrk"]
-[ext_resource type="Theme" uid="uid://bypw0hvab8qeu" path="res://themes/v1/button.tres" id="3_jt4fe"]
 [ext_resource type="PackedScene" uid="uid://kiuugoj7icb3" path="res://addons/fade/TransitionManager.tscn" id="4_8ggrk"]
 [ext_resource type="Texture2D" uid="uid://bfv2a6rlipcbn" path="res://icon.png" id="4_187wt"]
 [ext_resource type="FontFile" uid="uid://brfyrno5hubv5" path="res://assets/v2/Font/Aldrich-Regular.ttf" id="5_jt4fe"]
@@ -198,14 +197,14 @@ metadata/_edit_use_anchors_ = true
 [node name="v1" type="Button" parent="v1orv2"]
 layout_mode = 2
 size_flags_horizontal = 3
-theme = ExtResource("3_jt4fe")
-text = "v1"
+theme_override_font_sizes/font_size = 46
+text = "Shop"
 
 [node name="v2" type="Button" parent="v1orv2"]
 layout_mode = 2
 size_flags_horizontal = 3
-theme = ExtResource("3_jt4fe")
-text = "v2"
+theme_override_font_sizes/font_size = 46
+text = "PhiSave"
 
 [node name="Splash" type="ColorRect" parent="."]
 layout_mode = 1

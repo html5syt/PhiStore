@@ -61,7 +61,7 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_font_sizes/font_size = 48
 tab_alignment = 1
-current_tab = 2
+current_tab = 1
 
 [node name="TapSDK" type="GridContainer" parent="TabContainer"]
 visible = false
@@ -161,7 +161,6 @@ theme_override_font_sizes/font_size = 48
 text = "RKS"
 
 [node name="PhiSave" type="GridContainer" parent="TabContainer"]
-visible = false
 layout_mode = 2
 theme_override_constants/h_separation = 20
 theme_override_constants/v_separation = 20
@@ -215,6 +214,7 @@ theme_override_font_sizes/font_size = 48
 text = "退出登录"
 
 [node name="PhiSaveTools" type="GridContainer" parent="TabContainer"]
+visible = false
 layout_mode = 2
 theme_override_constants/h_separation = 20
 theme_override_constants/v_separation = 20
@@ -279,9 +279,7 @@ position = Vector2i(0, 36)
 size = Vector2i(1300, 700)
 ok_button_text = "Open"
 file_mode = 3
-access = 1
 show_hidden_files = true
-use_native_dialog = true
 
 [connection signal="pressed" from="TabContainer/TapSDK/Login" to="." method="_on_TDS_login_pressed"]
 [connection signal="pressed" from="TabContainer/TapSDK/Login2" to="." method="_on_TDS_logout_pressed"]

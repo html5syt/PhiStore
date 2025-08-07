@@ -8,7 +8,7 @@ script/source = "extends Control
 
 func _on_bg_button_pressed() -> void:
     $AnimationPlayer.play_backwards(&\"in\")
-    await get_tree().create_timer(0.5).timeout
+    await $AnimationPlayer.animation_finished
     if self.is_inside_tree():
         self.queue_free()
 "

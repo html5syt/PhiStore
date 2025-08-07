@@ -57,14 +57,13 @@ func start_browser_auth_flow():
     state = _generate_random_string(32, "abcdefghijklmnopqrstuvwxyz0123456789")
     
     # 启动本地HTTP服务器
-    if not OS.has_feature("web"):
-        _start_local_server()
-    else:
-        push_warning("Browser auth TCPServer not supported on web platform")
-        # 打开浏览器进行授权
-        auth_flow_need_code.emit()
-        redirect_uri = "https://127.0.0.1:14514/authorize"
-        _open_browser_for_auth()
+    _start_local_server()
+    # else:
+    #     push_warning("Browser auth TCPServer not supported on web platform")
+    #     # 打开浏览器进行授权
+    #     auth_flow_need_code.emit()
+    #     redirect_uri = "https://127.0.0.1:14514/authorize"
+    #     _open_browser_for_auth()
 
 # 手动用授权码（回调链接内code参数）交换令牌
 func exchange_code_for_token(auth_code):
@@ -429,7 +428,7 @@ func _request_user_info(token_data: Dictionary):
     var http_request = HTTPRequest.new()
     add_child(http_request)
 #    CORS代理
-    var base_url = "https://" if not OS.has_feature("web") else "https://open-tapapis.bravely.pp.ua/?url=https://"
+    var base_url = "https://" if not OS.has_feature("web") else "https://open-tapapis.bravely.pp.ua/?url="
     http_request.request(base_url + host + request_url, headers, HTTPClient.METHOD_GET)
     http_request.connect("request_completed", _on_user_info_response.bind(token_data))
 

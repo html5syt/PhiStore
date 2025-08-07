@@ -8,6 +8,7 @@ var Save_Worker = SaveWorker.new()
 var cloud_save = Phi_Save.Cloud_Save
 var old_id : String 
 var tap_login : TapLogin
+var GodotTDS
 
 # 断开指定对象上某个信号的所有连接
 func disconnect_all_connections(object: Object, signal_name: String) -> void:
@@ -41,8 +42,8 @@ func _file():
     $FileDialog.visible=true
 
 func _ready() -> void:
-    GodotTDS.on_login_return.connect(_on_test_return)
-    GodotTDS.on_anti_addiction_return.connect(_on_anti_test_return)
+    #GodotTDS.on_login_return.connect(_on_test_return)
+    #GodotTDS.on_anti_addiction_return.connect(_on_anti_test_return)
     tap_login = TapLogin.new()
     add_child(tap_login)
 

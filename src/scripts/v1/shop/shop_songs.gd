@@ -19,17 +19,26 @@ var illustrations = []  # 用于存储插图名
 var avatars = []  # 用于存储头像名
 var songs_to_load = []  # 待加载的歌曲数据队列
 var loading_in_progress = false
-var placeholder_texture = preload("res://assets/v1/SingleChapterCoverBlur.png")
+var placeholder_texture = load("res://assets/v1/SingleChapterCoverBlur.png" if OS.has_feature("editor") else "res://assets/v1/SingleChapterCoverBlur.png.import")
+
+# 检测是否为Web平台且不支持线程
+var is_web_platform: bool = OS.has_feature("web") and OS.has_feature("nothreads")
 
 func _ready() -> void:
     # 预加载占位图
-    placeholder_texture = preload("res://assets/v1/SingleChapterCoverBlur.png")
+    placeholder_texture = load("res://assets/v1/SingleChapterCoverBlur.png" if OS.has_feature("editor") else "res://assets/v1/SingleChapterCoverBlur.png.import")
     # 异步加载TSV数据
     _load_song_data_async()
     if not $/root/Shop/bgMusic.playing:
         $/root/Shop/bgMusic.play()
 
 func _load_song_data_async() -> void:
+    # 在Web平台上直接在主线程加载
+    if is_web_platform:
+        _thread_load_song_data(null)
+        _on_song_data_loaded(null)
+        return
+    
     # 使用线程避免主线程阻塞
     var thread = Thread.new()
     thread.start(_thread_load_song_data.bind(thread))
@@ -59,10 +68,12 @@ func _thread_load_song_data(thread: Thread) -> void:
         avatars = SaveWorker.Avatars.new().getPaidedAvatars()
 
     # 数据准备好后回调到主线程
-    call_deferred("_on_song_data_loaded", thread)
+    if thread:  # 非Web平台才需要call_deferred
+        call_deferred("_on_song_data_loaded", thread)
 
 func _on_song_data_loaded(thread: Thread) -> void:
-    thread.wait_to_finish()
+    if thread:
+        thread.wait_to_finish()
     
     var paidSongs
     var paidIllustrations
@@ -95,7 +106,7 @@ func _on_song_data_loaded(thread: Thread) -> void:
             var songItem = songs[1][song]
             var data = int(randf_range(8, 17) * 100) / 100.0
             var dataOffPrecentRand = randi_range(dataOffPrecent * 10.0 - 5.0, dataOffPrecent * 10.0) / 10.0
-            var illustration = "res://assets/pigeon/illustrationLowRes/%s.png" % song
+            var illustration = "res://assets/pigeon/illustrationLowRes/%s.png" % song if OS.has_feature("editor") else "res://assets/pigeon/illustrationLowRes/%s.png.import" % song
             
             songs_to_load.push_back({
                 "itemName": songItem["songName"],
@@ -110,7 +121,7 @@ func _on_song_data_loaded(thread: Thread) -> void:
         # 准备已购买歌曲数据
         for song in songs[0]:
             var songItem = songs[0][song]
-            var illustration = "res://assets/pigeon/illustrationLowRes/%s.png" % song
+            var illustration = "res://assets/pigeon/illustrationLowRes/%s.png" % song if OS.has_feature("editor") else "res://assets/pigeon/illustrationLowRes/%s.png.import" % song
             
             songs_to_load.push_back({
                 "itemName": songItem["songName"],
@@ -131,11 +142,11 @@ func _on_song_data_loaded(thread: Thread) -> void:
             var songItem = avatar
             var data = int(randf_range(8, 17) * 100) / 100.0
             var dataOffPrecentRand = randi_range(dataOffPrecent * 10.0 - 5.0, dataOffPrecent * 10.0) / 10.0
-            var illustration = "res://assets/pigeon/avatar/%s.png" % avatar
+            var illustration = "res://assets/pigeon/avatar/%s.png" % avatar if OS.has_feature("editor") else "res://assets/pigeon/avatar/%s.png.import" % avatar
             # fuck special name
             match avatar:
                 "Cipher : /2&//<|0":
-                    illustration = "res://assets/pigeon/avatar/%s.png" % "Cipher1"
+                    illustration = "res://assets/pigeon/avatar/%s.png" % "Cipher1" if OS.has_feature("editor") else "res://assets/pigeon/avatar/%s.png.import" % "Cipher1"
                 "":
                     break
 
@@ -152,11 +163,11 @@ func _on_song_data_loaded(thread: Thread) -> void:
         # 准备已购买歌曲数据
         for avatar in avatars[1]:
             var songItem = avatar
-            var illustration = "res://assets/pigeon/avatar/%s.png" % avatar
+            var illustration = "res://assets/pigeon/avatar/%s.png" % avatar if OS.has_feature("editor") else "res://assets/pigeon/avatar/%s.png.import" % avatar
             # fuck special name
             match avatar:
                 "Cipher : /2&//<|0":
-                    illustration = "res://assets/pigeon/avatar/%s.png" % "Cipher1"
+                    illustration = "res://assets/pigeon/avatar/%s.png" % "Cipher1" if OS.has_feature("editor") else "res://assets/pigeon/avatar/%s.png.import" % "Cipher1"
                 "":
                     break
 
@@ -205,6 +216,6 @@ func _create_song_item(song_data: Dictionary) -> void:
     songContainer.isSoldOut = song_data["isSoldOut"]
     
     # 设置图片（使用占位符异步加载）
-    songContainer.set_illustration_async(song_data["illustration"], placeholder_texture)
+    songContainer.set_illustration_async(song_data["illustration"], placeholder_texture, is_web_platform)
     
     $MarginContainer/FlowContainer.add_child(songContainer)

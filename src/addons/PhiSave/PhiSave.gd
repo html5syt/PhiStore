@@ -7,11 +7,14 @@ var sessiontoken: String
 var old_id: String = ""
 var Cloud_Save: CloudSave
 var uuid: String
+var GodotTDS
 
 signal on_TDS_login_success
 signal on_TDS_sync_success
 signal on_sessiontoken_login_success # sessiontoken登录成功
 signal on_sessiontoken_sync_success # sessiontoken同步成功
+signal on_sessiontoken_get_success # sessiontoken存档获取成功
+signal on_sessiontoken_upload_success # sessiontoken存档上传成功
 signal require_sessiontoken # 由对应UI负责处理弹窗请求
 
 func _init(parent: Node) -> void:
@@ -20,14 +23,14 @@ func _init(parent: Node) -> void:
     var load_result = Config.load("user://config.cfg")
 
     # 如果文件没有加载，忽略它。
-    if load_result != OK or Config.get_value("Config", "sessionToken") == "":
+    if load_result != OK or Config.get_value("Config", "sessionToken","") == "":
         push_warning("config.cfg 加载失败")
         Config = ConfigFile.new()
         sessiontoken = ""
         #uuid = Time.get_datetime_dict_from_system()
         uuid = str(Time.get_unix_time_from_system())
         Config.set_value("Config", "uuid", uuid)
-        Config.set_value("Config", "sessiontoken", sessiontoken)
+        Config.set_value("Config", "sessionToken", sessiontoken)
         Config.save("user://config.cfg")
     else:
         sessiontoken = Config.get_value("Config", "sessionToken")
@@ -85,6 +88,8 @@ static func init(default: String = "res://addons/PhiSave/default.json",save_path
 # TDS登录
 
 func TDS_login() -> void:
+    push_warning("Not implemented")
+    return
     PhiSaveTools.disconnect_all_connections(GodotTDS, "on_login_return")
     GodotTDS.on_login_return.connect(_on_TDS_login_return)
     GodotTDS.login()
@@ -210,6 +215,8 @@ func TDS_upload_save(Force = false,msg: String = "") -> void:
 
 # TDS退出登录
 func TDS_logout() -> void:
+    push_warning("Not implemented")
+    return
     GodotTDS.logout()
     SessionToken_logout()
 
@@ -258,13 +265,15 @@ func SessionToken_sync_save() -> void:
     
 # sessiontoken退出登录
 func SessionToken_logout() -> void:
-    Config.clear()
+    Config.erase_section("Config")
     Config.set_value("Config", "uuid", uuid)
     Config.set_value("Config", "sessionToken", "")
     Config.save("user://config.cfg")
     
 func anti_addition():
 #    实名认证
+    push_warning("Not implemented")
+    return
     uuid = Config.get_value("Config", "uuid")
     GodotTDS.on_anti_addiction_return.connect(func(code: int, msg: String):
         if code != GodotTDS.StateCode.ANTI_ADDITION_SUCCESS:
@@ -275,3 +284,29 @@ func anti_addition():
             Config.save("user://config.cfg")
             )
     GodotTDS.anti_addiction(uuid)
+
+func get_cloud_save_summary() -> Dictionary:
+    var updateAt = await Cloud_Save.get_summary()
+    return updateAt
+
+func get_cloud_save_update_time() -> int:
+    var updateAt = await get_cloud_save_summary()
+    return Time.get_unix_time_from_datetime_string((updateAt["updateAt"]))
+
+func SessionToken_get_save():
+    Cloud_Save.get_save()
+    Cloud_Save.get_save_success.connect(SessionToken_get_save_success)
+
+func SessionToken_get_save_success(_data):
+    PackSave.dePack("user://.save", "user://PhigrosSaves.json")
+    Config.set_value("SaveInfo", "updateTime", Time.get_unix_time_from_system() as int)
+    Config.save("user://config.cfg")
+    on_sessiontoken_get_success.emit()
+
+func SessionToken_upload_save():
+    PackSave.Pack("user://PhigrosSaves.json", "user://.save")
+    Cloud_Save.upload_save()
+    Cloud_Save.upload_save_success.connect(SessionToken_upload_save_success)
+
+func SessionToken_upload_save_success():
+    on_sessiontoken_upload_success.emit()

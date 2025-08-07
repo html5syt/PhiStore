@@ -34,11 +34,19 @@ func get_random_file_from_directory(directory_path: String) -> String:
     return directory_path.path_join(file_list[random_index])
     
 func _ready() -> void:
+    #var file = FileDialog.new()
+    #file.file_mode = FileDialog.FILE_MODE_OPEN_ANY
+    #file.access = FileDialog.ACCESS_RESOURCES
+    #file.size = Vector2i(800,700)
+    #file.position = Vector2i(200,200)
+    #get_tree().root.add_child(file)
+    #file.visible = true
+
     $bgLoop.play()
     loading()
 
 func loading() -> void:
-    var bg := get_random_file_from_directory("res://assets/pigeon/illustration/" if not OS.has_feature("web") else "res://assets/pigeon/illustrationLowRes/")
+    var bg := get_random_file_from_directory("res://assets/pigeon/illustrationLowRes/")
     # 检查存档文件是否存在
     if not FileAccess.file_exists("user://PhigrosSaves.json"):
         PhiSave.init()
