@@ -1,35 +1,35 @@
 [submodule "src/assets/pigeon/chart"]
 	path = src/assets/pigeon/chart
-	url = https://github.com/7aGiven/Phigros_Resource.git
+	url = https://github.com/html5syt/Phigros_Resource.git
 	branch = chart
 	shallow = true
 [submodule "src/assets/pigeon/avatar"]
 	path = src/assets/pigeon/avatar
-	url = https://github.com/7aGiven/Phigros_Resource.git
+	url = https://github.com/html5syt/Phigros_Resource.git
 	branch = avatar
 	shallow = true
 [submodule "src/assets/pigeon/illustrationBlur"]
 	path = src/assets/pigeon/illustrationBlur
-	url = https://github.com/7aGiven/Phigros_Resource.git
+	url = https://github.com/html5syt/Phigros_Resource.git
 	branch = illustrationBlur
 	shallow = true
 [submodule "src/assets/pigeon/illustrationLowRes"]
 	path = src/assets/pigeon/illustrationLowRes
-	url = https://github.com/7aGiven/Phigros_Resource.git
+	url = https://github.com/html5syt/Phigros_Resource.git
 	branch = illustrationLowRes
 	shallow = true
 [submodule "src/assets/pigeon/music"]
 	path = src/assets/pigeon/music
-	url = https://github.com/7aGiven/Phigros_Resource.git
+	url = https://github.com/html5syt/Phigros_Resource.git
 	branch = music
 	shallow = true
 [submodule "src/assets/pigeon/info"]
 	path = src/assets/pigeon/info
-	url = https://github.com/7aGiven/Phigros_Resource.git
+	url = https://github.com/html5syt/Phigros_Resource.git
 	branch = info
 	shallow = true
 [submodule "src/assets/pigeon/illustration"]
 	path = src/assets/pigeon/illustration
-	url = https://github.com/7aGiven/Phigros_Resource.git
+	url = https://github.com/html5syt/Phigros_Resource.git
 	branch = illustration
 	shallow = true
