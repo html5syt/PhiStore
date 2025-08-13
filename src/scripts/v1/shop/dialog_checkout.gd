@@ -49,6 +49,7 @@ func _on_bg_cancelled() -> void:
         self.queue_free()
 
 func _on_confirmed() -> void:
+    $Button.play()
     if SaveWorker.Data.new().getData() < PhiSaveTools.DataSizeConverter.convert_to_kb(PhiSaveTools.DataSizeConverter.convert_from_highest(cheapData if cheapData else amountData)):
         push_warning("No enough money")
         $Dialog/NoEnoughMoney.visible = true

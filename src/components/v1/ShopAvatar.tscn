@@ -1,9 +1,10 @@
 [gd_scene load_steps=11 format=3 uid="uid://ccb4m3q37pxqo"]
 
 [ext_resource type="Script" uid="uid://j6wfid6f6ioe" path="res://scripts/v1/shop/shop_song.gd" id="1_iooqr"]
-[ext_resource type="Texture2D" uid="uid://1dvmorpbpjkn" path="res://assets/v1/SingleChapterCoverBlur.png" id="2_02db2"]
-[ext_resource type="FontFile" uid="uid://dyywuscj3o4xw" path="res://assets/v1/Font/Exo-Regular.otf" id="4_fq48n"]
-[ext_resource type="Texture2D" uid="uid://br487ovbanfki" path="res://assets/v1/商店_素材.png" id="6_54kvp"]
+[ext_resource type="AudioStream" uid="uid://j83ggkvqsd62" path="res://assets/v1/Tap1.wav" id="2_0waxu"]
+[ext_resource type="Texture2D" uid="uid://dmsrq2trbjrw1" path="res://assets/v1/SingleChapterCoverBlur.png" id="2_02db2"]
+[ext_resource type="FontFile" uid="uid://bxa3w0wqr0whf" path="res://assets/v1/Font/Exo-Regular.otf" id="4_fq48n"]
+[ext_resource type="Texture2D" uid="uid://5vaqd1ynicf3" path="res://assets/v1/商店_素材.png" id="6_54kvp"]
 
 [sub_resource type="CompressedTexture2D" id="CompressedTexture2D_0waxu"]
 load_path = "res://.godot/imported/商店_素材.png-70b15738ab931353a08126e8cae05906.ctex"
@@ -11,10 +12,6 @@ load_path = "res://.godot/imported/商店_素材.png-70b15738ab931353a08126e8cae
 [sub_resource type="AtlasTexture" id="AtlasTexture_jw6rc"]
 atlas = SubResource("CompressedTexture2D_0waxu")
 region = Rect2(432, 914, 92, 92)
-
-[sub_resource type="FontVariation" id="FontVariation_rituo"]
-base_font = ExtResource("4_fq48n")
-spacing_glyph = 2
 
 [sub_resource type="FontVariation" id="FontVariation_kl62y"]
 base_font = ExtResource("4_fq48n")
@@ -37,6 +34,9 @@ theme_override_constants/margin_left = 20
 theme_override_constants/margin_right = 5
 script = ExtResource("1_iooqr")
 pageType = 2
+
+[node name="Button" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("2_0waxu")
 
 [node name="ShopSong" type="Control" parent="."]
 layout_mode = 2
@@ -69,19 +69,6 @@ pivot_offset = Vector2(46, 46)
 texture = SubResource("AtlasTexture_jw6rc")
 expand_mode = 1
 stretch_mode = 2
-
-[node name="itemNameLabel" type="Label" parent="ShopSong"]
-visible = false
-layout_mode = 0
-offset_left = 17.0
-offset_top = 133.0
-offset_right = 165.0
-offset_bottom = 164.0
-theme_override_fonts/font = SubResource("FontVariation_rituo")
-theme_override_font_sizes/font_size = 20
-text = "杂鱼φ@#$"
-vertical_alignment = 1
-clip_text = true
 
 [node name="Data" type="Control" parent="ShopSong"]
 layout_mode = 2

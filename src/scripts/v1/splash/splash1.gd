@@ -7,7 +7,7 @@ func get_random_file_from_directory(directory_path: String) -> String:
     var dir = DirAccess.open(directory_path)
     if not dir:
         push_error("无法打开目录: " + directory_path)
-        return "res://assets/pigeon-default/illustration/LeaveAllBehind.rider.png"
+        return "res://assets/pigeon-default/illustration/LeaveAllBehind.rider.webp"
         #return get_random_file_from_directory("res://assets/pigeon-default/illustration/")
     
     # 获取目录中的所有文件
@@ -26,7 +26,7 @@ func get_random_file_from_directory(directory_path: String) -> String:
     # 检查是否找到文件
     if file_list.is_empty():
         push_warning("目录中没有文件: " + directory_path)
-        return "res://assets/pigeon-default/illustration/LeaveAllBehind.rider.png"
+        return "res://assets/pigeon-default/illustration/LeaveAllBehind.rider.webp"
         #return get_random_file_from_directory("res://assets/pigeon-default/illustration/")
     
     # 随机选择并返回完整路径

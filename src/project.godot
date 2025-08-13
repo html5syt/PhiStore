@@ -43,11 +43,17 @@ project/assembly_name="PhiStore"
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/qr_code/plugin.cfg")
+enabled=PackedStringArray("res://addons/autoscroll_container/plugin.cfg", "res://addons/qr_code/plugin.cfg")
 
 [gui]
 
 theme/default_font_multichannel_signed_distance_field=true
+
+[importer_defaults]
+
+texture={
+&"compress/mode": 1
+}
 
 [rendering]
 

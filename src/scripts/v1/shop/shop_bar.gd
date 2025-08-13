@@ -14,6 +14,7 @@ func indicate_move(n: float = 1) -> void:
     indicate_tween.play()
     
 func on_shop_bar_button_pressed(n: int = 1) -> void:
+    $Button.play()
     indicate_move(n)
 #    切换回调
     shop_bar_button_pressed.emit(n)

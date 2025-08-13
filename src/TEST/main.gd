@@ -236,3 +236,7 @@ func _on_qr_login_pressed() -> void:
 
 func _on_code_input_changed() -> void:
     tap_login.exchange_code_for_token($TabContainer/PhiSaveTools/TextEdit.text) # Replace with function body.
+
+
+func _on_back_pressed() -> void:
+    get_tree().change_scene_to_file("res://scenes/global/splash0.tscn")

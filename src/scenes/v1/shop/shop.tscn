@@ -1,15 +1,16 @@
-[gd_scene load_steps=18 format=3 uid="uid://b0b06kbopxi33"]
+[gd_scene load_steps=19 format=3 uid="uid://b0b06kbopxi33"]
 
 [ext_resource type="Script" uid="uid://b8yaak7ve8aam" path="res://scripts/v1/shop/shop.gd" id="1_w1d2f"]
 [ext_resource type="PackedScene" uid="uid://kiuugoj7icb3" path="res://addons/fade/TransitionManager.tscn" id="2_bv3dc"]
-[ext_resource type="AudioStream" uid="uid://cnk60g4bcviiv" path="res://assets/v1/Shop0.mp3" id="2_kwhjx"]
-[ext_resource type="Texture2D" uid="uid://1dvmorpbpjkn" path="res://assets/v1/SingleChapterCoverBlur.png" id="3_u6xri"]
+[ext_resource type="AudioStream" uid="uid://dymev32u8n2k2" path="res://assets/v1/Shop0.mp3" id="2_kwhjx"]
+[ext_resource type="AudioStream" uid="uid://j83ggkvqsd62" path="res://assets/v1/Tap1.wav" id="3_kwhjx"]
+[ext_resource type="Texture2D" uid="uid://dmsrq2trbjrw1" path="res://assets/v1/SingleChapterCoverBlur.png" id="3_u6xri"]
 [ext_resource type="PackedScene" uid="uid://c62nlt5v5iy5" path="res://components/global/BackButton.tscn" id="4_324vs"]
 [ext_resource type="PackedScene" uid="uid://bqdws2ryc1ioy" path="res://components/v1/RemainingData.tscn" id="5_6vrdq"]
 [ext_resource type="PackedScene" uid="uid://co6h6i0cctl7q" path="res://components/v1/ShopSongs.tscn" id="5_u6xri"]
 [ext_resource type="PackedScene" uid="uid://d10eslrpyunpq" path="res://components/v1/ShopBar.tscn" id="7_ljq3v"]
 [ext_resource type="Script" uid="uid://07gwcadip3w7" path="res://addons/tools/long_press_button.gd" id="8_kwhjx"]
-[ext_resource type="FontFile" uid="uid://dyywuscj3o4xw" path="res://assets/v1/Font/Exo-Regular.otf" id="8_u6xri"]
+[ext_resource type="FontFile" uid="uid://bxa3w0wqr0whf" path="res://assets/v1/Font/Exo-Regular.otf" id="8_u6xri"]
 
 [sub_resource type="CompressedTexture2D" id="CompressedTexture2D_ll415"]
 
@@ -131,6 +132,9 @@ grow_horizontal = 2
 grow_vertical = 2
 color = Color(0, 0, 0, 1)
 metadata/_edit_lock_ = true
+
+[node name="Button" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("3_kwhjx")
 
 [node name="bgMusic" type="AudioStreamPlayer" parent="."]
 stream = ExtResource("2_kwhjx")

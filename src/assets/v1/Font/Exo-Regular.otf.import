@@ -2,7 +2,7 @@
 
 importer="font_data_dynamic"
 type="FontFile"
-uid="uid://dyywuscj3o4xw"
+uid="uid://bxa3w0wqr0whf"
 path="res://.godot/imported/Exo-Regular.otf-f25c93ce1cae5c33720b5689b15dda3c.fontdata"
 
 [deps]
@@ -26,7 +26,7 @@ subpixel_positioning=4
 keep_rounding_remainders=true
 oversampling=0.0
 Fallbacks=null
-fallbacks=[Resource("res://assets/v2/Font/Source Han Sans & Saira Hybrid-Regular.ttf")]
+fallbacks=[Resource("res://assets/v2/Font/Source Han Sans & Saira Hybrid-Regular.woff2")]
 Compress=null
 compress=true
 preload=[{

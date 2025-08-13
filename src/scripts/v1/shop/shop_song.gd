@@ -17,7 +17,8 @@ var dialog: Control
 
 
 func _ready() -> void:
-    $ShopSong/itemNameLabel.text = itemName
+    if pageType != page_type.Avatar:
+        $ShopSong/AutoScrollContainer/itemNameLabel.text = itemName
     $ShopSong/Data/Data.text = data if dataOffPrecent == 0 else dataOff
     $ShopSong/DataOff.visible = dataOffPrecent != 0
     $ShopSong/SoldOut.visible = isSoldOut
@@ -31,6 +32,7 @@ func _ready() -> void:
 
 
 func _on_button_pressed() -> void:
+    $Button.play()
     if isSoldOut:
         return
     dialog = preload("res://components/v1/dialog_checkout.tscn").instantiate()

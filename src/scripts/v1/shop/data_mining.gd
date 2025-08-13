@@ -120,9 +120,9 @@ func randomChoice():
     var choice = {
         itemType.Illustration: 0.03,
         itemType.Avatar: 0.05,
-        itemType.Collection: 0.12,
+        itemType.Collection: 0.07,
         itemType.Data: 0.20,
-        itemType.Null: 0.60
+        itemType.Null: 0.65
     }
     var result = {"type":PhiSaveTools.weighted_random(choice)}
     match result["type"]:
@@ -166,6 +166,7 @@ func randomChoice():
     return result
 
 func single():
+    $Button.play()
     if not $Question/AnimationPlayer.is_playing() and not lock:
         if stateCount == 0:
             if SaveWorker.Data.new().getData() < PhiSaveTools.DataSizeConverter.convert_to_kb(PhiSaveTools.DataSizeConverter.convert_from_highest("1MB")):
@@ -197,7 +198,7 @@ func single():
             stateCount = 0
 
 func ten():
-    print(stateCount)
+    $Button.play()
     if not $Question/AnimationPlayer.is_playing() and not lock:
         print(stateCount)
         if stateCount == 0:

@@ -1,8 +1,9 @@
-[gd_scene load_steps=12 format=3 uid="uid://d10eslrpyunpq"]
+[gd_scene load_steps=13 format=3 uid="uid://d10eslrpyunpq"]
 
 [ext_resource type="Script" uid="uid://50b770k1ejj7" path="res://scripts/v1/shop/shop_bar.gd" id="1_e5ftk"]
-[ext_resource type="Texture2D" uid="uid://br487ovbanfki" path="res://assets/v1/商店_素材.png" id="2_qs4v5"]
-[ext_resource type="Texture2D" uid="uid://ns236b8pq30r" path="res://assets/v1/icon-shop_dataMining.png" id="3_b6cbe"]
+[ext_resource type="AudioStream" uid="uid://j83ggkvqsd62" path="res://assets/v1/Tap1.wav" id="2_b6cbe"]
+[ext_resource type="Texture2D" uid="uid://5vaqd1ynicf3" path="res://assets/v1/商店_素材.png" id="2_qs4v5"]
+[ext_resource type="Texture2D" uid="uid://dnmo4wy732v3m" path="res://assets/v1/icon-shop_dataMining.png" id="3_b6cbe"]
 
 [sub_resource type="Gradient" id="Gradient_k4pe5"]
 offsets = PackedFloat32Array(0.131086, 0.7603, 1)
@@ -67,6 +68,9 @@ offset_top = -4.048
 offset_right = -299.2
 offset_bottom = -0.0480003
 grow_horizontal = 2
+
+[node name="Button" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("2_b6cbe")
 
 [node name="ShopButton" type="HBoxContainer" parent="."]
 layout_mode = 1

@@ -1,11 +1,11 @@
 [gd_scene load_steps=11 format=3 uid="uid://duhfrp2sobaps"]
 
 [ext_resource type="Script" uid="uid://32nep4bws3qw" path="res://scripts/global/splash0.gd" id="1_c774y"]
-[ext_resource type="FontFile" uid="uid://bkeun2le5ddao" path="res://assets/v1/Font/Exo-Medium.otf" id="2_187wt"]
-[ext_resource type="FontFile" uid="uid://t7yp607ed1es" path="res://assets/v2/Font/SourceHanSansCN_&_SairaCondensed_Hybrid_Medium.ttf" id="3_8ggrk"]
+[ext_resource type="FontFile" uid="uid://do0pm1xcht1yr" path="res://assets/v1/Font/Exo-Medium.otf" id="2_187wt"]
+[ext_resource type="FontFile" uid="uid://btcktbho6f4tv" path="res://assets/v2/Font/SourceHanSansCN_&_SairaCondensed_Hybrid_Medium.woff2" id="3_8ggrk"]
 [ext_resource type="PackedScene" uid="uid://kiuugoj7icb3" path="res://addons/fade/TransitionManager.tscn" id="4_8ggrk"]
-[ext_resource type="Texture2D" uid="uid://bfv2a6rlipcbn" path="res://icon.png" id="4_187wt"]
-[ext_resource type="FontFile" uid="uid://brfyrno5hubv5" path="res://assets/v2/Font/Aldrich-Regular.ttf" id="5_jt4fe"]
+[ext_resource type="Texture2D" uid="uid://ccp8pjn0joah1" path="res://icon.png" id="4_187wt"]
+[ext_resource type="FontFile" uid="uid://drj7gep2vauuw" path="res://assets/v2/Font/Aldrich-Regular.ttf" id="5_jt4fe"]
 
 [sub_resource type="FontVariation" id="FontVariation_jt4fe"]
 fallbacks = Array[Font]([ExtResource("3_8ggrk")])

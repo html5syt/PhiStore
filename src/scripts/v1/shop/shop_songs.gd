@@ -19,14 +19,14 @@ var illustrations = []  # 用于存储插图名
 var avatars = []  # 用于存储头像名
 var songs_to_load = []  # 待加载的歌曲数据队列
 var loading_in_progress = false
-var placeholder_texture = load("res://assets/v1/SingleChapterCoverBlur.webp" if OS.has_feature("editor") else "res://assets/v1/SingleChapterCoverBlur.webp.import")
+var placeholder_texture = load("res://assets/v1/SingleChapterCoverBlur.png")
 
 # 检测是否为Web平台且不支持线程
 var is_web_platform: bool = OS.has_feature("web") and OS.has_feature("nothreads")
 
 func _ready() -> void:
     # 预加载占位图
-    placeholder_texture = load("res://assets/v1/SingleChapterCoverBlur.png" if OS.has_feature("editor") else "res://assets/v1/SingleChapterCoverBlur.png.import")
+    placeholder_texture = load("res://assets/v1/SingleChapterCoverBlur.png")
     # 异步加载TSV数据
     _load_song_data_async()
     if not $/root/Shop/bgMusic.playing:
@@ -106,7 +106,7 @@ func _on_song_data_loaded(thread: Thread) -> void:
             var songItem = songs[1][song]
             var data = int(randf_range(8, 17) * 100) / 100.0
             var dataOffPrecentRand = randi_range(dataOffPrecent * 10.0 - 5.0, dataOffPrecent * 10.0) / 10.0
-            var illustration = "res://assets/pigeon/illustrationLowRes/%s.webp" % song if OS.has_feature("editor") else "res://assets/pigeon/illustrationLowRes/%s.webp.import" % song
+            var illustration = "res://assets/pigeon/illustrationLowRes/%s.webp" % song
             
             songs_to_load.push_back({
                 "itemName": songItem["songName"],
@@ -121,7 +121,7 @@ func _on_song_data_loaded(thread: Thread) -> void:
         # 准备已购买歌曲数据
         for song in songs[0]:
             var songItem = songs[0][song]
-            var illustration = "res://assets/pigeon/illustrationLowRes/%s.webp" % song if OS.has_feature("editor") else "res://assets/pigeon/illustrationLowRes/%s.webp.import" % song
+            var illustration = "res://assets/pigeon/illustrationLowRes/%s.webp" % song
             
             songs_to_load.push_back({
                 "itemName": songItem["songName"],
@@ -142,11 +142,11 @@ func _on_song_data_loaded(thread: Thread) -> void:
             var songItem = avatar
             var data = int(randf_range(8, 17) * 100) / 100.0
             var dataOffPrecentRand = randi_range(dataOffPrecent * 10.0 - 5.0, dataOffPrecent * 10.0) / 10.0
-            var illustration = "res://assets/pigeon/avatar/%s.webp" % avatar if OS.has_feature("editor") else "res://assets/pigeon/avatar/%s.webp.import" % avatar
+            var illustration = "res://assets/pigeon/avatar/%s.webp" % avatar
             # fuck special name
             match avatar:
                 "Cipher : /2&//<|0":
-                    illustration = "res://assets/pigeon/avatar/%s.webp" % "Cipher1" if OS.has_feature("editor") else "res://assets/pigeon/avatar/%s.webp.import" % "Cipher1"
+                    illustration = "res://assets/pigeon/avatar/%s.webp" % "Cipher1"
                 "":
                     break
 
@@ -163,12 +163,11 @@ func _on_song_data_loaded(thread: Thread) -> void:
         # 准备已购买歌曲数据
         for avatar in avatars[1]:
             var songItem = avatar
-            var illustration = "res://assets/pigeon/avatar/%s.webp" % avatar if OS.has_feature("editor") else "res://assets/pigeon/avatar/%s.webp.import" % avatar
+            var illustration = "res://assets/pigeon/avatar/%s.webp" % avatar
             # fuck special name
             match avatar:
                 "Cipher : /2&//<|0":
-                    illustration = "res://assets/pigeon/avatar/%s.webp" % "Cipher1" if OS.has_feature("editor") else "res://assets/pigeon/avatar/%s.webp.import" % "Cipher1"
-                "":
+                    illustration = "res://assets/pigeon/avatar/%s.webp" % "Cipher1"
                     break
 
             songs_to_load.push_back({

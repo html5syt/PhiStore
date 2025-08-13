@@ -1,6 +1,6 @@
 [gd_scene load_steps=8 format=3 uid="uid://dtuuc0ml4qcs6"]
 
-[ext_resource type="FontFile" uid="uid://dyywuscj3o4xw" path="res://assets/v1/Font/Exo-Regular.otf" id="1_gkmww"]
+[ext_resource type="FontFile" uid="uid://bxa3w0wqr0whf" path="res://assets/v1/Font/Exo-Regular.otf" id="1_gkmww"]
 
 [sub_resource type="GDScript" id="GDScript_gkmww"]
 script/source = "extends Control

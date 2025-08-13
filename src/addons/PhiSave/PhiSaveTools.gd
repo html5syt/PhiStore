@@ -349,9 +349,9 @@ static func weighted_random(weights: Dictionary):
 static func get_avatar_path(avatarName:String) -> String:
     if avatarName == "":
         avatarName = "Introduction"
-    var avatarPath = "res://assets/pigeon/avatar/%s.webp" % avatarName if OS.has_feature("editor") else "res://assets/pigeon/avatar/%s.webp.import" % avatarName
+    var avatarPath = "res://assets/pigeon/avatar/%s.webp" % avatarName if FileAccess.file_exists("res://assets/pigeon/avatar/%s.webp" % avatarName) else "res://assets/pigeon-default/avatar/Introduction.webp"
     # fuck special name
     match avatarName:
         "Cipher : /2&//<|0":
-            avatarPath = "res://assets/pigeon/avatar/%s.webp" % "Cipher1" if OS.has_feature("editor") else "res://assets/pigeon/avatar/%s.webp.import" % "Cipher1"
+            avatarPath = "res://assets/pigeon/avatar/%s.webp" % "Cipher1"
     return avatarPath

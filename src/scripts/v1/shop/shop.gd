@@ -49,10 +49,12 @@ func _on_shop_bar_button_pressed(n) -> void:
 
 
 func _on_remaining_data_pressed() -> void:
+    $Button.play()
     var DataDialog = preload("res://components/v1/DataDialog.tscn").instantiate()
     add_child(DataDialog)
 
 
 func _on_remaining_data_long_pressed() -> void:
+    $Button.play()
     var ShopLogin = preload("res://components/v1/ShopLogin.tscn").instantiate()
     add_child(ShopLogin)
