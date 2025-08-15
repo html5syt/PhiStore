@@ -908,7 +908,7 @@ func generate_image(module_px_size: int = 1, light_module_color: Color = Color.W
 
     var module_count: int = self.get_module_count()
     var image_size: int = (module_count + 2 * quiet_zone_size) * module_px_size
-    var image: Image = Image.create(image_size, image_size, false, Image.FORMAT_RGB8)
+    var image: Image = Image.create_empty(image_size, image_size, false, Image.FORMAT_RGB8)
     image.fill(light_module_color)
 
     for y: int in range(module_count):

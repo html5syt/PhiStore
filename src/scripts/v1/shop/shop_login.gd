@@ -117,7 +117,7 @@ func _on_get() -> void:
     await Phi_Save.SessionToken_get_save()
     await Phi_Save.on_sessiontoken_get_success
     $SyncTimer.stop()
-    _sync_save_end()
+    _sync_save_end(true)
     set_user_info()
 
 func _on_logout() -> void:
@@ -149,15 +149,18 @@ func _sync_save_start() -> void:
     $AnimationPlayer.play(&"indicate_loop")
     on_sync_animation_finished.emit()
 
-func _sync_save_end() -> void:
+func _sync_save_end(restart: bool = false) -> void:
     $AnimationPlayer.stop()
-    $Syncing/Msg.text = "同步成功！"
-    await get_tree().create_timer(2).timeout
+    $Syncing/Msg.text = "同步成功！\n 即将于3s后重启..." if restart else "同步成功！"
+    await get_tree().create_timer(3).timeout
     $AnimationPlayer.play_backwards(&"sync_dialog_in")
     await $AnimationPlayer.animation_finished
     $Syncing.visible = false
-    $LoginDialog.visible = true
-    $AnimationPlayer.play(&"in")
+    if restart:
+        await $"/root/Shop/TransitionManager".transition_to("res://scenes/global/splash0.tscn")
+    else:
+        $LoginDialog.visible = true
+        $AnimationPlayer.play(&"in")
 
 func _sync_save_error(error_msg: String) -> void:
     $AnimationPlayer.stop()

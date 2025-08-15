@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=3 uid="uid://duhfrp2sobaps"]
+[gd_scene load_steps=12 format=3 uid="uid://duhfrp2sobaps"]
 
 [ext_resource type="Script" uid="uid://32nep4bws3qw" path="res://scripts/global/splash0.gd" id="1_c774y"]
 [ext_resource type="FontFile" uid="uid://do0pm1xcht1yr" path="res://assets/v1/Font/Exo-Medium.otf" id="2_187wt"]
@@ -6,6 +6,7 @@
 [ext_resource type="PackedScene" uid="uid://kiuugoj7icb3" path="res://addons/fade/TransitionManager.tscn" id="4_8ggrk"]
 [ext_resource type="Texture2D" uid="uid://ccp8pjn0joah1" path="res://icon.png" id="4_187wt"]
 [ext_resource type="FontFile" uid="uid://drj7gep2vauuw" path="res://assets/v2/Font/Aldrich-Regular.ttf" id="5_jt4fe"]
+[ext_resource type="Texture2D" uid="uid://up4nqc56lngc" path="res://assets/v1/developer_board.svg" id="7_8ggrk"]
 
 [sub_resource type="FontVariation" id="FontVariation_jt4fe"]
 fallbacks = Array[Font]([ExtResource("3_8ggrk")])
@@ -141,70 +142,44 @@ grow_horizontal = 2
 grow_vertical = 2
 color = Color(0, 0, 0, 1)
 
-[node name="Label2" type="Label" parent="."]
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -281.0
-offset_top = -304.0
-offset_right = 284.0
-offset_bottom = -118.0
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_fonts/font = SubResource("FontVariation_jt4fe")
-theme_override_font_sizes/font_size = 40
-text = "Warn：in dev
-©Pigeon Games
-Remake by Tim"
-horizontal_alignment = 1
-
-[node name="UiVersion" type="Label" parent="."]
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -238.0
-offset_top = -24.0
-offset_right = 234.0
-offset_bottom = 79.0
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_fonts/font = SubResource("FontVariation_jt4fe")
-theme_override_font_sizes/font_size = 80
-text = "请选择UI版本"
-horizontal_alignment = 1
-
-[node name="v1orv2" type="HBoxContainer" parent="."]
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
 layout_mode = 1
 anchors_preset = -1
 anchor_left = 0.5
-anchor_top = 0.775556
+anchor_top = 0.5
 anchor_right = 0.5
-anchor_bottom = 0.775556
-offset_left = -665.0
-offset_top = -65.0
-offset_right = 665.0
-offset_bottom = 65.0
+anchor_bottom = 0.5
+offset_left = -146.5
+offset_top = -64.0
+offset_right = 146.5
+offset_bottom = 64.0
 grow_horizontal = 2
 grow_vertical = 2
-metadata/_edit_use_anchors_ = true
 
-[node name="v1" type="Button" parent="v1orv2"]
+[node name="Label2" type="Label" parent="VBoxContainer"]
 layout_mode = 2
-size_flags_horizontal = 3
-theme_override_font_sizes/font_size = 46
-text = "Shop"
+theme_override_constants/line_spacing = 100
+theme_override_fonts/font = SubResource("FontVariation_jt4fe")
+theme_override_font_sizes/font_size = 40
+text = "© Pigeon Games
+Remake by Tim
+Original: Phigros V 1.6.11"
+horizontal_alignment = 1
 
-[node name="v2" type="Button" parent="v1orv2"]
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_font_sizes/font_size = 46
-text = "PhiSave"
+[node name="DeveloperBoard" type="TextureButton" parent="."]
+modulate = Color(0.33061612, 0.33061612, 0.33061612, 1)
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -83.0
+offset_top = -83.0
+grow_horizontal = 0
+grow_vertical = 0
+texture_normal = ExtResource("7_8ggrk")
+stretch_mode = 6
 
 [node name="Splash" type="ColorRect" parent="."]
 layout_mode = 1
@@ -218,14 +193,14 @@ color = Color(0, 0, 0, 1)
 
 [node name="Icon" type="TextureRect" parent="Splash"]
 layout_mode = 1
-anchors_preset = 8
+anchors_preset = -1
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
 offset_left = -96.0
 offset_top = -328.0
-offset_right = 564.0
+offset_right = 564.0001
 offset_bottom = 329.0
 grow_horizontal = 2
 grow_vertical = 2
@@ -238,7 +213,7 @@ texture = ExtResource("4_187wt")
 [node name="PhiStore" type="Label" parent="Splash"]
 clip_contents = true
 layout_mode = 1
-anchors_preset = 8
+anchors_preset = -1
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
@@ -262,5 +237,4 @@ autoplay = "splash"
 [node name="TransitionManager" parent="." instance=ExtResource("4_8ggrk")]
 next_scene_path = "uid://b0b06kbopxi33"
 
-[connection signal="pressed" from="v1orv2/v1" to="." method="_choose_v1_ui"]
-[connection signal="pressed" from="v1orv2/v2" to="." method="_choose_v2_ui"]
+[connection signal="pressed" from="DeveloperBoard" to="." method="_on_developer_board_pressed"]

@@ -428,7 +428,7 @@ func _request_user_info(token_data: Dictionary):
     var http_request = HTTPRequest.new()
     add_child(http_request)
 #    CORS代理
-    var base_url = "https://" if not OS.has_feature("web") else "https://open-tapapis.bravely.pp.ua/?url="
+    var base_url = "https://" if not OS.has_feature("web") else "https://open-tapapis.bravely.pp.ua/?url=https://"
     http_request.request(base_url + host + request_url, headers, HTTPClient.METHOD_GET)
     http_request.connect("request_completed", _on_user_info_response.bind(token_data))
 

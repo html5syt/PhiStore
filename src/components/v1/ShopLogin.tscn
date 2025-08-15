@@ -7,9 +7,9 @@
 [ext_resource type="Texture2D" uid="uid://chfh51viotrsq" path="res://assets/v1/TapTapLoginBlack.svg" id="4_gilxw"]
 [ext_resource type="Texture2D" uid="uid://cdtado0cju4o3" path="res://assets/v1/TapTapLoginBlue.svg" id="5_g0h5k"]
 [ext_resource type="Script" uid="uid://dynulhnyq5hpq" path="res://addons/qr_code/qr_code_rect.gd" id="6_g0h5k"]
-[ext_resource type="FontFile" uid="uid://ciqlgyy4bvof6" path="res://assets/v1/Font/Exo-Bold.otf" id="7_6re2r"]
 [ext_resource type="Texture2D" uid="uid://de3c23n1wsjrq" path="res://assets/v1/retry.png" id="7_tn2mv"]
 [ext_resource type="Texture2D" uid="uid://1tmowbbgp5i1" path="res://assets/pigeon/avatar/Introduction.webp" id="9_1p6bn"]
+[ext_resource type="FontFile" uid="uid://do0pm1xcht1yr" path="res://assets/v1/Font/Exo-Medium.otf" id="9_ysnxm"]
 [ext_resource type="Texture2D" uid="uid://bk3r02xbe5yny" path="res://assets/v1/shape037_style01_color08.png" id="10_pelc5"]
 
 [sub_resource type="Animation" id="Animation_rituo"]
@@ -488,7 +488,6 @@ one_shot = true
 
 [node name="LoginDialog" type="Control" parent="."]
 layout_mode = 1
-anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
@@ -517,7 +516,6 @@ uv = PackedVector2Array(-200, -64, -232, 48, -176, 64, -144, -72)
 visible = false
 modulate = Color(1, 1, 1, 0)
 layout_mode = 1
-anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
@@ -657,7 +655,6 @@ text = "网页登录"
 visible = false
 modulate = Color(1, 1, 1, 0)
 layout_mode = 1
-anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
@@ -727,7 +724,7 @@ color = Color(0.516602, 0.516602, 0.516602, 0.894118)
 
 [node name="TextureRect" type="TextureRect" parent="LoginDialog/QRLogin/QRCodeRect/Expired"]
 layout_mode = 1
-anchors_preset = 8
+anchors_preset = -1
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
@@ -748,23 +745,22 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="RichTextLabel" type="RichTextLabel" parent="LoginDialog/QRLogin"]
+[node name="Label" type="Label" parent="LoginDialog/QRLogin"]
 layout_mode = 1
 anchors_preset = -1
-anchor_left = 0.536
-anchor_top = 0.284
-anchor_right = 0.938
-anchor_bottom = 0.665
-offset_left = 0.311981
-offset_top = 0.0879974
-offset_right = -0.204041
-offset_bottom = 0.0299988
-theme_override_constants/line_separation = 6
-theme_override_fonts/normal_font = ExtResource("7_6re2r")
+anchor_left = 0.57100004
+anchor_top = 0.28
+anchor_right = 0.90300006
+anchor_bottom = 0.63900006
+offset_left = 0.28198242
+offset_top = -0.040000916
+offset_right = -0.17401123
+offset_bottom = 0.031326294
+theme_override_constants/line_spacing = 5
+theme_override_fonts/font = ExtResource("9_ysnxm")
 text = "请使用 TapTap 扫描左侧二维码
 有效期 5min
-点击二维码以刷新
-"
+点击二维码以刷新"
 horizontal_alignment = 1
 vertical_alignment = 1
 
@@ -779,6 +775,7 @@ offset_left = -0.146027
 offset_top = -0.0500031
 offset_right = 0.175964
 offset_bottom = 0.0473175
+theme_override_fonts/font = ExtResource("2_cpoxp")
 text = "剩余 300 s"
 horizontal_alignment = 1
 vertical_alignment = 1
@@ -786,7 +783,6 @@ vertical_alignment = 1
 [node name="SaveManage" type="Control" parent="LoginDialog"]
 modulate = Color(1, 1, 1, 0)
 layout_mode = 1
-anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
@@ -1121,7 +1117,6 @@ offset_bottom = -0.00402832
 
 [node name="Syncing" type="Control" parent="."]
 layout_mode = 1
-anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
@@ -1143,7 +1138,7 @@ texture = SubResource("CanvasTexture_k4pe5")
 [node name="Msg" type="Label" parent="Syncing"]
 modulate = Color(1, 1, 1, 0)
 layout_mode = 1
-anchors_preset = 8
+anchors_preset = -1
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5

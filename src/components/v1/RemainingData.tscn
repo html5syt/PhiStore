@@ -14,7 +14,7 @@ region = Rect2(148, 49, 140, 100)
 
 [node name="RemainingData" type="TextureButton"]
 clip_contents = true
-anchors_preset = 1
+anchors_preset = -1
 anchor_left = 1.0
 anchor_right = 1.0
 offset_left = -337.0
@@ -26,7 +26,7 @@ texture_normal = SubResource("AtlasTexture_6vrdq")
 
 [node name="DataIcon" type="TextureRect" parent="."]
 layout_mode = 1
-anchors_preset = 4
+anchors_preset = -1
 anchor_top = 0.5
 anchor_bottom = 0.5
 offset_left = 31.1111
@@ -47,7 +47,6 @@ theme_override_font_sizes/font_size = 62
 text = "953.77 TB Data"
 horizontal_alignment = 1
 vertical_alignment = 1
-clip_text = true
 script = ExtResource("3_6p4tx")
 min_font_size = 1
 metadata/_custom_type_script = "uid://ddc252tqeqyxv"

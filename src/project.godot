@@ -14,7 +14,7 @@ config/name="PhiStore"
 config/version="3.14.0"
 config/tags=PackedStringArray("project")
 run/main_scene="uid://duhfrp2sobaps"
-config/features=PackedStringArray("4.4", "Mobile")
+config/features=PackedStringArray("4.5", "Mobile")
 boot_splash/bg_color=Color(0, 0, 0, 1)
 boot_splash/show_image=false
 boot_splash/fullsize=false
@@ -53,6 +53,9 @@ theme/default_font_multichannel_signed_distance_field=true
 
 texture={
 &"compress/mode": 1
+}
+font_data_dynamic={
+&"multichannel_signed_distance_field": true
 }
 
 [rendering]

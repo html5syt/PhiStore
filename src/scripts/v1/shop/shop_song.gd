@@ -170,23 +170,25 @@ func set_illustration_async(path: String, placeholder: Texture2D, force_main_thr
 
 # 主线程加载方法（用于Web平台）
 func _load_texture_main_thread() -> void:
-    var texture: Texture2D = null
+    return
+    # fuck web pic load
+    # var texture: Texture2D = null
     
-    # 使用 ResourceLoader 加载纹理资源
-    if ResourceLoader.exists(_texture_path):
-        var resource = ResourceLoader.load(_texture_path, "Texture2D", ResourceLoader.CACHE_MODE_IGNORE)
-        if resource is Texture2D:
-            texture = resource
-        else:
-            print("Loaded resource is not a Texture2D: ", _texture_path)
-    else:
-        print("Resource not found: ", _texture_path)
+    # # 使用 ResourceLoader 加载纹理资源
+    # if ResourceLoader.exists(_texture_path):
+    #     var resource = ResourceLoader.load(_texture_path, "Texture2D", ResourceLoader.CACHE_MODE_IGNORE)
+    #     if resource is Texture2D:
+    #         texture = resource
+    #     else:
+    #         print("Loaded resource is not a Texture2D: ", _texture_path)
+    # else:
+    #     print("Resource not found: ", _texture_path)
     
-    # 设置纹理
-    if texture and $ShopSong/Illustration:
-        $ShopSong/Illustration.texture = texture
-    elif $ShopSong/Illustration:
-        $ShopSong/Illustration.texture = placeholder_texture
+    # # 设置纹理
+    # if texture and $ShopSong/Illustration:
+    #     $ShopSong/Illustration.texture = texture
+    # elif $ShopSong/Illustration:
+    #     $ShopSong/Illustration.texture = placeholder_texture
 
 func _load_texture_thread() -> void:
     var texture: Texture2D = null

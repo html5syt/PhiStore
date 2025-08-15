@@ -4,9 +4,6 @@ class_name AutoSizer
 static func update_font_size_label(label: AutoSizeLabel) -> void:
     _update_font_size(label, "font", "font_size", Vector2i(label.min_font_size, label.max_font_size), label.text)
 
-static func update_font_size_richlabel(label: AutoSizeRichLabel) -> void:
-    _update_font_size(label, "normal_font", "normal_font_size", Vector2i(label.min_font_size, label.max_font_size), label.text)
-
 static func _update_font_size(label: Control, font_name: StringName, font_style_name: StringName, font_size_range: Vector2i, text: String) -> void:
     var font := label.get_theme_font(font_name)
 

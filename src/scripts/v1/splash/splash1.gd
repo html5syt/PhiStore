@@ -62,6 +62,8 @@ func _on_load_complete() -> void:
     $bgPic/AnimationPlayer.play(&"fade_in")
     $TouchToStart/Label.text = "touch to start"
     $START.visible = true
+    if OS.has_feature("web"):
+        _on_press_start()
 
 
 func _on_press_start() -> void:
