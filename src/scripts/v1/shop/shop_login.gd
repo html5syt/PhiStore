@@ -91,9 +91,14 @@ func _on_retry_pressed() -> void:
 func _on_login_successful(cloud_data: Dictionary):
     print("\nCloud user Getted: ", cloud_data)
     print("\nSessiontoken: ", cloud_data["sessionToken"])
+    _sync_save_start()
+    await on_sync_animation_finished
+    $SyncTimer.start()
     Phi_Save.SessionToken_login(cloud_data["sessionToken"], cloud_data)
     await Phi_Save.on_sessiontoken_sync_success
-    _on_bg_button_pressed()
+    $SyncTimer.stop()
+    _sync_save_end(true)
+    #_on_bg_button_pressed()
 
 
 func _on_web_login_pressed() -> void:

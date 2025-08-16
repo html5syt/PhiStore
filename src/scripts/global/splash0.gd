@@ -1,8 +1,12 @@
 extends Control
 
 func _ready() -> void:
+    $Label.text = "© Pigeon Games
+Remake by Tim
+Original: Phigros V1.6.11
+Ver: %s" % ProjectSettings.get_setting("application/ExConfig/GameVersion")
     await $splashAnimation.animation_finished
-    await get_tree().create_timer(3).timeout
+    await get_tree().create_timer(1).timeout
     await $TransitionManager.transition_to("res://scenes/v1/splash/Splash.tscn")
 
 

@@ -23,7 +23,8 @@ config/icon="uid://bfv2a6rlipcbn"
 config/macos_native_icon="uid://bfv2a6rlipcbn"
 config/windows_native_icon="res://icon.ico"
 ExConfig/SaveVersion=6
-ExConfig/GameVersionInt=128
+ExConfig/GameVersionInt=131
+ExConfig/GameVersion="1.6.11.0"
 
 [autoload]
 
