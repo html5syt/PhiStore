@@ -22,11 +22,7 @@ func _enter_tree() -> void:
     var load_result = Config.load("user://config.cfg")
 
     # 如果文件没有加载，忽略它。
-    if load_result != OK or Config.get_value("Config", "sessionToken", "") == "":
-        # 准备登录
-        push_warning("config.cfg 加载失败")
-        Config = ConfigFile.new()
-        $LoginDialog/Login.visible = true
+    if load_result != OK or Config.get_valu
         $LoginDialog/QRLogin.visible = false
         $LoginDialog/SaveManage.visible = false
     else:

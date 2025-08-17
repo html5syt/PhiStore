@@ -99,7 +99,7 @@ tracks/6/keys = {
 
 [sub_resource type="Animation" id="Animation_c774y"]
 resource_name = "splash"
-length = 5.0
+length = 6.0
 step = 0.0166667
 tracks/0/type = "bezier"
 tracks/0/imported = false
@@ -168,8 +168,8 @@ tracks/5/interp = 1
 tracks/5/loop_wrap = true
 tracks/5/keys = {
 "handle_modes": PackedInt32Array(0, 2),
-"points": PackedFloat32Array(0.8, -0.25, 0, 0.25, 0, 1.024219, -1.5626514, -0.0408867, 0, 0),
-"times": PackedFloat32Array(3.5529928, 4.878648)
+"points": PackedFloat32Array(0.8015053, -0.25, 0, 1.6692615, -0.0002667904, 1.0253822, -2.9277456, -0.03455621, 0, 0),
+"times": PackedFloat32Array(3.0666666, 6)
 }
 tracks/6/type = "bezier"
 tracks/6/imported = false
@@ -222,13 +222,14 @@ grow_horizontal = 2
 grow_vertical = 2
 scale = Vector2(0.8, 1)
 pivot_offset = Vector2(324, 232)
-theme_override_constants/line_spacing = 100
+theme_override_constants/line_spacing = 65
 theme_override_fonts/font = SubResource("FontVariation_jt4fe")
 theme_override_font_sizes/font_size = 40
 text = "© Pigeon Games
-Remake by Tim
 Original: Phigros V1.6.11
-Ver: 1.6.11.0"
+Remake by Tim
+Github @html5syt
+Ver: %s"
 horizontal_alignment = 1
 
 [node name="DeveloperBoard" type="TextureButton" parent="."]
@@ -265,7 +266,7 @@ anchor_right = 0.5
 anchor_bottom = 0.5
 offset_left = -96.0
 offset_top = -328.0
-offset_right = 564.00134
+offset_right = 564.0
 offset_bottom = 329.0
 grow_horizontal = 2
 grow_vertical = 2
