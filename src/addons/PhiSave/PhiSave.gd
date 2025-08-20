@@ -16,6 +16,7 @@ signal on_sessiontoken_sync_success # sessiontoken同步成功
 signal on_sessiontoken_get_success # sessiontoken存档获取成功
 signal on_sessiontoken_upload_success # sessiontoken存档上传成功
 signal require_sessiontoken # 由对应UI负责处理弹窗请求
+signal not_login # 由对应UI负责处理弹窗请求
 
 func _init(parent: Node) -> void:
     Cloud_Save = CloudSave.new("", parent)
@@ -23,7 +24,7 @@ func _init(parent: Node) -> void:
     var load_result = Config.load("user://config.cfg")
 
     # 如果文件没有加载，忽略它。
-    if load_result != OK or Config.get_value("Config", "sessionToken","") == "":
+    if load_result != OK:
         push_warning("config.cfg 加载失败")
         Config = ConfigFile.new()
         sessiontoken = ""
@@ -32,6 +33,10 @@ func _init(parent: Node) -> void:
         Config.set_value("Config", "uuid", uuid)
         Config.set_value("Config", "sessionToken", sessiontoken)
         Config.save("user://config.cfg")
+    elif Config.get_value("Config", "sessionToken") == "":
+        push_warning("sessionToken 为空")
+        sessiontoken = ""
+        not_login.emit()
     else:
         sessiontoken = Config.get_value("Config", "sessionToken")
         Cloud_Save.headers["X-LC-Session"] = sessiontoken

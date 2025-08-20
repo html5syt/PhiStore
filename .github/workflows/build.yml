@@ -4,6 +4,8 @@ on:
   schedule:
     - cron: '5 10 * * 5,6'  # 每周五、六的10:05 UTC
   workflow_dispatch:         # 允许手动触发
+  push:                      # 添加推送事件触发
+    branches: [ Godot ]       # 指定触发分支
 
 permissions:
   contents: write
@@ -19,12 +21,12 @@ jobs:
       new_version: ${{ steps.check-update.outputs.new_version }}
     steps:
       - name: Checkout repository
-        if: ${{ github.event_name != 'workflow_dispatch' }}
+        if: ${{ github.event_name != 'workflow_dispatch' && github.event_name != 'push' }}
         uses: actions/checkout@v4
 
-      - name: Skip check if manual trigger
-        if: ${{ github.event_name == 'workflow_dispatch' }}
-        run: echo "WORKFLOW_DISPATCH=true" >> $GITHUB_ENV
+      - name: Skip check if manual trigger or push
+        if: ${{ github.event_name == 'workflow_dispatch' || github.event_name == 'push' }}
+        run: echo "FORCE_BUILD=true" >> $GITHUB_ENV
         id: skip-check
 
       - name: Get remote version
@@ -33,7 +35,7 @@ jobs:
           echo "REMOTE_VER=$REMOTE_VER" >> $GITHUB_ENV
 
       - name: Get local version
-        if: ${{ github.event_name != 'workflow_dispatch' }}
+        if: ${{ github.event_name != 'workflow_dispatch' && github.event_name != 'push' }}
         run: |
           LOCAL_VER=$(awk -F= '/^\[application\]/{i=1;next}/^\[/{i=0}i&&$1=="config/version"{gsub(/^[ \t"]+|[ \t"]+$/,"",$2);print $2;exit}' src/project.godot)
           echo "LOCAL_VER=$LOCAL_VER" >> $GITHUB_ENV
@@ -41,7 +43,10 @@ jobs:
       - name: Compare versions
         id: check-update
         run: |
-          if [ "$REMOTE_VER" = "$LOCAL_VER" ] && [ "$WORKFLOW_DISPATCH" != "true" ]; then
+          if [ "$FORCE_BUILD" = "true" ]; then
+            echo "should_build=true" >> $GITHUB_OUTPUT
+            echo "new_version=$REMOTE_VER" >> $GITHUB_OUTPUT
+          elif [ "$REMOTE_VER" = "$LOCAL_VER" ]; then
             echo "should_build=false" >> $GITHUB_OUTPUT
           else
             echo "should_build=true" >> $GITHUB_OUTPUT
@@ -69,13 +74,13 @@ jobs:
           echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
 
       - name: Update project.godot
-        if: ${{ github.event_name != 'workflow_dispatch' }}
+        if: ${{ github.event_name != 'workflow_dispatch' && github.event_name != 'push' }}
         run: |
           cd src
           sed -i "/\[application\]/,/config\/version/s/config\/version *= *\".*\"/config\/version = \"$NEW_VERSION\"/" project.godot
 
       - name: Commit changes
-        if: ${{ github.event_name != 'workflow_dispatch' }}
+        if: ${{ github.event_name != 'workflow_dispatch' && github.event_name != 'push' }}
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
@@ -84,7 +89,7 @@ jobs:
           git push
 
       - name: Set tag
-        if: ${{ github.event_name != 'workflow_dispatch' }}
+        if: ${{ github.event_name != 'workflow_dispatch' && github.event_name != 'push' }}
         run: |
           git tag v$NEW_VERSION
           git push origin v$NEW_VERSION
@@ -226,18 +231,8 @@ jobs:
             "macos")
               godot --headless --export-release "PhiStore-MacOS" "../builds/macos/PhiStore.app" 
               ;;
-            # "ios")
-            #   godot --headless --export-release "PhiStore-iOS" "../builds/ios/PhiStore.ipa" 
-            #   ;;
           esac
           cd ..
-          # tree -a builds
-          # if [ "${{ matrix.platform }}" = "ios" ]; then
-          #   echo "Use XCode to export iOS build..."
-          #   sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
-          #   chmod +x build-templates/ios-export.sh
-          #   build-templates/ios-export.sh 
-          # fi
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
@@ -301,27 +296,38 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
-      - name: Download artifacts
-        uses: actions/download-artifact@v4
         with:
-          path: release_assets
-        
-      # - name: Prepare version info
-      #   id: version_info
-      #   run: |
-      #     # 从update-version作业获取版本号
-      #     VERSION="${{ needs.update-version.outputs.new_version }}"
-      #     echo "version=$VERSION" >> $GITHUB_OUTPUT
-      #     echo "RELEASE_NAME=Release v$VERSION" >> $GITHUB_ENV
-      #     echo "TAG_NAME=v$VERSION" >> $GITHUB_ENV
+          fetch-depth: 0
+
       - name: Get local version
+        id: version_info
         run: |
           VERSION=$(awk -F= '/^\[application\]/{i=1;next}/^\[/{i=0}i&&$1=="config/version"{gsub(/^[ \t"]+|[ \t"]+$/,"",$2);print $2;exit}' src/project.godot)
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "RELEASE_NAME=Release v$VERSION" >> $GITHUB_ENV
           echo "TAG_NAME=v$VERSION" >> $GITHUB_ENV
 
+      - name: Delete existing release if manual or push trigger
+        if: ${{ github.event_name == 'workflow_dispatch' || github.event_name == 'push' }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # 检查release是否存在
+          if gh release view "$TAG_NAME" >/dev/null 2>&1; then
+            echo "Release $TAG_NAME exists, deleting..."
+            gh release delete "$TAG_NAME" --yes
+            # 删除tag
+            git tag -d "$TAG_NAME" 2>/dev/null || true
+            git push origin --delete "$TAG_NAME" 2>/dev/null || true
+          else
+            echo "Release $TAG_NAME does not exist, skipping deletion."
+          fi
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: release_assets
+        
       - name: List and Zip artifacts
         run: |
           tree -a release_assets
@@ -341,7 +347,7 @@ jobs:
           tag_name: ${{ env.TAG_NAME }}
           body: |
             自动同步Phigros更新： ${{ env.TAG_NAME }}
-            由${{ github.event_name == 'workflow_dispatch' && '手动更新' || '计划更新' }}触发构建
+            由${{ github.event_name == 'workflow_dispatch' && '手动更新' || (github.event_name == 'push' && '推送更新' || '计划更新') }}触发构建
             
             构建Runner平台:
             ${{ needs.build-windows.result == 'success' && '- Windows' || '' }}

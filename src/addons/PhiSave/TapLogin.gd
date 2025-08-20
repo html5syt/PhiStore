@@ -86,7 +86,8 @@ func exchange_code_for_token(auth_code):
 
 # 处理设备码响应
 func _on_device_code_response(result, response_code, headers, body):
-    if result != HTTPRequest.RESULT_SUCCESS or response_code != 200:
+    push_warning(result, response_code, headers, body)
+    if result != HTTPRequest.RESULT_SUCCESS:
         push_error("Failed to get device code")
         return
     

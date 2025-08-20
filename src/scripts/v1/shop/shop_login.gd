@@ -22,7 +22,14 @@ func _enter_tree() -> void:
     var load_result = Config.load("user://config.cfg")
 
     # 如果文件没有加载，忽略它。
-    if load_result != OK or Config.get_valu
+    if load_result != OK:
+        # 准备登录
+        push_warning("config.cfg 加载失败")
+        Config = ConfigFile.new()
+    elif Config.get_value("Config", "sessionToken", "") == "":
+    # 如果文件没有sessionToken，准备登录
+        push_warning("sessionToken 为空")
+        $LoginDialog/Login.visible = true
         $LoginDialog/QRLogin.visible = false
         $LoginDialog/SaveManage.visible = false
     else:
@@ -68,6 +75,7 @@ func _on_qr_ready(qr_url: String) -> void:
     $LoginDialog/QRLogin/ExpiredTime.set(&"theme_override_colors/font_color", Color.WHITE)
     $LoginDialog/QRLogin/QRCodeRect.data = qr_url
     $AnimationPlayer.play(&"in")
+    await $AnimationPlayer.animation_finished
     QR_expire_time = 300
     $LoginDialog/QRLogin/QRCodeRect/Expired.visible = false
     while QR_expire_time > 0:
