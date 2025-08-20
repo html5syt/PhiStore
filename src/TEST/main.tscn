@@ -275,7 +275,6 @@ quiet_zone_size = 4
 metadata/_custom_type_script = "uid://dynulhnyq5hpq"
 
 [node name="Back" parent="." instance=ExtResource("4_wdoi0")]
-anchors_preset = -1
 
 [node name="FileDialog" type="FileDialog" parent="."]
 title = "Open a File or Directory"

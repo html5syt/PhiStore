@@ -47,6 +47,7 @@ theme_override_font_sizes/font_size = 62
 text = "953.77 TB Data"
 horizontal_alignment = 1
 vertical_alignment = 1
+clip_text = true
 script = ExtResource("3_6p4tx")
 min_font_size = 1
 metadata/_custom_type_script = "uid://ddc252tqeqyxv"

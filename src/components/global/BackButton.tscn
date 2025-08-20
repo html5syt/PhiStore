@@ -13,6 +13,7 @@ func _on_pressed() -> void:
 "
 
 [node name="Back" type="TextureButton"]
+anchors_preset = -1
 offset_right = 190.0
 offset_bottom = 145.0
 scale = Vector2(0.78, 0.78)
