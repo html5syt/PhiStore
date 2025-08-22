@@ -121,7 +121,7 @@ jobs:
       - name: Install custom export templates
         run: |
           # 定义目标目录路径
-          templateDir="$HOME/AppData/Roaming/Godot/export_templates/4.5.beta5"
+          templateDir="$HOME/AppData/Roaming/Godot/export_templates/4.5.beta6"
 
           # 创建目录（-p 参数确保父目录不存在时也会创建）
           mkdir -p "$templateDir"
@@ -211,7 +211,7 @@ jobs:
 
       - name: Install custom export templates
         run: |
-          templateDir="$HOME/Library/Application Support/Godot/export_templates/4.5.beta5"
+          templateDir="$HOME/Library/Application Support/Godot/export_templates/4.5.beta6"
           mkdir -p "$templateDir"
           cp -r build-templates/* "$templateDir/"
 
@@ -261,7 +261,7 @@ jobs:
 
       - name: Install custom export templates
         run: |
-          templateDir="$HOME/.local/share/godot/export_templates/4.5.beta5"
+          templateDir="$HOME/.local/share/godot/export_templates/4.5.beta6"
           mkdir -p "$templateDir"
           cp -r build-templates/* "$templateDir/"
 
