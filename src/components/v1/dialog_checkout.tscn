@@ -714,17 +714,17 @@ offset_top = -1.0
 offset_right = -0.0820923
 offset_bottom = -0.316002
 theme_override_font_sizes/font_size = 34
-theme_override_styles/focus = SubResource("StyleBoxFlat_h8dhx")
-theme_override_styles/disabled_mirrored = SubResource("StyleBoxFlat_h8dhx")
-theme_override_styles/disabled = SubResource("StyleBoxFlat_h8dhx")
-theme_override_styles/hover_pressed_mirrored = SubResource("StyleBoxFlat_7o227")
-theme_override_styles/hover_pressed = SubResource("StyleBoxFlat_7o227")
-theme_override_styles/hover_mirrored = SubResource("StyleBoxFlat_7o227")
-theme_override_styles/hover = SubResource("StyleBoxFlat_7o227")
-theme_override_styles/pressed_mirrored = SubResource("StyleBoxFlat_7o227")
-theme_override_styles/pressed = SubResource("StyleBoxFlat_7o227")
-theme_override_styles/normal_mirrored = SubResource("StyleBoxFlat_h8dhx")
 theme_override_styles/normal = SubResource("StyleBoxFlat_h8dhx")
+theme_override_styles/normal_mirrored = SubResource("StyleBoxFlat_h8dhx")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_7o227")
+theme_override_styles/pressed_mirrored = SubResource("StyleBoxFlat_7o227")
+theme_override_styles/hover = SubResource("StyleBoxFlat_7o227")
+theme_override_styles/hover_mirrored = SubResource("StyleBoxFlat_7o227")
+theme_override_styles/hover_pressed = SubResource("StyleBoxFlat_7o227")
+theme_override_styles/hover_pressed_mirrored = SubResource("StyleBoxFlat_7o227")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_h8dhx")
+theme_override_styles/disabled_mirrored = SubResource("StyleBoxFlat_h8dhx")
+theme_override_styles/focus = SubResource("StyleBoxFlat_h8dhx")
 
 [node name="NoEnoughMoney" type="Label" parent="Dialog"]
 visible = false

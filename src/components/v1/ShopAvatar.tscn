@@ -71,7 +71,6 @@ expand_mode = 1
 stretch_mode = 2
 
 [node name="Data" type="Control" parent="ShopSong"]
-layout_mode = 2
 anchors_preset = 0
 offset_right = 346.0
 offset_bottom = 196.0
@@ -111,7 +110,6 @@ metadata/_edit_group_ = true
 
 [node name="SoldOut" type="Control" parent="ShopSong"]
 visible = false
-layout_mode = 3
 anchors_preset = 0
 offset_right = 312.0
 offset_bottom = 177.0
@@ -137,7 +135,6 @@ horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="DataOff" type="Control" parent="ShopSong"]
-layout_mode = 3
 anchors_preset = 0
 offset_right = 40.0
 offset_bottom = 40.0

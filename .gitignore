@@ -169,7 +169,7 @@ animation/
 # Godot
 build/
 
-*.import
+# *.import
 
 *.tmp
 

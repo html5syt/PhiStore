@@ -488,6 +488,7 @@ one_shot = true
 
 [node name="LoginDialog" type="Control" parent="."]
 layout_mode = 1
+anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
@@ -516,6 +517,7 @@ uv = PackedVector2Array(-200, -64, -232, 48, -176, 64, -144, -72)
 visible = false
 modulate = Color(1, 1, 1, 0)
 layout_mode = 1
+anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
@@ -655,6 +657,7 @@ text = "网页登录"
 visible = false
 modulate = Color(1, 1, 1, 0)
 layout_mode = 1
+anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
@@ -783,6 +786,7 @@ vertical_alignment = 1
 [node name="SaveManage" type="Control" parent="LoginDialog"]
 modulate = Color(1, 1, 1, 0)
 layout_mode = 1
+anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
@@ -1117,6 +1121,7 @@ offset_bottom = -0.00402832
 
 [node name="Syncing" type="Control" parent="."]
 layout_mode = 1
+anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5

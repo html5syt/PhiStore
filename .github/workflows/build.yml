@@ -115,7 +115,7 @@ jobs:
       - name: Setup Godot
         uses: chickensoft-games/setup-godot@v2
         with:
-          version: "4.5.0-beta.5"
+          version: "4.5.0-beta.6"
           use-dotnet: false
 
       - name: Install custom export templates
@@ -206,7 +206,7 @@ jobs:
       - name: Setup Godot
         uses: chickensoft-games/setup-godot@v2
         with:
-          version: "4.5.0-beta.5"
+          version: "4.5.0-beta.6"
           use-dotnet: false
 
       - name: Install custom export templates
@@ -256,7 +256,7 @@ jobs:
       - name: Setup Godot
         uses: chickensoft-games/setup-godot@v2
         with:
-          version: "4.5.0-beta.5"
+          version: "4.5.0-beta.6"
           use-dotnet: false
 
       - name: Install custom export templates
