@@ -25,6 +25,7 @@ base_font = ExtResource("2_1ym62")
 spacing_glyph = 1
 
 [node name="ShopSongMargin" type="MarginContainer"]
+anchors_preset = -1
 offset_top = 1.0
 offset_right = 395.0
 offset_bottom = 178.0

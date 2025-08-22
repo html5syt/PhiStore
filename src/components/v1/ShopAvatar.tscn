@@ -27,6 +27,7 @@ spacing_glyph = 1
 
 [node name="ShopSongMargin" type="MarginContainer"]
 custom_minimum_size = Vector2(345, 177)
+anchors_preset = -1
 offset_top = 1.0
 offset_right = 345.0
 offset_bottom = 178.0

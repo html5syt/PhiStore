@@ -38,7 +38,6 @@ region = Rect2(-26, -17, 110, 108)
 
 [node name="ShopBar" type="Control"]
 layout_mode = 3
-anchors_preset = 12
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -74,7 +73,7 @@ stream = ExtResource("2_b6cbe")
 
 [node name="ShopButton" type="HBoxContainer" parent="."]
 layout_mode = 1
-anchors_preset = 7
+anchors_preset = -1
 anchor_left = 0.5
 anchor_top = 1.0
 anchor_right = 0.5

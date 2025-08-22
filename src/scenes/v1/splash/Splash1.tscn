@@ -178,7 +178,6 @@ libraries = {
 
 [node name="Logo" type="Control" parent="."]
 layout_mode = 3
-anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
@@ -214,7 +213,6 @@ autoplay = "move"
 
 [node name="TouchToStart" type="Control" parent="."]
 layout_mode = 3
-anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
