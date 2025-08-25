@@ -38,10 +38,11 @@ region = Rect2(-26, -17, 110, 108)
 
 [node name="ShopBar" type="Control"]
 layout_mode = 3
+anchors_preset = 12
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_top = -104.0
+offset_top = -97.0
 grow_horizontal = 2
 grow_vertical = 0
 script = ExtResource("1_e5ftk")
