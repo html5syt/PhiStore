@@ -183,14 +183,14 @@ metadata/_edit_lock_ = true
 [node name="RemainingData" parent="." instance=ExtResource("5_6vrdq")]
 z_index = 1
 layout_mode = 1
-offset_left = -695.0
-offset_right = 0.0
+offset_left = -340.99988
+offset_right = 354.00012
 script = ExtResource("8_kwhjx")
-metadata/_edit_lock_ = true
 
 [node name="ShopBar" parent="." instance=ExtResource("7_ljq3v")]
 z_index = 1
 layout_mode = 1
+anchors_preset = 12
 metadata/_edit_lock_ = true
 
 [node name="FirstRun" type="Control" parent="."]

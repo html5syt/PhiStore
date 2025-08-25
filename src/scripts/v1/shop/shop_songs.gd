@@ -105,6 +105,7 @@ func _on_song_data_loaded(thread: Thread) -> void:
         for song in songs[1]:
             var songItem = songs[1][song]
             var data = int(randf_range(8, 17) * 100) / 100.0
+            @warning_ignore("narrowing_conversion")
             var dataOffPrecentRand = randi_range(dataOffPrecent * 10.0 - 5.0, dataOffPrecent * 10.0) / 10.0
             var illustration = "res://assets/pigeon/illustrationLowRes/%s.webp" % song
             
@@ -139,8 +140,8 @@ func _on_song_data_loaded(thread: Thread) -> void:
                     offAvatars.append(avatars[1][randi() % avatars[1].size()])
         # 准备头像数据
         for avatar in avatars[1]:
-            var songItem = avatar
             var data = int(randf_range(8, 17) * 100) / 100.0
+            @warning_ignore("narrowing_conversion")
             var dataOffPrecentRand = randi_range(dataOffPrecent * 10.0 - 5.0, dataOffPrecent * 10.0) / 10.0
             var illustration = "res://assets/pigeon/avatar/%s.webp" % avatar
             # fuck special name
@@ -162,7 +163,6 @@ func _on_song_data_loaded(thread: Thread) -> void:
         
         # 准备已购买歌曲数据
         for avatar in avatars[1]:
-            var songItem = avatar
             var illustration = "res://assets/pigeon/avatar/%s.webp" % avatar
             # fuck special name
             match avatar:
