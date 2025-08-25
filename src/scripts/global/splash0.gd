@@ -1,7 +1,7 @@
 extends Control
 
 func _ready() -> void:
-    $Label.text = $Label.text % ProjectSettings.get_setting("config/Version")
+    $Label.text = $Label.text % ProjectSettings.get_setting("application/config/version")
     await $splashAnimation.animation_finished
     await get_tree().create_timer(1).timeout
     await $TransitionManager.transition_to("res://scenes/v1/splash/Splash.tscn")
