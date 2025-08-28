@@ -3,15 +3,44 @@
 </div>
 <h1 align="center">PhiStore</h1>
 
-# 正在使用Godot重构中...
+# 简介
 
-~~尝试使用Flet还原Phigros v1.6.11的商店系统，V1.0版本已开发完成。部分资源（如icon）来自Phigros安装包，**禁止商业及不正当使用。**~~
+尝试使用Godot还原Phigros v1.6.11的商店系统，V2.0版本已开发完成。部分资源（如icon）来自Phigros安装包，**禁止商业及不正当使用。**
 
-~~网页版：[https://html5syt.github.io/PhiStore](https://html5syt.github.io/PhiStore)~~
+网页版：[https://html5syt.github.io/PhiStore](https://html5syt.github.io/PhiStore)
 
-~~**您可以在Action的artifact中找到最新的全平台离线安装包。**~~
+**Release 最新版[链接→](https://github.com/html5syt/PhiStore/releases/latest)**
 
-~~# **Release V1.0.0已发布，[链接→](https://github.com/html5syt/PhiStore/releases/tag/v1.0.0)**~~
+**2.0版本会自动同步上游Phigros更新，并自动构建包含最新定数的版本。**
+
+# 2.0新增功能
+
+## 1. 开屏界面
+
+## 2. 登录系统与存档系统
+
+登录方式：长按商店右上角的剩余Data数打开登陆界面
+
+有3种登陆方式：
+
+1. sessionToken登录：和使用查分bot一样，获取sessionToken后输入并点击箭头即可登录。
+2. TapTap登录：
+   1. 网页登录：除了web端均可用，浏览器登录完成后需手动回到app
+   2. 扫码登录：使用TapTap扫码登录
+
+登录成功后，再次长按商店右上角的剩余Data数打开存档界面，可在此处上传和下载存档。
+
+**注意：目前程序没有设计存档冲突的处理，建议在程序中对存档进行操作之前，先进行存档下载，避免出现冲突。**
+
+<h1 align="center">🎉完结撒花🎉</h1>
+
+<h2 align="right">by Tim<br>Originally created by Pigeon Games<br></h2>
+
+<h3 align="right" style="font-color:red">本项目仅供学习交流使用，禁止商业及不正当使用！<br></h3>
+
+---
+
+
 
 # 另记录抽奖相关信息
 
@@ -60,71 +89,4 @@
     1. 描述
     2. 描述颜色
     3. 图标
-
-## 5. Json格式
-
-（Json：导入/出；本地最近一次自定义记录保存到本地存储，预定义列表）
-
-```json
-{
-  "File": {
-    "White": [
-      "File,White",
-      "File,White,White"
-    ],
-    "Blue": [
-      "File,Blue",
-      "File,Blue,Blue"
-    ],
-    "Purple": [
-      "File,Purple",
-      "File,Purple,Purple"
-    ],
-    "Yellow": [
-      "File,Yellow",
-      "File,Yellow,Yellow"
-    ]
-  },
-  "Data": {
-    "White": [
-      262144
-    ],
-    "Blue": [
-      524288
-    ],
-    "Purple": [
-      2097152,
-      4194304,
-      8388608,
-      16777216
-    ],
-    "Yellow": [
-      33554432,
-      67108864,
-      134217728
-    ]
-  },
-  "Null": {
-    "White": [
-      "Null"
-    ]
-  },
-  "Avatar": {
-    "Blue": [
-      "Avatar,Blue",
-      "Avatar,Blue,Blue"
-    ],
-    "Purple": [
-      "Avatar,Purple",
-      "Avatar,Purple,Purple"
-    ]
-  },
-  "Illustration": {
-    "White": [
-      "Illustration,White",
-      "Illustration,White,White"
-    ]
-  }
-}
-```
 
