@@ -188,6 +188,40 @@ jobs:
         id: deployment
         uses: actions/deploy-pages@v4
 
+      - name: Prepare Cloudflare Artifact (Web)
+        if: ${{ matrix.platform == 'web' && success() }}
+        run: |
+          # 为Cloudflare部署专门准备一个干净的目录
+          mkdir -p cloudflare-deploy
+          cp -r builds/web/* cloudflare-deploy/
+          # 可以根据需要添加Cloudflare Pages特定的配置文件，如 _redirects、_headers 等
+          # 例如：处理SPA路由，防止404错误
+          echo "/* /index.html 200" > cloudflare-deploy/_redirects
+
+      # - name: Upload Cloudflare Artifact
+      #   if: ${{ matrix.platform == 'web' && success() }}
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: cloudflare-pages-deploy
+      #     path: cloudflare-deploy
+      #     retention-days: 1
+
+      # - name: Download Cloudflare Artifact
+      #   uses: actions/download-artifact@v4
+      #   with:
+      #     name: cloudflare-pages-deploy
+      #     path: cloudflare-deploy
+
+      - name: List deployment contents
+        run: ls -la cloudflare-deploy/
+
+      - name: Deploy to Cloudflare Pages using Wrangler
+        uses: cloudflare/wrangler-action@v3 # 使用wrangler-action
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy cloudflare-deploy --project-name=phistore
+
   # macOS平台构建
   build-macos:
     name: Build macOS Platforms
