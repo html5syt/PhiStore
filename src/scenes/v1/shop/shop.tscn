@@ -189,9 +189,11 @@ script = ExtResource("8_kwhjx")
 
 [node name="ShopBar" parent="." instance=ExtResource("7_ljq3v")]
 z_index = 1
+custom_minimum_size = Vector2(0, 97)
 layout_mode = 1
-anchors_preset = 12
-metadata/_edit_lock_ = true
+anchors_preset = -1
+anchor_top = 0.892
+offset_top = 97.20001
 
 [node name="FirstRun" type="Control" parent="."]
 layout_mode = 1
