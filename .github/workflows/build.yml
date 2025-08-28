@@ -213,9 +213,11 @@ jobs:
       #     path: cloudflare-deploy
 
       - name: List deployment contents
+        if: ${{ matrix.platform == 'web' && success() }}
         run: ls -la cloudflare-deploy/
 
       - name: Deploy to Cloudflare Pages using Wrangler
+        if: ${{ matrix.platform == 'web' && success() }}
         uses: cloudflare/wrangler-action@v3 # 使用wrangler-action
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
