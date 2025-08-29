@@ -9,3 +9,10 @@ func _ready() -> void:
 
 func _on_developer_board_pressed() -> void:
     await $TransitionManager.transition_to("res://TEST/main.tscn")
+
+
+func _on_developer_board_short_pressed() -> void:
+    if DisplayServer.window_get_mode() == DisplayServer.WINDOW_MODE_FULLSCREEN:
+        DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED)
+    else:
+        DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN)

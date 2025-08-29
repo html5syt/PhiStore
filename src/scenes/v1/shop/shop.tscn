@@ -262,7 +262,6 @@ libraries = {
 }
 
 [node name="TransitionManager" parent="." instance=ExtResource("2_bv3dc")]
-visible = false
 
 [connection signal="finished" from="bgMusic" to="." method="_on_bg_music_finished"]
 [connection signal="pressed" from="Back" to="." method="_on_button_pressed"]
