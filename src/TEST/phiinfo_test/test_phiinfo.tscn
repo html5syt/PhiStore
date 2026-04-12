@@ -1,0 +1,76 @@
+[gd_scene format=3 uid="uid://d3u3a2s38s0b"]
+
+[ext_resource type="Script" uid="uid://cvq1el1rckq2r" path="res://TEST/phiinfo_test/test_phiinfo.gd" id="1_4n5m6"]
+
+[node name="TestPhiinfo" type="Control" unique_id=1625013238]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_4n5m6")
+
+[node name="TextureRect" type="TextureRect" parent="." unique_id=912083223]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+stretch_mode = 3
+
+[node name="VBoxContainer" type="VBoxContainer" parent="." unique_id=309900108]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -200.0
+offset_top = -100.0
+offset_right = 200.0
+offset_bottom = 100.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Label" type="Label" parent="VBoxContainer" unique_id=163351773]
+layout_mode = 2
+text = "请点击按钮选择 Phigros APK 以初始化"
+horizontal_alignment = 1
+
+[node name="Button" type="Button" parent="VBoxContainer" unique_id=825959864]
+layout_mode = 2
+text = "选择 本地 APK 分析"
+
+[node name="HSeparator" type="HSeparator" parent="VBoxContainer" unique_id=1961133263]
+layout_mode = 2
+
+[node name="LineEdit" type="LineEdit" parent="VBoxContainer" unique_id=1024]
+layout_mode = 2
+placeholder_text = "输入 APK 直链 (http://...)"
+alignment = 1
+
+[node name="WebButton" type="Button" parent="VBoxContainer" unique_id=2048]
+layout_mode = 2
+text = "流式解包分析 (Web API)"
+
+[node name="ProgressBar" type="ProgressBar" parent="VBoxContainer" unique_id=1679874534]
+layout_mode = 2
+max_value = 1.0
+
+[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="." unique_id=1972152266]
+
+[node name="FileDialog" type="FileDialog" parent="." unique_id=691971719]
+title = "选择分析的包"
+size = Vector2i(500, 400)
+ok_button_text = "打开"
+mode_overrides_title = false
+file_mode = 0
+access = 2
+filters = PackedStringArray("*.apk ; Android Package")
+use_native_dialog = true
+
+[connection signal="pressed" from="VBoxContainer/Button" to="." method="_on_button_pressed"]
+[connection signal="pressed" from="VBoxContainer/WebButton" to="." method="_on_web_button_pressed"]
+[connection signal="file_selected" from="FileDialog" to="." method="_on_file_dialog_file_selected"]

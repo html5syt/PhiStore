@@ -4,4 +4,14 @@
     <TargetFramework Condition=" '$(GodotTargetPlatform)' == 'android' ">net9.0</TargetFramework>
     <EnableDynamicLoading>true</EnableDynamicLoading>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="addons\PhiInfo\libs\src\**\*.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="addons\PhiInfo\libs\src\PhiInfo.Core\PhiInfo.Core.csproj" />
+    <ProjectReference Include="addons\PhiInfo\libs\src\PhiInfo.Processing\PhiInfo.Processing.csproj" />
+    <ProjectReference Include="addons\PhiInfo\libs\src\Shua.Zip\Shua.Zip.csproj" />
+  </ItemGroup>
 </Project>

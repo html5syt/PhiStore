@@ -1,6 +1,3 @@
-[submodule "src/assets/pigeon"]
-	path = src/assets/pigeon
-	url = git@github.com:html5syt/Phigros_Resource.git
-	branch = Resource
-	shallow = true
-	ignore = all
+[submodule "src/addons/PhiInfo/libs"]
+	path = src/addons/PhiInfo/libs
+	url = https://github.com/PhigrosLabs/PhiInfo.git
