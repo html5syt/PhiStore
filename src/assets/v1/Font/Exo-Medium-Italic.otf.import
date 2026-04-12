@@ -2,7 +2,7 @@
 
 importer="font_data_dynamic"
 type="FontFile"
-uid="uid://byvohlfrah8vl"
+uid="uid://da12rrpqh5lua"
 path="res://.godot/imported/Exo-Medium-Italic.otf-c38debe748ca67db0ee5756d4b77e19b.fontdata"
 
 [deps]
@@ -27,7 +27,7 @@ subpixel_positioning=4
 keep_rounding_remainders=true
 oversampling=0.0
 Fallbacks=null
-fallbacks=[Resource("uid://bc1mcrjjqbkl8", "res://assets/v2/Font/Source Han Sans & Saira Hybrid-Regular.woff2")]
+fallbacks=[]
 Compress=null
 compress=true
 preload=[]

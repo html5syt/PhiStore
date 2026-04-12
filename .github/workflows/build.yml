@@ -1,11 +1,11 @@
 name: Godot Auto Build
 
 on:
-  schedule:
-    - cron: '5 10 * * 5,6'  # 每周五、六的10:05 UTC
+  # schedule:
+  #   - cron: '5 10 * * 5,6'  # 每周五、六的10:05 UTC
   workflow_dispatch:         # 允许手动触发
-  push:                      # 添加推送事件触发
-    branches: [ Godot ]       # 指定触发分支
+  # push:                      # 添加推送事件触发
+  #   branches: [ Godot ]       # 指定触发分支
 
 permissions:
   contents: write

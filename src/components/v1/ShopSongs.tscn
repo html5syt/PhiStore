@@ -1,8 +1,8 @@
-[gd_scene load_steps=2 format=3 uid="uid://co6h6i0cctl7q"]
+[gd_scene format=3 uid="uid://co6h6i0cctl7q"]
 
 [ext_resource type="Script" uid="uid://bk1mfflmcv3a4" path="res://scripts/v1/shop/shop_songs.gd" id="1_4u3ii"]
 
-[node name="ShopSongs" type="ScrollContainer"]
+[node name="ShopSongs" type="ScrollContainer" unique_id=967958068]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -14,14 +14,14 @@ script = ExtResource("1_4u3ii")
 metadata/_edit_lock_ = true
 metadata/_edit_group_ = true
 
-[node name="MarginContainer" type="MarginContainer" parent="."]
+[node name="MarginContainer" type="MarginContainer" parent="." unique_id=1129348631]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 theme_override_constants/margin_top = 111
 theme_override_constants/margin_bottom = 170
 
-[node name="FlowContainer" type="FlowContainer" parent="MarginContainer"]
+[node name="FlowContainer" type="FlowContainer" parent="MarginContainer" unique_id=1830479512]
 layout_mode = 2
 theme_override_constants/v_separation = 80
 alignment = 1

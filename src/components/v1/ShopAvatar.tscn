@@ -1,10 +1,10 @@
-[gd_scene load_steps=11 format=3 uid="uid://ccb4m3q37pxqo"]
+[gd_scene format=3 uid="uid://ccb4m3q37pxqo"]
 
 [ext_resource type="Script" uid="uid://j6wfid6f6ioe" path="res://scripts/v1/shop/shop_song.gd" id="1_iooqr"]
-[ext_resource type="AudioStream" uid="uid://j83ggkvqsd62" path="res://assets/v1/Tap1.wav" id="2_0waxu"]
-[ext_resource type="Texture2D" uid="uid://dmsrq2trbjrw1" path="res://assets/v1/SingleChapterCoverBlur.png" id="2_02db2"]
-[ext_resource type="FontFile" uid="uid://bxa3w0wqr0whf" path="res://assets/v1/Font/Exo-Regular.otf" id="4_fq48n"]
-[ext_resource type="Texture2D" uid="uid://5vaqd1ynicf3" path="res://assets/v1/商店_素材.png" id="6_54kvp"]
+[ext_resource type="AudioStream" uid="uid://d2l7vb33wjsj5" path="res://assets/v1/Tap1.wav" id="2_0waxu"]
+[ext_resource type="Texture2D" uid="uid://hg01jwcfo2g1" path="res://assets/v1/SingleChapterCoverBlur.png" id="2_02db2"]
+[ext_resource type="FontFile" uid="uid://daa1ia283wsd5" path="res://assets/v1/Font/Exo-Regular.otf" id="4_fq48n"]
+[ext_resource type="Texture2D" uid="uid://be1dumov8rhts" path="res://assets/v1/商店_素材.png" id="6_54kvp"]
 
 [sub_resource type="CompressedTexture2D" id="CompressedTexture2D_0waxu"]
 load_path = "res://.godot/imported/商店_素材.png-70b15738ab931353a08126e8cae05906.ctex"
@@ -25,7 +25,7 @@ region = Rect2(148, 49, 140, 100)
 base_font = ExtResource("4_fq48n")
 spacing_glyph = 1
 
-[node name="ShopSongMargin" type="MarginContainer"]
+[node name="ShopSongMargin" type="MarginContainer" unique_id=1863868936]
 custom_minimum_size = Vector2(345, 177)
 anchors_preset = -1
 offset_top = 1.0
@@ -36,20 +36,20 @@ theme_override_constants/margin_right = 5
 script = ExtResource("1_iooqr")
 pageType = 2
 
-[node name="Button" type="AudioStreamPlayer" parent="."]
+[node name="Button" type="AudioStreamPlayer" parent="." unique_id=1138944564]
 stream = ExtResource("2_0waxu")
 
-[node name="ShopSong" type="Control" parent="."]
+[node name="ShopSong" type="Control" parent="." unique_id=179242082]
 layout_mode = 2
 
-[node name="Bg" type="ColorRect" parent="ShopSong"]
+[node name="Bg" type="ColorRect" parent="ShopSong" unique_id=1940457453]
 layout_mode = 0
 offset_top = 7.0
 offset_right = 168.0
 offset_bottom = 176.0
 color = Color(0, 0, 0, 0.811765)
 
-[node name="Illustration" type="TextureRect" parent="ShopSong"]
+[node name="Illustration" type="TextureRect" parent="ShopSong" unique_id=2063042837]
 modulate = Color(0.713436, 0.713436, 0.713436, 1)
 layout_mode = 0
 offset_left = 6.0
@@ -59,7 +59,7 @@ texture = ExtResource("2_02db2")
 expand_mode = 1
 stretch_mode = 6
 
-[node name="Type" type="TextureRect" parent="ShopSong"]
+[node name="Type" type="TextureRect" parent="ShopSong" unique_id=1526753821]
 layout_mode = 0
 offset_left = 102.0
 offset_top = -20.0
@@ -71,13 +71,13 @@ texture = SubResource("AtlasTexture_jw6rc")
 expand_mode = 1
 stretch_mode = 2
 
-[node name="Data" type="Control" parent="ShopSong"]
+[node name="Data" type="Control" parent="ShopSong" unique_id=1469228440]
 anchors_preset = 0
 offset_right = 346.0
 offset_bottom = 196.0
 scale = Vector2(0.9, 0.9)
 
-[node name="DataBg" type="Polygon2D" parent="ShopSong/Data"]
+[node name="DataBg" type="Polygon2D" parent="ShopSong/Data" unique_id=375629363]
 position = Vector2(143.182, 56.0402)
 scale = Vector2(1.05361, 1.02976)
 color = Color(0.713726, 0.72549, 0.741176, 1)
@@ -85,7 +85,7 @@ polygon = PackedVector2Array(0.143417, 136.138, 174.705, 136.138, 183.639, 98.79
 uv = PackedVector2Array(7.71814, 136.333, 167.704, 135.998, 183.804, 80.6567, 23.8174, 80.6567)
 metadata/_edit_group_ = true
 
-[node name="Data" type="Label" parent="ShopSong/Data"]
+[node name="Data" type="Label" parent="ShopSong/Data" unique_id=1888892274]
 layout_mode = 0
 offset_left = 158.0
 offset_top = 167.0
@@ -99,7 +99,7 @@ horizontal_alignment = 2
 vertical_alignment = 1
 metadata/_edit_group_ = true
 
-[node name="DataLogo" type="TextureRect" parent="ShopSong/Data"]
+[node name="DataLogo" type="TextureRect" parent="ShopSong/Data" unique_id=1092668539]
 layout_mode = 0
 offset_left = 284.444
 offset_top = 162.222
@@ -109,20 +109,20 @@ scale = Vector2(0.32, 0.32)
 texture = SubResource("AtlasTexture_rituo")
 metadata/_edit_group_ = true
 
-[node name="SoldOut" type="Control" parent="ShopSong"]
+[node name="SoldOut" type="Control" parent="ShopSong" unique_id=1162192948]
 visible = false
 anchors_preset = 0
 offset_right = 312.0
 offset_bottom = 177.0
 
-[node name="SoldBg" type="Polygon2D" parent="ShopSong/SoldOut"]
+[node name="SoldBg" type="Polygon2D" parent="ShopSong/SoldOut" unique_id=1911844805]
 position = Vector2(129.865, 49.3944)
 scale = Vector2(0.942802, 0.937325)
 color = Color(0.713726, 0.72549, 0.741176, 1)
 polygon = PackedVector2Array(0.143417, 136.138, 174.705, 136.138, 183.639, 98.7977, 9.07767, 98.7977)
 uv = PackedVector2Array(7.71814, 136.333, 167.704, 135.998, 183.804, 80.6567, 23.8174, 80.6567)
 
-[node name="Sold" type="Label" parent="ShopSong/SoldOut"]
+[node name="Sold" type="Label" parent="ShopSong/SoldOut" unique_id=1242681658]
 layout_mode = 0
 offset_left = 137.0
 offset_top = 150.0
@@ -135,19 +135,19 @@ text = "Sold out"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="DataOff" type="Control" parent="ShopSong"]
+[node name="DataOff" type="Control" parent="ShopSong" unique_id=1323574279]
 anchors_preset = 0
 offset_right = 40.0
 offset_bottom = 40.0
 
-[node name="DataOffBg" type="Polygon2D" parent="ShopSong/DataOff"]
+[node name="DataOffBg" type="Polygon2D" parent="ShopSong/DataOff" unique_id=1619698467]
 position = Vector2(213.926, 72.3633)
 scale = Vector2(0.512529, 0.512529)
 color = Color(0.721569, 0.313726, 0.290196, 0.831373)
 polygon = PackedVector2Array(0.143417, 136.138, 174.705, 136.138, 183.639, 98.7977, 9.07767, 98.7977)
 uv = PackedVector2Array(7.71814, 136.333, 167.704, 135.998, 183.804, 80.6567, 23.8174, 80.6567)
 
-[node name="DataOff" type="Label" parent="ShopSong/DataOff"]
+[node name="DataOff" type="Label" parent="ShopSong/DataOff" unique_id=999662115]
 layout_mode = 0
 offset_left = 227.407
 offset_top = 126.0
@@ -159,7 +159,7 @@ text = "70%  OFF"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="Button" type="TextureButton" parent="ShopSong"]
+[node name="Button" type="TextureButton" parent="ShopSong" unique_id=1720673442]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0

@@ -1,11 +1,11 @@
-[gd_scene load_steps=106 format=3 uid="uid://64285daa57vp"]
+[gd_scene format=3 uid="uid://64285daa57vp"]
 
 [ext_resource type="Script" uid="uid://yrjgngjvh8gr" path="res://scripts/v1/shop/data_mining.gd" id="1_j7fvr"]
-[ext_resource type="FontFile" uid="uid://bxa3w0wqr0whf" path="res://assets/v1/Font/Exo-Regular.otf" id="1_qdrm6"]
-[ext_resource type="AudioStream" uid="uid://j83ggkvqsd62" path="res://assets/v1/Tap1.wav" id="2_oxmbu"]
-[ext_resource type="Texture2D" uid="uid://5vaqd1ynicf3" path="res://assets/v1/商店_素材.png" id="3_j7fvr"]
+[ext_resource type="FontFile" uid="uid://daa1ia283wsd5" path="res://assets/v1/Font/Exo-Regular.otf" id="1_qdrm6"]
+[ext_resource type="AudioStream" uid="uid://d2l7vb33wjsj5" path="res://assets/v1/Tap1.wav" id="2_oxmbu"]
+[ext_resource type="Texture2D" uid="uid://be1dumov8rhts" path="res://assets/v1/商店_素材.png" id="3_j7fvr"]
 [ext_resource type="Texture2D" uid="uid://cpuiqpquqrs7g" path="res://assets/v1/ShopData.tres" id="3_rvded"]
-[ext_resource type="Texture2D" uid="uid://bniwr5vd8b7h" path="res://assets/v1/DM.png" id="4_oxmbu"]
+[ext_resource type="Texture2D" uid="uid://l6h7pa052s5m" path="res://assets/v1/DM.png" id="4_oxmbu"]
 
 [sub_resource type="FontVariation" id="FontVariation_kl62y"]
 base_font = ExtResource("1_qdrm6")
@@ -1079,7 +1079,7 @@ region = Rect2(148, 49, 140, 100)
 base_font = ExtResource("1_qdrm6")
 spacing_glyph = 2
 
-[node name="DataMining" type="Control"]
+[node name="DataMining" type="Control" unique_id=209095149]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -1089,10 +1089,10 @@ grow_vertical = 2
 script = ExtResource("1_j7fvr")
 metadata/_edit_lock_ = true
 
-[node name="Button" type="AudioStreamPlayer" parent="."]
+[node name="Button" type="AudioStreamPlayer" parent="." unique_id=1024843531]
 stream = ExtResource("2_oxmbu")
 
-[node name="DataMiningLabel" type="Label" parent="."]
+[node name="DataMiningLabel" type="Label" parent="." unique_id=921687630]
 layout_mode = 0
 anchor_left = 0.5
 anchor_top = 0.04
@@ -1105,7 +1105,7 @@ theme_override_fonts/font = SubResource("FontVariation_kl62y")
 theme_override_font_sizes/font_size = 43
 text = "Data mining"
 
-[node name="Split" type="ColorRect" parent="."]
+[node name="Split" type="ColorRect" parent="." unique_id=1302923447]
 layout_mode = 1
 anchors_preset = -1
 anchor_top = 0.133
@@ -1116,7 +1116,7 @@ offset_bottom = 2.300003
 grow_horizontal = 2
 color = Color(0.748694, 0.748694, 0.748694, 1)
 
-[node name="Question" type="Control" parent="."]
+[node name="Question" type="Control" parent="." unique_id=98747968]
 layout_mode = 1
 anchor_top = 0.193
 anchor_right = 1.0
@@ -1125,7 +1125,7 @@ offset_left = 1.0
 offset_top = 0.300003
 offset_bottom = 371.3
 
-[node name="Question" type="AspectRatioContainer" parent="Question"]
+[node name="Question" type="AspectRatioContainer" parent="Question" unique_id=172217645]
 layout_mode = 1
 anchors_preset = -1
 anchor_left = 0.5
@@ -1135,14 +1135,14 @@ offset_right = 208.5
 offset_bottom = 391.0
 metadata/_edit_group_ = true
 
-[node name="Question" type="AnimatedSprite2D" parent="Question/Question"]
+[node name="Question" type="AnimatedSprite2D" parent="Question/Question" unique_id=284121977]
 position = Vector2(205, 201)
 scale = Vector2(0.767107, 0.767107)
 sprite_frames = SubResource("SpriteFrames_u6xri")
 autoplay = "default"
 frame_progress = 0.39700508
 
-[node name="Icon" type="AspectRatioContainer" parent="Question"]
+[node name="Icon" type="AspectRatioContainer" parent="Question" unique_id=70832285]
 layout_mode = 1
 anchors_preset = -1
 anchor_left = 0.418
@@ -1157,12 +1157,12 @@ scale = Vector2(1, 1e-05)
 pivot_offset = Vector2(236, 90)
 metadata/_edit_group_ = true
 
-[node name="TextureRect" type="TextureRect" parent="Question/Icon"]
+[node name="TextureRect" type="TextureRect" parent="Question/Icon" unique_id=1817727766]
 layout_mode = 2
 texture = ExtResource("3_rvded")
 stretch_mode = 5
 
-[node name="Name" type="Label" parent="Question"]
+[node name="Name" type="Label" parent="Question" unique_id=739562299]
 layout_mode = 1
 anchors_preset = -1
 anchor_top = 1.0
@@ -1181,7 +1181,7 @@ vertical_alignment = 1
 visible_characters = 0
 visible_ratio = 0.0
 
-[node name="IconOut" type="AspectRatioContainer" parent="Question"]
+[node name="IconOut" type="AspectRatioContainer" parent="Question" unique_id=2100547550]
 visible = false
 layout_mode = 1
 anchors_preset = -1
@@ -1196,12 +1196,12 @@ offset_bottom = 0.039978027
 pivot_offset = Vector2(236, 90)
 metadata/_edit_group_ = true
 
-[node name="TextureRect" type="TextureRect" parent="Question/IconOut"]
+[node name="TextureRect" type="TextureRect" parent="Question/IconOut" unique_id=1250836985]
 layout_mode = 2
 texture = ExtResource("3_rvded")
 stretch_mode = 5
 
-[node name="NameOut" type="Label" parent="Question"]
+[node name="NameOut" type="Label" parent="Question" unique_id=1800382179]
 visible = false
 layout_mode = 1
 anchors_preset = -1
@@ -1218,12 +1218,10 @@ text = "2 MB"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="AnimationPlayer" type="AnimationPlayer" parent="Question"]
-libraries = {
-&"": SubResource("AnimationLibrary_p5sui")
-}
+[node name="AnimationPlayer" type="AnimationPlayer" parent="Question" unique_id=2094318886]
+libraries/ = SubResource("AnimationLibrary_p5sui")
 
-[node name="1024KB" type="Control" parent="."]
+[node name="1024KB" type="Control" parent="." unique_id=1045889891]
 custom_minimum_size = Vector2(602.2, 0)
 layout_mode = 1
 anchor_left = 0.327
@@ -1237,21 +1235,21 @@ offset_bottom = -220.0
 size_flags_vertical = 3
 metadata/_edit_lock_ = true
 
-[node name="BgBorder" type="Polygon2D" parent="1024KB"]
+[node name="BgBorder" type="Polygon2D" parent="1024KB" unique_id=607660645]
 modulate = Color(1, 1, 1, 0.443137)
 position = Vector2(459, 570)
 invert_border = 0.1
 polygon = PackedVector2Array(-363, -148, 15, -148, -6, -67, -385, -67)
 uv = PackedVector2Array(-358.421, -127.264, 24, -128, -24, -24, -400, -32)
 
-[node name="Bg" type="Polygon2D" parent="1024KB"]
+[node name="Bg" type="Polygon2D" parent="1024KB" unique_id=1993342343]
 position = Vector2(459, 570)
 color = Color(0, 0, 0, 1)
 invert_border = 0.1
 polygon = PackedVector2Array(-361, -146, 12, -146, -8, -69, -382, -69)
 uv = PackedVector2Array(-358.421, -127.264, 24, -128, -24, -24, -400, -32)
 
-[node name="DataIcon" type="TextureRect" parent="1024KB"]
+[node name="DataIcon" type="TextureRect" parent="1024KB" unique_id=1808711534]
 layout_mode = 1
 anchors_preset = -1
 anchor_left = 0.223
@@ -1266,7 +1264,7 @@ scale = Vector2(0.41, 0.41)
 pivot_offset = Vector2(69, 50)
 texture = SubResource("AtlasTexture_0p7ic")
 
-[node name="Label" type="Label" parent="1024KB"]
+[node name="Label" type="Label" parent="1024KB" unique_id=572800326]
 layout_mode = 1
 anchors_preset = -1
 anchor_left = 0.422
@@ -1283,7 +1281,7 @@ text = "1024  KB"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="Button" type="TextureButton" parent="1024KB"]
+[node name="Button" type="TextureButton" parent="1024KB" unique_id=370191172]
 self_modulate = Color(1, 1, 1, 0)
 layout_mode = 1
 anchors_preset = -1
@@ -1296,7 +1294,7 @@ offset_top = -0.173981
 offset_right = 3.05176e-05
 offset_bottom = -0.00402832
 
-[node name="8MB" type="Control" parent="."]
+[node name="8MB" type="Control" parent="." unique_id=1490067156]
 custom_minimum_size = Vector2(602.2, 0)
 anchors_preset = 0
 anchor_left = 0.706
@@ -1310,21 +1308,21 @@ offset_bottom = -220.0
 size_flags_vertical = 3
 metadata/_edit_lock_ = true
 
-[node name="BgBorder" type="Polygon2D" parent="8MB"]
+[node name="BgBorder" type="Polygon2D" parent="8MB" unique_id=10272388]
 modulate = Color(1, 1, 1, 0.443137)
 position = Vector2(459, 570)
 invert_border = 0.1
 polygon = PackedVector2Array(-363, -148, 15, -148, -6, -67, -385, -67)
 uv = PackedVector2Array(-358.421, -127.264, 24, -128, -24, -24, -400, -32)
 
-[node name="Bg" type="Polygon2D" parent="8MB"]
+[node name="Bg" type="Polygon2D" parent="8MB" unique_id=817858942]
 position = Vector2(459, 570)
 color = Color(0.678471, 0.678471, 0.678471, 1)
 invert_border = 0.1
 polygon = PackedVector2Array(-361, -146, 12, -146, -8, -69, -382, -69)
 uv = PackedVector2Array(-358.421, -127.264, 24, -128, -24, -24, -400, -32)
 
-[node name="DataIcon" type="TextureRect" parent="8MB"]
+[node name="DataIcon" type="TextureRect" parent="8MB" unique_id=1642799693]
 layout_mode = 1
 anchors_preset = -1
 anchor_left = 0.223
@@ -1339,7 +1337,7 @@ scale = Vector2(0.41, 0.41)
 pivot_offset = Vector2(69, 50)
 texture = SubResource("AtlasTexture_0p7ic")
 
-[node name="Label" type="Label" parent="8MB"]
+[node name="Label" type="Label" parent="8MB" unique_id=498522337]
 layout_mode = 1
 anchors_preset = -1
 anchor_left = 0.422
@@ -1357,7 +1355,7 @@ text = "8  MB"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="Button" type="TextureButton" parent="8MB"]
+[node name="Button" type="TextureButton" parent="8MB" unique_id=870719854]
 self_modulate = Color(1, 1, 1, 0)
 layout_mode = 1
 anchors_preset = -1
@@ -1370,7 +1368,7 @@ offset_top = -0.173981
 offset_right = 3.05176e-05
 offset_bottom = -0.00402832
 
-[node name="NoEnoughMoney" type="Label" parent="."]
+[node name="NoEnoughMoney" type="Label" parent="." unique_id=1856644253]
 visible = false
 layout_mode = 1
 anchors_preset = -1
@@ -1388,7 +1386,7 @@ text = "余额不足"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="MBoverlay" type="Button" parent="."]
+[node name="MBoverlay" type="Button" parent="." unique_id=136190873]
 visible = false
 modulate = Color(1, 1, 1, 0)
 layout_mode = 1

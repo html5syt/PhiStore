@@ -1,4 +1,4 @@
-[gd_scene load_steps=5 format=3 uid="uid://kiuugoj7icb3"]
+[gd_scene format=3 uid="uid://kiuugoj7icb3"]
 
 [ext_resource type="Script" uid="uid://cfvg1imwluhje" path="res://addons/fade/transition_manager.gd" id="1_v8pmt"]
 
@@ -39,11 +39,11 @@ _data = {
 &"RESET": SubResource("Animation_v8pmt")
 }
 
-[node name="TransitionManager" type="CanvasLayer"]
+[node name="TransitionManager" type="CanvasLayer" unique_id=1701002437]
 layer = 128
 script = ExtResource("1_v8pmt")
 
-[node name="Background" type="ColorRect" parent="."]
+[node name="Background" type="ColorRect" parent="." unique_id=1906343502]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -52,7 +52,5 @@ grow_vertical = 2
 mouse_filter = 2
 color = Color(0, 0, 0, 1)
 
-[node name="AnimationPlayer" type="AnimationPlayer" parent="Background"]
-libraries = {
-&"": SubResource("AnimationLibrary_68hrm")
-}
+[node name="AnimationPlayer" type="AnimationPlayer" parent="Background" unique_id=416598571]
+libraries/ = SubResource("AnimationLibrary_68hrm")

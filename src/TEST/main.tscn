@@ -1,7 +1,7 @@
-[gd_scene load_steps=7 format=3 uid="uid://b5n862gour2ie"]
+[gd_scene format=3 uid="uid://b5n862gour2ie"]
 
 [ext_resource type="Script" uid="uid://vorsg4jk0jbs" path="res://TEST/main.gd" id="1_t6b0v"]
-[ext_resource type="FontFile" uid="uid://bxa3w0wqr0whf" path="res://assets/v1/Font/Exo-Regular.otf" id="2_bc3hi"]
+[ext_resource type="FontFile" uid="uid://daa1ia283wsd5" path="res://assets/v1/Font/Exo-Regular.otf" id="2_bc3hi"]
 [ext_resource type="Script" uid="uid://dynulhnyq5hpq" path="res://addons/qr_code/qr_code_rect.gd" id="2_hry11"]
 [ext_resource type="PackedScene" uid="uid://c62nlt5v5iy5" path="res://components/global/BackButton.tscn" id="4_wdoi0"]
 
@@ -17,10 +17,10 @@ data = {
 [sub_resource type="ImageTexture" id="ImageTexture_yu1ua"]
 image = SubResource("Image_wdoi0")
 
-[node name="Main" type="CanvasLayer"]
+[node name="Main" type="CanvasLayer" unique_id=117577484]
 script = ExtResource("1_t6b0v")
 
-[node name="Code" type="Label" parent="."]
+[node name="Code" type="Label" parent="." unique_id=133474614]
 anchors_preset = -1
 anchor_left = 0.5
 anchor_right = 0.5
@@ -32,7 +32,7 @@ grow_horizontal = 2
 theme_override_font_sizes/font_size = 40
 text = "0"
 
-[node name="Text" type="TextEdit" parent="."]
+[node name="Text" type="TextEdit" parent="." unique_id=414030248]
 anchors_preset = -1
 anchor_left = 0.5
 anchor_top = 0.5
@@ -48,7 +48,7 @@ theme_override_font_sizes/font_size = 25
 text = "READY"
 wrap_mode = 1
 
-[node name="TabContainer" type="TabContainer" parent="."]
+[node name="TabContainer" type="TabContainer" parent="." unique_id=327204080]
 anchors_preset = -1
 anchor_left = 0.5
 anchor_top = 0.5
@@ -64,7 +64,7 @@ theme_override_font_sizes/font_size = 48
 tab_alignment = 1
 current_tab = 1
 
-[node name="TapSDK" type="GridContainer" parent="TabContainer"]
+[node name="TapSDK" type="GridContainer" parent="TabContainer" unique_id=453712558]
 visible = false
 layout_mode = 2
 theme_override_constants/h_separation = 20
@@ -72,7 +72,7 @@ theme_override_constants/v_separation = 20
 columns = 4
 metadata/_tab_index = 0
 
-[node name="Login" type="Button" parent="TabContainer/TapSDK"]
+[node name="Login" type="Button" parent="TabContainer/TapSDK" unique_id=313857082]
 custom_minimum_size = Vector2(200, 80)
 layout_mode = 2
 size_flags_horizontal = 3
@@ -81,7 +81,7 @@ theme_override_fonts/font = ExtResource("2_bc3hi")
 theme_override_font_sizes/font_size = 48
 text = "登录"
 
-[node name="Login2" type="Button" parent="TabContainer/TapSDK"]
+[node name="Login2" type="Button" parent="TabContainer/TapSDK" unique_id=591013776]
 custom_minimum_size = Vector2(200, 80)
 layout_mode = 2
 size_flags_horizontal = 3
@@ -90,7 +90,7 @@ theme_override_fonts/font = ExtResource("2_bc3hi")
 theme_override_font_sizes/font_size = 48
 text = "退出登录"
 
-[node name="Logout" type="Button" parent="TabContainer/TapSDK"]
+[node name="Logout" type="Button" parent="TabContainer/TapSDK" unique_id=1666027274]
 visible = false
 custom_minimum_size = Vector2(200, 80)
 layout_mode = 2
@@ -100,7 +100,7 @@ theme_override_fonts/font = ExtResource("2_bc3hi")
 theme_override_font_sizes/font_size = 48
 text = "退出登录"
 
-[node name="AntiAddiction" type="Button" parent="TabContainer/TapSDK"]
+[node name="AntiAddiction" type="Button" parent="TabContainer/TapSDK" unique_id=2080900280]
 custom_minimum_size = Vector2(200, 80)
 layout_mode = 2
 focus_mode = 0
@@ -108,7 +108,7 @@ theme_override_fonts/font = ExtResource("2_bc3hi")
 theme_override_font_sizes/font_size = 48
 text = "防沉迷"
 
-[node name="GetUserProfile" type="Button" parent="TabContainer/TapSDK"]
+[node name="GetUserProfile" type="Button" parent="TabContainer/TapSDK" unique_id=970788589]
 custom_minimum_size = Vector2(200, 80)
 layout_mode = 2
 focus_mode = 0
@@ -116,7 +116,7 @@ theme_override_fonts/font = ExtResource("2_bc3hi")
 theme_override_font_sizes/font_size = 48
 text = "用户信息"
 
-[node name="SubmitGameSave" type="Button" parent="TabContainer/TapSDK"]
+[node name="SubmitGameSave" type="Button" parent="TabContainer/TapSDK" unique_id=1858992993]
 custom_minimum_size = Vector2(200, 80)
 layout_mode = 2
 focus_mode = 0
@@ -124,7 +124,7 @@ theme_override_fonts/font = ExtResource("2_bc3hi")
 theme_override_font_sizes/font_size = 48
 text = "保存到云存档"
 
-[node name="FetchGameSaves" type="Button" parent="TabContainer/TapSDK"]
+[node name="FetchGameSaves" type="Button" parent="TabContainer/TapSDK" unique_id=1538771338]
 visible = false
 custom_minimum_size = Vector2(200, 80)
 layout_mode = 2
@@ -133,12 +133,12 @@ theme_override_fonts/font = ExtResource("2_bc3hi")
 theme_override_font_sizes/font_size = 48
 text = "获取云存档"
 
-[node name="GameSaveObjectId" type="TextEdit" parent="TabContainer/TapSDK"]
+[node name="GameSaveObjectId" type="TextEdit" parent="TabContainer/TapSDK" unique_id=1141266597]
 layout_mode = 2
 theme_override_font_sizes/font_size = 25
 wrap_mode = 1
 
-[node name="DeleteGameSave" type="Button" parent="TabContainer/TapSDK"]
+[node name="DeleteGameSave" type="Button" parent="TabContainer/TapSDK" unique_id=1121121333]
 custom_minimum_size = Vector2(200, 80)
 layout_mode = 2
 focus_mode = 0
@@ -146,14 +146,14 @@ theme_override_fonts/font = ExtResource("2_bc3hi")
 theme_override_font_sizes/font_size = 48
 text = "删除云存档"
 
-[node name="sync" type="Button" parent="TabContainer/TapSDK"]
+[node name="sync" type="Button" parent="TabContainer/TapSDK" unique_id=1128684801]
 layout_mode = 2
 theme_override_fonts/font = ExtResource("2_bc3hi")
 theme_override_font_sizes/font_size = 40
 text = "sync
 "
 
-[node name="DeleteGameSave2" type="Button" parent="TabContainer/TapSDK"]
+[node name="DeleteGameSave2" type="Button" parent="TabContainer/TapSDK" unique_id=611570952]
 custom_minimum_size = Vector2(200, 80)
 layout_mode = 2
 focus_mode = 0
@@ -161,51 +161,51 @@ theme_override_fonts/font = ExtResource("2_bc3hi")
 theme_override_font_sizes/font_size = 48
 text = "RKS"
 
-[node name="PhiSave" type="GridContainer" parent="TabContainer"]
+[node name="PhiSave" type="GridContainer" parent="TabContainer" unique_id=1600540755]
 layout_mode = 2
 theme_override_constants/h_separation = 20
 theme_override_constants/v_separation = 20
 columns = 4
 metadata/_tab_index = 1
 
-[node name="sessiontoken" type="TextEdit" parent="TabContainer/PhiSave"]
+[node name="sessiontoken" type="TextEdit" parent="TabContainer/PhiSave" unique_id=1449503969]
 custom_minimum_size = Vector2(700, 0)
 layout_mode = 2
 theme_override_font_sizes/font_size = 30
 placeholder_text = "sessionToken"
 
-[node name="login" type="Button" parent="TabContainer/PhiSave"]
+[node name="login" type="Button" parent="TabContainer/PhiSave" unique_id=587761348]
 layout_mode = 2
 theme_override_fonts/font = ExtResource("2_bc3hi")
 theme_override_font_sizes/font_size = 40
 text = "login"
 
-[node name="get" type="Button" parent="TabContainer/PhiSave"]
+[node name="get" type="Button" parent="TabContainer/PhiSave" unique_id=1462480473]
 layout_mode = 2
 theme_override_fonts/font = ExtResource("2_bc3hi")
 theme_override_font_sizes/font_size = 40
 text = "get"
 
-[node name="Upload" type="Button" parent="TabContainer/PhiSave"]
+[node name="Upload" type="Button" parent="TabContainer/PhiSave" unique_id=2121780943]
 layout_mode = 2
 theme_override_fonts/font = ExtResource("2_bc3hi")
 theme_override_font_sizes/font_size = 40
 text = "upload"
 
-[node name="file" type="Button" parent="TabContainer/PhiSave"]
+[node name="file" type="Button" parent="TabContainer/PhiSave" unique_id=929049367]
 layout_mode = 2
 theme_override_fonts/font = ExtResource("2_bc3hi")
 theme_override_font_sizes/font_size = 40
 text = "File"
 
-[node name="sync" type="Button" parent="TabContainer/PhiSave"]
+[node name="sync" type="Button" parent="TabContainer/PhiSave" unique_id=1613255856]
 layout_mode = 2
 theme_override_fonts/font = ExtResource("2_bc3hi")
 theme_override_font_sizes/font_size = 40
 text = "sync
 "
 
-[node name="Login2" type="Button" parent="TabContainer/PhiSave"]
+[node name="Login2" type="Button" parent="TabContainer/PhiSave" unique_id=1524078827]
 custom_minimum_size = Vector2(200, 80)
 layout_mode = 2
 size_flags_horizontal = 3
@@ -214,7 +214,7 @@ theme_override_fonts/font = ExtResource("2_bc3hi")
 theme_override_font_sizes/font_size = 48
 text = "退出登录"
 
-[node name="PhiSaveTools" type="GridContainer" parent="TabContainer"]
+[node name="PhiSaveTools" type="GridContainer" parent="TabContainer" unique_id=799911172]
 visible = false
 layout_mode = 2
 theme_override_constants/h_separation = 20
@@ -222,31 +222,31 @@ theme_override_constants/v_separation = 20
 columns = 4
 metadata/_tab_index = 2
 
-[node name="getPaidedSongs" type="Button" parent="TabContainer/PhiSaveTools"]
+[node name="getPaidedSongs" type="Button" parent="TabContainer/PhiSaveTools" unique_id=154908775]
 layout_mode = 2
 theme_override_fonts/font = ExtResource("2_bc3hi")
 theme_override_font_sizes/font_size = 40
 text = "getPaidedSongs"
 
-[node name="DataSizeConverter" type="Button" parent="TabContainer/PhiSaveTools"]
+[node name="DataSizeConverter" type="Button" parent="TabContainer/PhiSaveTools" unique_id=29532440]
 layout_mode = 2
 theme_override_fonts/font = ExtResource("2_bc3hi")
 theme_override_font_sizes/font_size = 40
 text = "DataSizeConverter"
 
-[node name="BrowserLogin" type="Button" parent="TabContainer/PhiSaveTools"]
+[node name="BrowserLogin" type="Button" parent="TabContainer/PhiSaveTools" unique_id=697808937]
 layout_mode = 2
 theme_override_fonts/font = ExtResource("2_bc3hi")
 theme_override_font_sizes/font_size = 40
 text = "BrowserLogin"
 
-[node name="QRLogin" type="Button" parent="TabContainer/PhiSaveTools"]
+[node name="QRLogin" type="Button" parent="TabContainer/PhiSaveTools" unique_id=1554985087]
 layout_mode = 2
 theme_override_fonts/font = ExtResource("2_bc3hi")
 theme_override_font_sizes/font_size = 40
 text = "QRLogin"
 
-[node name="TextEdit" type="TextEdit" parent="TabContainer/PhiSaveTools"]
+[node name="TextEdit" type="TextEdit" parent="TabContainer/PhiSaveTools" unique_id=1959352925]
 custom_minimum_size = Vector2(468, 57)
 layout_mode = 2
 theme_override_fonts/font = ExtResource("2_bc3hi")
@@ -254,7 +254,7 @@ theme_override_font_sizes/font_size = 26
 placeholder_text = "回调code input"
 autowrap_mode = 1
 
-[node name="QRCodeRect" type="TextureRect" parent="TabContainer/PhiSaveTools"]
+[node name="QRCodeRect" type="TextureRect" parent="TabContainer/PhiSaveTools" unique_id=1404984110]
 custom_minimum_size = Vector2(350, 350)
 layout_mode = 2
 texture = SubResource("ImageTexture_yu1ua")
@@ -274,15 +274,14 @@ auto_module_px_size = true
 quiet_zone_size = 4
 metadata/_custom_type_script = "uid://dynulhnyq5hpq"
 
-[node name="Back" parent="." instance=ExtResource("4_wdoi0")]
+[node name="Back" parent="." unique_id=1527055725 instance=ExtResource("4_wdoi0")]
 
-[node name="FileDialog" type="FileDialog" parent="."]
+[node name="FileDialog" type="FileDialog" parent="." unique_id=1467146124]
 title = "Open a File or Directory"
 position = Vector2i(0, 36)
 size = Vector2i(1300, 700)
 ok_button_text = "Open"
 file_mode = 3
-show_hidden_files = true
 
 [connection signal="pressed" from="TabContainer/TapSDK/Login" to="." method="_on_TDS_login_pressed"]
 [connection signal="pressed" from="TabContainer/TapSDK/Login2" to="." method="_on_TDS_logout_pressed"]

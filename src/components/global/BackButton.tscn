@@ -1,8 +1,8 @@
-[gd_scene load_steps=5 format=3 uid="uid://c62nlt5v5iy5"]
+[gd_scene format=3 uid="uid://c62nlt5v5iy5"]
 
-[ext_resource type="Texture2D" uid="uid://b845hkbl3138u" path="res://assets/global/Button_Left.png" id="1_v83xn"]
-[ext_resource type="Texture2D" uid="uid://dbksku7jxtmut" path="res://assets/global/back.png" id="2_nn0ks"]
-[ext_resource type="AudioStream" uid="uid://bxjd0xbg7lxll" path="res://assets/v1/Tap3.wav" id="3_nn0ks"]
+[ext_resource type="Texture2D" uid="uid://cckgqytjodcny" path="res://assets/global/Button_Left.png" id="1_v83xn"]
+[ext_resource type="Texture2D" uid="uid://bsjarc754u3xd" path="res://assets/global/back.png" id="2_nn0ks"]
+[ext_resource type="AudioStream" uid="uid://bney42kw0dq4r" path="res://assets/v1/Tap3.wav" id="3_nn0ks"]
 
 [sub_resource type="GDScript" id="GDScript_wligj"]
 script/source = "extends TextureButton
@@ -12,7 +12,7 @@ func _on_pressed() -> void:
     $AudioStreamPlayer.play()
 "
 
-[node name="Back" type="TextureButton"]
+[node name="Back" type="TextureButton" unique_id=1441287296]
 anchors_preset = -1
 offset_right = 190.0
 offset_bottom = 145.0
@@ -21,7 +21,7 @@ texture_normal = ExtResource("1_v83xn")
 stretch_mode = 6
 script = SubResource("GDScript_wligj")
 
-[node name="arrow" type="TextureRect" parent="."]
+[node name="arrow" type="TextureRect" parent="." unique_id=1086877164]
 layout_mode = 0
 offset_left = 43.5897
 offset_top = 39.7436
@@ -29,7 +29,7 @@ offset_right = 87.5897
 offset_bottom = 79.7436
 texture = ExtResource("2_nn0ks")
 
-[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="."]
+[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="." unique_id=683903329]
 stream = ExtResource("3_nn0ks")
 
 [connection signal="pressed" from="." to="." method="_on_pressed"]

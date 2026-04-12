@@ -1,7 +1,7 @@
-[gd_scene load_steps=6 format=3 uid="uid://bqdws2ryc1ioy"]
+[gd_scene format=3 uid="uid://bqdws2ryc1ioy"]
 
-[ext_resource type="Texture2D" uid="uid://5vaqd1ynicf3" path="res://assets/v1/商店_素材.png" id="1_00cb5"]
-[ext_resource type="FontFile" uid="uid://bxa3w0wqr0whf" path="res://assets/v1/Font/Exo-Regular.otf" id="2_ecm73"]
+[ext_resource type="Texture2D" uid="uid://be1dumov8rhts" path="res://assets/v1/商店_素材.png" id="1_00cb5"]
+[ext_resource type="FontFile" uid="uid://daa1ia283wsd5" path="res://assets/v1/Font/Exo-Regular.otf" id="2_ecm73"]
 [ext_resource type="Script" uid="uid://ddc252tqeqyxv" path="res://addons/AutoSizer/AutoSizeLabel.gd" id="3_6p4tx"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_6vrdq"]
@@ -12,7 +12,7 @@ region = Rect2(417, 0, 695, 150)
 atlas = ExtResource("1_00cb5")
 region = Rect2(148, 49, 140, 100)
 
-[node name="RemainingData" type="TextureButton"]
+[node name="RemainingData" type="TextureButton" unique_id=973219482]
 clip_contents = true
 anchors_preset = 1
 anchor_left = 1.0
@@ -24,7 +24,7 @@ grow_horizontal = 0
 scale = Vector2(0.45, 0.45)
 texture_normal = SubResource("AtlasTexture_6vrdq")
 
-[node name="DataIcon" type="TextureRect" parent="."]
+[node name="DataIcon" type="TextureRect" parent="." unique_id=1897405008]
 layout_mode = 1
 anchors_preset = -1
 anchor_top = 0.5
@@ -36,7 +36,7 @@ offset_bottom = 45.0
 grow_vertical = 2
 texture = SubResource("AtlasTexture_w1d2f")
 
-[node name="Data" type="Label" parent="."]
+[node name="Data" type="Label" parent="." unique_id=910773347]
 layout_mode = 0
 offset_left = 206.445
 offset_top = 24.0

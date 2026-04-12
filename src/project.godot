@@ -14,10 +14,10 @@ config/name="PhiStore"
 config/version="3.15.0"
 config/tags=PackedStringArray("project")
 run/main_scene="uid://duhfrp2sobaps"
-config/features=PackedStringArray("4.5", "Mobile")
+config/features=PackedStringArray("4.6", "C#", "Mobile")
 boot_splash/bg_color=Color(0, 0, 0, 1)
 boot_splash/show_image=false
-boot_splash/fullsize=false
+boot_splash/stretch_mode=0
 boot_splash/use_filter=false
 config/icon="uid://ccp8pjn0joah1"
 config/macos_native_icon="res://icon-macos.icns"
@@ -43,7 +43,7 @@ project/assembly_name="PhiStore"
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/autoscroll_container/plugin.cfg", "res://addons/qr_code/plugin.cfg")
+enabled=PackedStringArray()
 
 [gui]
 

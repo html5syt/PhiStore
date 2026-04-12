@@ -1,16 +1,16 @@
-[gd_scene load_steps=19 format=3 uid="uid://b0b06kbopxi33"]
+[gd_scene format=3 uid="uid://b0b06kbopxi33"]
 
 [ext_resource type="Script" uid="uid://b8yaak7ve8aam" path="res://scripts/v1/shop/shop.gd" id="1_w1d2f"]
 [ext_resource type="PackedScene" uid="uid://kiuugoj7icb3" path="res://addons/fade/TransitionManager.tscn" id="2_bv3dc"]
-[ext_resource type="AudioStream" uid="uid://dymev32u8n2k2" path="res://assets/v1/Shop0.mp3" id="2_kwhjx"]
-[ext_resource type="AudioStream" uid="uid://j83ggkvqsd62" path="res://assets/v1/Tap1.wav" id="3_kwhjx"]
-[ext_resource type="Texture2D" uid="uid://dmsrq2trbjrw1" path="res://assets/v1/SingleChapterCoverBlur.png" id="3_u6xri"]
+[ext_resource type="AudioStream" uid="uid://bfs7aw4lr6ab6" path="res://assets/v1/Shop0.mp3" id="2_kwhjx"]
+[ext_resource type="AudioStream" uid="uid://d2l7vb33wjsj5" path="res://assets/v1/Tap1.wav" id="3_kwhjx"]
+[ext_resource type="Texture2D" uid="uid://hg01jwcfo2g1" path="res://assets/v1/SingleChapterCoverBlur.png" id="3_u6xri"]
 [ext_resource type="PackedScene" uid="uid://c62nlt5v5iy5" path="res://components/global/BackButton.tscn" id="4_324vs"]
 [ext_resource type="PackedScene" uid="uid://bqdws2ryc1ioy" path="res://components/v1/RemainingData.tscn" id="5_6vrdq"]
 [ext_resource type="PackedScene" uid="uid://co6h6i0cctl7q" path="res://components/v1/ShopSongs.tscn" id="5_u6xri"]
 [ext_resource type="PackedScene" uid="uid://d10eslrpyunpq" path="res://components/v1/ShopBar.tscn" id="7_ljq3v"]
 [ext_resource type="Script" uid="uid://07gwcadip3w7" path="res://addons/tools/long_press_button.gd" id="8_kwhjx"]
-[ext_resource type="FontFile" uid="uid://bxa3w0wqr0whf" path="res://assets/v1/Font/Exo-Regular.otf" id="8_u6xri"]
+[ext_resource type="FontFile" uid="uid://daa1ia283wsd5" path="res://assets/v1/Font/Exo-Regular.otf" id="8_u6xri"]
 
 [sub_resource type="CompressedTexture2D" id="CompressedTexture2D_ll415"]
 
@@ -113,7 +113,7 @@ _data = {
 &"in": SubResource("Animation_ll415")
 }
 
-[node name="Shop" type="Control"]
+[node name="Shop" type="Control" unique_id=2113009039]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -123,7 +123,7 @@ grow_vertical = 2
 script = ExtResource("1_w1d2f")
 metadata/_edit_lock_ = true
 
-[node name="Background" type="ColorRect" parent="."]
+[node name="Background" type="ColorRect" parent="." unique_id=1052568894]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -133,13 +133,13 @@ grow_vertical = 2
 color = Color(0, 0, 0, 1)
 metadata/_edit_lock_ = true
 
-[node name="Button" type="AudioStreamPlayer" parent="."]
+[node name="Button" type="AudioStreamPlayer" parent="." unique_id=437837269]
 stream = ExtResource("3_kwhjx")
 
-[node name="bgMusic" type="AudioStreamPlayer" parent="."]
+[node name="bgMusic" type="AudioStreamPlayer" parent="." unique_id=1985251050]
 stream = ExtResource("2_kwhjx")
 
-[node name="BgPic" type="TextureRect" parent="."]
+[node name="BgPic" type="TextureRect" parent="." unique_id=1239508384]
 modulate = Color(0.414125, 0.414124, 0.414124, 1)
 layout_mode = 1
 anchors_preset = 15
@@ -151,7 +151,7 @@ texture = ExtResource("3_u6xri")
 stretch_mode = 6
 metadata/_edit_lock_ = true
 
-[node name="TextureRect" type="TextureRect" parent="."]
+[node name="TextureRect" type="TextureRect" parent="." unique_id=1377624285]
 visible = false
 layout_mode = 1
 anchors_preset = 15
@@ -163,7 +163,7 @@ texture = SubResource("CompressedTexture2D_ll415")
 expand_mode = 1
 metadata/_edit_lock_ = true
 
-[node name="Pages" type="Control" parent="."]
+[node name="Pages" type="Control" parent="." unique_id=645421000]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -172,22 +172,22 @@ grow_horizontal = 2
 grow_vertical = 2
 metadata/_edit_lock_ = true
 
-[node name="ShopSongs" parent="Pages" instance=ExtResource("5_u6xri")]
+[node name="ShopSongs" parent="Pages" unique_id=1096633600 instance=ExtResource("5_u6xri")]
 layout_mode = 1
 
-[node name="Back" parent="." instance=ExtResource("4_324vs")]
+[node name="Back" parent="." unique_id=2021965781 instance=ExtResource("4_324vs")]
 layout_mode = 0
 anchors_preset = 0
 metadata/_edit_lock_ = true
 
-[node name="RemainingData" parent="." instance=ExtResource("5_6vrdq")]
+[node name="RemainingData" parent="." unique_id=690894878 instance=ExtResource("5_6vrdq")]
 z_index = 1
 layout_mode = 1
 offset_left = -340.99988
 offset_right = 354.00012
 script = ExtResource("8_kwhjx")
 
-[node name="ShopBar" parent="." instance=ExtResource("7_ljq3v")]
+[node name="ShopBar" parent="." unique_id=1212666603 instance=ExtResource("7_ljq3v")]
 z_index = 1
 custom_minimum_size = Vector2(0, 97)
 layout_mode = 1
@@ -195,7 +195,7 @@ anchors_preset = -1
 anchor_top = 0.892
 offset_top = 97.20001
 
-[node name="FirstRun" type="Control" parent="."]
+[node name="FirstRun" type="Control" parent="." unique_id=1140795244]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -204,7 +204,7 @@ grow_horizontal = 2
 grow_vertical = 2
 script = SubResource("GDScript_ll415")
 
-[node name="BgButton" type="TextureButton" parent="FirstRun"]
+[node name="BgButton" type="TextureButton" parent="FirstRun" unique_id=1016267401]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -212,7 +212,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="Control" type="Control" parent="FirstRun"]
+[node name="Control" type="Control" parent="FirstRun" unique_id=1418350879]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -226,14 +226,14 @@ offset_bottom = 450.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="Bg" type="Sprite2D" parent="FirstRun/Control"]
+[node name="Bg" type="Sprite2D" parent="FirstRun/Control" unique_id=601745929]
 modulate = Color(0, 0, 0, 0.796078)
 position = Vector2(629.349, 451)
 scale = Vector2(1e-05, 4074.56)
 skew = 0.261799
 texture = SubResource("CanvasTexture_k4pe5")
 
-[node name="Label" type="Label" parent="FirstRun"]
+[node name="Label" type="Label" parent="FirstRun" unique_id=1491542349]
 modulate = Color(1, 1, 1, 0)
 layout_mode = 1
 anchors_preset = -1
@@ -256,12 +256,10 @@ text = "游戏中的某些歌曲需要在【商店】中购买
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="AnimationPlayer" type="AnimationPlayer" parent="FirstRun"]
-libraries = {
-&"": SubResource("AnimationLibrary_kwhjx")
-}
+[node name="AnimationPlayer" type="AnimationPlayer" parent="FirstRun" unique_id=65203759]
+libraries/ = SubResource("AnimationLibrary_kwhjx")
 
-[node name="TransitionManager" parent="." instance=ExtResource("2_bv3dc")]
+[node name="TransitionManager" parent="." unique_id=2011528602 instance=ExtResource("2_bv3dc")]
 
 [connection signal="finished" from="bgMusic" to="." method="_on_bg_music_finished"]
 [connection signal="pressed" from="Back" to="." method="_on_button_pressed"]

@@ -2,7 +2,7 @@
 
 importer="font_data_dynamic"
 type="FontFile"
-uid="uid://ciqlgyy4bvof6"
+uid="uid://dcnkxwnaauc6p"
 path="res://.godot/imported/Exo-Bold.otf-ff61e7864f021ea07f8265af1dd2b1ec.fontdata"
 
 [deps]
@@ -27,7 +27,7 @@ subpixel_positioning=4
 keep_rounding_remainders=true
 oversampling=0.0
 Fallbacks=null
-fallbacks=[Resource("uid://btcktbho6f4tv", "res://assets/v2/Font/SourceHanSansCN_&_SairaCondensed_Hybrid_Medium.woff2")]
+fallbacks=[]
 Compress=null
 compress=true
 preload=[]

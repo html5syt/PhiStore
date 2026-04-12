@@ -1,10 +1,10 @@
-[gd_scene load_steps=16 format=3 uid="uid://btutpiqr5rxy2"]
+[gd_scene format=3 uid="uid://btutpiqr5rxy2"]
 
 [ext_resource type="Script" uid="uid://bpbuslf0vf84p" path="res://scripts/v1/splash/splash1.gd" id="1_qr8y8"]
 [ext_resource type="PackedScene" uid="uid://kiuugoj7icb3" path="res://addons/fade/TransitionManager.tscn" id="1_uj71l"]
 [ext_resource type="Texture2D" uid="uid://jpequleco75k" path="res://assets/v1/bb.png" id="2_aafn5"]
-[ext_resource type="AudioStream" uid="uid://6viw3lf6t5q4" path="res://assets/global/TouchToStart0.mp3" id="2_us1gx"]
-[ext_resource type="FontFile" uid="uid://bxa3w0wqr0whf" path="res://assets/v1/Font/Exo-Regular.otf" id="4_5tqki"]
+[ext_resource type="AudioStream" uid="uid://x3tc5jcudtf5" path="res://assets/global/TouchToStart0.mp3" id="2_us1gx"]
+[ext_resource type="FontFile" uid="uid://daa1ia283wsd5" path="res://assets/v1/Font/Exo-Regular.otf" id="4_5tqki"]
 
 [sub_resource type="Animation" id="Animation_63iqt"]
 length = 0.001
@@ -146,10 +146,10 @@ _data = {
 &"scale": SubResource("Animation_is8r2")
 }
 
-[node name="Splash1" type="Node"]
+[node name="Splash1" type="Node" unique_id=1227690310]
 script = ExtResource("1_qr8y8")
 
-[node name="Background" type="ColorRect" parent="."]
+[node name="Background" type="ColorRect" parent="." unique_id=1867164458]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -157,10 +157,10 @@ grow_horizontal = 2
 grow_vertical = 2
 color = Color(0, 0, 0, 1)
 
-[node name="bgLoop" type="AudioStreamPlayer" parent="."]
+[node name="bgLoop" type="AudioStreamPlayer" parent="." unique_id=862818300]
 stream = ExtResource("2_us1gx")
 
-[node name="bgPic" type="TextureRect" parent="."]
+[node name="bgPic" type="TextureRect" parent="." unique_id=253197381]
 modulate = Color(1, 1, 1, 0)
 anchors_preset = 15
 anchor_right = 1.0
@@ -171,13 +171,12 @@ size_flags_horizontal = 4
 size_flags_vertical = 4
 stretch_mode = 6
 
-[node name="AnimationPlayer" type="AnimationPlayer" parent="bgPic"]
-libraries = {
-&"": SubResource("AnimationLibrary_hqnks")
-}
+[node name="AnimationPlayer" type="AnimationPlayer" parent="bgPic" unique_id=1882571230]
+libraries/ = SubResource("AnimationLibrary_hqnks")
 
-[node name="Logo" type="Control" parent="."]
+[node name="Logo" type="Control" parent="." unique_id=1123832977]
 layout_mode = 3
+anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
@@ -190,7 +189,7 @@ grow_horizontal = 2
 grow_vertical = 2
 size_flags_horizontal = 4
 
-[node name="logov1" type="TextureRect" parent="Logo"]
+[node name="logov1" type="TextureRect" parent="Logo" unique_id=952611034]
 layout_mode = 1
 anchors_preset = -1
 anchor_left = -5.275
@@ -204,15 +203,14 @@ scale = Vector2(0.228404, 0.228404)
 texture = ExtResource("2_aafn5")
 stretch_mode = 2
 
-[node name="AnimationPlayer" type="AnimationPlayer" parent="Logo"]
+[node name="AnimationPlayer" type="AnimationPlayer" parent="Logo" unique_id=140514292]
 root_node = NodePath("../logov1")
-libraries = {
-&"": SubResource("AnimationLibrary_is8r2")
-}
-autoplay = "move"
+libraries/ = SubResource("AnimationLibrary_is8r2")
+autoplay = &"move"
 
-[node name="TouchToStart" type="Control" parent="."]
+[node name="TouchToStart" type="Control" parent="." unique_id=1886735035]
 layout_mode = 3
+anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
@@ -225,7 +223,7 @@ grow_horizontal = 2
 grow_vertical = 2
 metadata/_edit_use_anchors_ = true
 
-[node name="Label" type="Label" parent="TouchToStart"]
+[node name="Label" type="Label" parent="TouchToStart" unique_id=176794278]
 layout_mode = 1
 anchors_preset = -1
 anchor_left = -0.022
@@ -242,13 +240,11 @@ text = "Loading..."
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="AnimationPlayer" type="AnimationPlayer" parent="TouchToStart"]
-libraries = {
-&"": SubResource("AnimationLibrary_xokrq")
-}
-autoplay = "scale"
+[node name="AnimationPlayer" type="AnimationPlayer" parent="TouchToStart" unique_id=811605831]
+libraries/ = SubResource("AnimationLibrary_xokrq")
+autoplay = &"scale"
 
-[node name="START" type="Button" parent="."]
+[node name="START" type="Button" parent="." unique_id=2097259181]
 visible = false
 self_modulate = Color(1, 1, 1, 0)
 anchors_preset = 15
@@ -257,7 +253,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="TransitionManager" parent="." instance=ExtResource("1_uj71l")]
+[node name="TransitionManager" parent="." unique_id=2113729008 instance=ExtResource("1_uj71l")]
 
 [connection signal="load_complete" from="." to="." method="_on_load_complete"]
 [connection signal="finished" from="bgLoop" to="." method="_on_bg_loop_play_finished"]

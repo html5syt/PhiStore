@@ -1,3 +1,4 @@
 {
-    "git.postCommitCommand": "none"
+    "git.postCommitCommand": "none",
+    "godotTools.editorPath.godot4": "d:\\CodingENV\\Godot\\Godot_mono_win64.exe"
 }

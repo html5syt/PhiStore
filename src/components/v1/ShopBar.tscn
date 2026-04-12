@@ -1,9 +1,9 @@
-[gd_scene load_steps=13 format=3 uid="uid://d10eslrpyunpq"]
+[gd_scene format=3 uid="uid://d10eslrpyunpq"]
 
 [ext_resource type="Script" uid="uid://50b770k1ejj7" path="res://scripts/v1/shop/shop_bar.gd" id="1_e5ftk"]
-[ext_resource type="AudioStream" uid="uid://j83ggkvqsd62" path="res://assets/v1/Tap1.wav" id="2_b6cbe"]
-[ext_resource type="Texture2D" uid="uid://5vaqd1ynicf3" path="res://assets/v1/商店_素材.png" id="2_qs4v5"]
-[ext_resource type="Texture2D" uid="uid://dnmo4wy732v3m" path="res://assets/v1/icon-shop_dataMining.png" id="3_b6cbe"]
+[ext_resource type="AudioStream" uid="uid://d2l7vb33wjsj5" path="res://assets/v1/Tap1.wav" id="2_b6cbe"]
+[ext_resource type="Texture2D" uid="uid://be1dumov8rhts" path="res://assets/v1/商店_素材.png" id="2_qs4v5"]
+[ext_resource type="Texture2D" uid="uid://byu4nv4onudq5" path="res://assets/v1/icon-shop_dataMining.png" id="3_b6cbe"]
 
 [sub_resource type="Gradient" id="Gradient_k4pe5"]
 offsets = PackedFloat32Array(0.131086, 0.7603, 1)
@@ -36,7 +36,7 @@ region = Rect2(427, 887, 101, 172)
 atlas = ExtResource("3_b6cbe")
 region = Rect2(-26, -17, 110, 108)
 
-[node name="ShopBar" type="Control"]
+[node name="ShopBar" type="Control" unique_id=497152079]
 layout_mode = 3
 anchors_preset = 12
 anchor_top = 1.0
@@ -47,7 +47,7 @@ grow_horizontal = 2
 grow_vertical = 0
 script = ExtResource("1_e5ftk")
 
-[node name="Bg" type="TextureRect" parent="."]
+[node name="Bg" type="TextureRect" parent="." unique_id=1089801799]
 custom_minimum_size = Vector2(0, 97)
 layout_mode = 1
 anchors_preset = 15
@@ -58,7 +58,7 @@ grow_vertical = 2
 texture = SubResource("GradientTexture2D_u6xri")
 expand_mode = 1
 
-[node name="Indicate" type="ColorRect" parent="."]
+[node name="Indicate" type="ColorRect" parent="." unique_id=1903719874]
 layout_mode = 1
 anchors_preset = -1
 anchor_left = 0.5
@@ -71,10 +71,10 @@ offset_right = -299.2
 offset_bottom = -0.0480003
 grow_horizontal = 2
 
-[node name="Button" type="AudioStreamPlayer" parent="."]
+[node name="Button" type="AudioStreamPlayer" parent="." unique_id=657126087]
 stream = ExtResource("2_b6cbe")
 
-[node name="ShopButton" type="HBoxContainer" parent="."]
+[node name="ShopButton" type="HBoxContainer" parent="." unique_id=1897654262]
 layout_mode = 1
 anchors_preset = -1
 anchor_left = 0.5
@@ -91,24 +91,24 @@ scale = Vector2(0.44, 0.44)
 theme_override_constants/separation = 525
 alignment = 1
 
-[node name="TextureButton" type="TextureButton" parent="ShopButton"]
+[node name="TextureButton" type="TextureButton" parent="ShopButton" unique_id=137706248]
 layout_mode = 2
 texture_normal = SubResource("AtlasTexture_ljq3v")
 stretch_mode = 6
 
-[node name="TextureButton2" type="TextureButton" parent="ShopButton"]
+[node name="TextureButton2" type="TextureButton" parent="ShopButton" unique_id=1950025246]
 clip_contents = true
 custom_minimum_size = Vector2(106, 0)
 layout_mode = 2
 texture_normal = SubResource("AtlasTexture_ll415")
 stretch_mode = 6
 
-[node name="TextureButton3" type="TextureButton" parent="ShopButton"]
+[node name="TextureButton3" type="TextureButton" parent="ShopButton" unique_id=371430046]
 layout_mode = 2
 texture_normal = SubResource("AtlasTexture_kl62y")
 stretch_mode = 6
 
-[node name="TextureButton4" type="TextureButton" parent="ShopButton"]
+[node name="TextureButton4" type="TextureButton" parent="ShopButton" unique_id=1963318063]
 layout_mode = 2
 texture_normal = SubResource("AtlasTexture_k4pe5")
 stretch_mode = 6
