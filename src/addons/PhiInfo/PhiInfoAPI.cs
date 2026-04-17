@@ -215,103 +215,47 @@ public partial class PhiInfoAPI : RefCounted
     }
 
     /// <summary>
+    /// 将 C# 对象序列化并解析为 Godot 原生的 Variant (包含 Dictionary/Array) 返回
+    /// </summary>
+    private Godot.Variant ToGodotVariant(object obj)
+    {
+        return Godot.Json.ParseString(System.Text.Json.JsonSerializer.Serialize(obj));
+    }
+
+    /// <summary>
     /// 获取所有的歌曲元数据信息。
     /// </summary>
-    /// <returns>包含歌曲各类详细信息的集合 (若给 Godot 使用建议调用 GetSongsJson 进行解析)</returns>
-    public List<SongInfo> GetSongs()
-    {
-        return _context.Info.ExtractSongInfo();
-    }
+    public Godot.Variant GetSongs() => ToGodotVariant(_context.Info.ExtractSongInfo());
 
     /// <summary>
-    /// 将歌曲信息序列化为 JSON 字符串，方便 GDScript 通过 JSON.parse 直接读取由于非 Godot 对象产生的反射屏蔽。
+    /// 获取合集信息。
     /// </summary>
-    public string GetSongsJson()
-    {
-        var songs = GetSongs();
-        return System.Text.Json.JsonSerializer.Serialize(songs);
-    }
+    public Godot.Variant GetCollection() => ToGodotVariant(_context.Info.ExtractCollection());
 
     /// <summary>
-    /// 将合集信息序列化为 JSON 字符串。
+    /// 获取头像信息。
     /// </summary>
-    public string GetCollectionJson()
-    {
-        var data = _context.Info.ExtractCollection();
-        return System.Text.Json.JsonSerializer.Serialize(data);
-    }
+    public Godot.Variant GetAvatars() => ToGodotVariant(_context.Info.ExtractAvatars());
 
     /// <summary>
-    /// 将头像信息序列化为 JSON 字符串。
+    /// 获取主线章节信息。
     /// </summary>
-    public string GetAvatarsJson()
-    {
-        var data = _context.Info.ExtractAvatars();
-        return System.Text.Json.JsonSerializer.Serialize(data);
-    }
+    public Godot.Variant GetChapters() => ToGodotVariant(_context.Info.ExtractChapters());
 
     /// <summary>
-    /// 将主线章节信息序列化为 JSON 字符串。
+    /// 获取资源目录。
     /// </summary>
-    public string GetChaptersJson()
-    {
-        var data = _context.Info.ExtractChapters();
-        return System.Text.Json.JsonSerializer.Serialize(data);
-    }
-
-    /// <summary>
-    /// 将资源目录序列化为 JSON 字符串。
-    /// </summary>
-    public string GetAssetCatalogJson()
-    {
-        var data = GetAssetCatalog();
-        return System.Text.Json.JsonSerializer.Serialize(data);
-    }
-
-    /// <summary>
-    /// 获取所有的合集/按包分类的收藏夹。
-    /// </summary>
-    /// <returns>包含各个文件夹/章节的列表</returns>
-    public List<Folder> GetCollection()
-    {
-        return _context.Info.ExtractCollection();
-    }
-
-    /// <summary>
-    /// 获取所有的头像信息。
-    /// </summary>
-    /// <returns>头像信息列表</returns>
-    public List<Avatar> GetAvatars()
-    {
-        return _context.Info.ExtractAvatars();
-    }
+    public Godot.Variant GetAssetCatalogData() => ToGodotVariant(GetAssetCatalog());
 
     /// <summary>
     /// 获取所有的提示信息(Tips)字符串。
     /// </summary>
-    /// <returns>提示信息的字符串列表</returns>
-    public string[] GetTips()
-    {
-        return _context.Info.ExtractTips().ToArray();
-    }
-
-    /// <summary>
-    /// 获取主线章节的详细信息。
-    /// </summary>
-    /// <returns>包含各主线章节数据的列表</returns>
-    public List<ChapterInfo> GetChapters()
-    {
-        return _context.Info.ExtractChapters();
-    }
+    public string[] GetTips() => _context.Info.ExtractTips().ToArray();
 
     /// <summary>
     /// 获取以上所有数据的归总大类 (AllInfo)。
     /// </summary>
-    /// <returns>包含了游玩所需的全部曲目、章节等等的 AllInfo 对象</returns>
-    public AllInfo GetAllInfo()
-    {
-        return _context.Info.ExtractAllInfo();
-    }
+    public Godot.Variant GetAllInfo() => ToGodotVariant(_context.Info.ExtractAllInfo());
 
     /// <summary>
     /// 获取资源版本信息 (PhiVersion)。
@@ -343,59 +287,106 @@ public partial class PhiInfoAPI : RefCounted
     }
 
     /// <summary>
-    /// 解析并获取指定的文本资源 (UnityText) 内容。
+    /// 提供曲目名字（ID），获取曲绘 (Illustration)
     /// </summary>
-    /// <param name="assetName">资源名或路径</param>
-    /// <returns>解析出的字符串文本</returns>
-    public string GetAssetText(string assetName)
+    public Godot.Variant GetSongIllustration(string songId)
     {
-        var rawPath = GetRawAssetPath(assetName);
-        if (rawPath == null) throw new FileNotFoundException($"Catalog missing tracking for {assetName}");
-
-        using var textData = _context.Bundle.Get<UnityText>(rawPath);
-        return textData.Content;
+        return GetAsset($"Assets/Tracks/{songId}/Illustration.jpg");
     }
 
     /// <summary>
-    /// 解析并获取指定的背景音乐或曲目 (UnityMusic)，并作为 Godot 的可播放音频流返回。
+    /// 提供曲目名字（ID），获取背景图 (Background)
     /// </summary>
-    /// <param name="assetName">资源名或路径</param>
-    /// <returns>Godot 中的 AudioStreamOggVorbis 数据，可以直接挂载到 AudioStreamPlayer</returns>
-    /// <exception cref="InvalidOperationException">当音乐解码失败时抛出</exception>
-    public AudioStreamOggVorbis GetAssetMusic(string assetName)
+    public Godot.Variant GetSongBackground(string songId)
     {
-        var rawPath = GetRawAssetPath(assetName);
-        if (rawPath == null) throw new FileNotFoundException($"Catalog missing tracking for {assetName}");
-
-        var musicData = PhiInfoDecoders.DecoderMusic(_context.Bundle.Get<UnityMusic>(rawPath));
-        if (musicData == null || musicData.Length == 0)
-            throw new InvalidOperationException($"无法解码音频资源: {assetName}");
-
-        return AudioStreamOggVorbis.LoadFromBuffer(musicData);
+        return GetAsset($"Assets/Tracks/{songId}/IllustrationBlur.jpg");
     }
 
     /// <summary>
-    /// 解析并获取指定的图片资源 (UnityImage)，并作为 Godot 原生 Image 结构返回。
-    /// 可以通过 ImageTexture.CreateFromImage(image) 转化为 Godot 的贴图格式用于渲染。
+    /// 提供曲目名字（ID），获取音频 (Music)
     /// </summary>
-    /// <param name="assetName">资源名或路径</param>
-    /// <returns>解析出的 Godot.Image 对象</returns>
-    /// <exception cref="InvalidOperationException">当图片无法解析或读取时抛出</exception>
-    public Godot.Image GetAssetImage(string assetName)
+    public Godot.Variant GetSongMusic(string songId)
     {
-        var rawPath = GetRawAssetPath(assetName);
-        if (rawPath == null) throw new FileNotFoundException($"Catalog missing tracking for {assetName}");
+        return GetAsset($"Assets/Tracks/{songId}/music.wav"); // 也可能是 ogg
+    }
 
-        using var image = (SixLabors.ImageSharp.Image<SixLabors.ImageSharp.PixelFormats.Rgb24>)PhiInfoDecoders.DecoderImage(_context.Bundle.Get<UnityImage>(rawPath));
-        if (image == null)
-            throw new InvalidOperationException($"无法解码图像资源: {assetName}");
+    /// <summary>
+    /// 提供曲目名字（ID），获取各个难度的谱面 (Chart JSON)。
+    /// difficulty: 0 -> EZ, 1 -> HD, 2 -> IN, 3 -> AT
+    /// </summary>
+    public Godot.Variant GetSongChart(string songId, int difficulty)
+    {
+        string diffStr = difficulty switch
+        {
+            0 => "EZ",
+            1 => "HD",
+            2 => "IN",
+            3 => "AT",
+            _ => "IN" // 默认退回到 IN
+        };
+        return GetAsset($"Assets/Tracks/{songId}/Chart_{diffStr}.json");
+    }
 
-        var width = image.Width;
-        var height = image.Height;
-        var data = new byte[width * height * 3];
-        image.CopyPixelDataTo(data);
+    /// <summary>
+    /// 提供收藏品名字，获取指定收藏品纹理/图像
+    /// </summary>
+    public Godot.Variant GetCollectionAsset(string collectionName)
+    {
+        // 可以根据 collectionName 组织拼合
+        return GetAsset(collectionName);
+    }
 
-        return Godot.Image.CreateFromData(width, height, false, Godot.Image.Format.Rgb8, data);
+    /// <summary>
+    /// 提供头像名字，获取指定头像图片内容
+    /// </summary>
+    public Godot.Variant GetAvatarAsset(string avatarName)
+    {
+        return GetAsset($"avatar.{avatarName}");
+    }
+
+    /// <summary>
+    /// 参照 PhiInfo CLI 逻辑，统合所有资源类型的提取。
+    /// 根据路径后缀/名称自动推断应该解析为文本、音频还是图像。
+    /// </summary>
+    /// <param name="assetPath">资源名或底层路径 (例如 .json, .wav, .jpg, avatar.)</param>
+    /// <returns>返回 Godot 中的 String, AudioStreamOggVorbis 或 Godot.Image</returns>
+    public Godot.Variant GetAsset(string assetPath)
+    {
+        var rawPath = GetRawAssetPath(assetPath);
+        if (rawPath == null) throw new FileNotFoundException($"Catalog missing tracking for {assetPath}");
+
+        if (assetPath.EndsWith(".json", StringComparison.OrdinalIgnoreCase))
+        {
+            using var textData = _context.Bundle.Get<UnityText>(rawPath);
+            return Godot.Variant.CreateFrom(textData.Content);
+        }
+
+        if (assetPath.EndsWith(".wav", StringComparison.OrdinalIgnoreCase))
+        {
+            var musicData = PhiInfoDecoders.DecoderMusic(_context.Bundle.Get<UnityMusic>(rawPath));
+            if (musicData == null || musicData.Length == 0)
+                throw new InvalidOperationException($"无法解码音频资源: {assetPath}");
+            return Godot.Variant.CreateFrom(AudioStreamOggVorbis.LoadFromBuffer(musicData));
+        }
+
+        if (assetPath.EndsWith(".jpg", StringComparison.OrdinalIgnoreCase) ||
+            assetPath.StartsWith("avatar.", StringComparison.OrdinalIgnoreCase) ||
+            assetPath.Contains("Illustration", StringComparison.OrdinalIgnoreCase))
+        {
+            using var image = (SixLabors.ImageSharp.Image<SixLabors.ImageSharp.PixelFormats.Rgb24>)PhiInfoDecoders.DecoderImage(_context.Bundle.Get<UnityImage>(rawPath));
+            if (image == null)
+                throw new InvalidOperationException($"无法解码图像资源: {assetPath}");
+
+            var width = image.Width;
+            var height = image.Height;
+            var data = new byte[width * height * 3]; // Rgb24 每像素3字节
+            image.CopyPixelDataTo(data);
+
+            var godotImage = Godot.Image.CreateFromData(width, height, false, Godot.Image.Format.Rgb8, data);
+            return Godot.Variant.CreateFrom(godotImage);
+        }
+
+        throw new NotSupportedException($"不支持的资源类型或后缀名: {assetPath}");
     }
 
     private string GetRawAssetPath(string assetName)

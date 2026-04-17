@@ -1,17 +1,20 @@
 <Project Sdk="Godot.NET.Sdk/4.6.2">
-  <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
-    <TargetFramework Condition=" '$(GodotTargetPlatform)' == 'android' ">net9.0</TargetFramework>
-    <EnableDynamicLoading>true</EnableDynamicLoading>
-  </PropertyGroup>
-
-  <ItemGroup>
-    <Compile Remove="addons\PhiInfo\libs\src\**\*.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="addons\PhiInfo\libs\src\PhiInfo.Core\PhiInfo.Core.csproj" />
-    <ProjectReference Include="addons\PhiInfo\libs\src\PhiInfo.Processing\PhiInfo.Processing.csproj" />
-    <ProjectReference Include="addons\PhiInfo\libs\src\Shua.Zip\Shua.Zip.csproj" />
-  </ItemGroup>
+	<PropertyGroup>
+		<TargetFramework>net10.0</TargetFramework>
+    <CodeAnalysisRuleSet>d:\Projects\Godot-Project\PhiStore\.vscode\ruleset.xml</CodeAnalysisRuleSet>
+		<TargetFramework Condition=" '$(GodotTargetPlatform)' == 'android' ">net10.0</TargetFramework>
+		<EnableDynamicLoading>true</EnableDynamicLoading>
+		<!-- 启用AOT -->
+		<PublishAOT>true</PublishAOT>
+	</PropertyGroup>
+	<ItemGroup>
+		<TrimmerRootAssembly Include="GodotSharp" />
+		<TrimmerRootAssembly Include="$(TargetName)" />
+	</ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="PhigrosLabs.PhiInfo.Core" Version="1.0.0-alpha.1" />
+		<PackageReference Include="PhigrosLabs.PhiInfo.Processing" Version="3.2.2" />
+		<PackageReference Include="PhigrosLibraryCSharp" Version="3.1.4" />
+		<PackageReference Include="Shua.Zip" Version="1.0.0" />
+	</ItemGroup>
 </Project>

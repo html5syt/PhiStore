@@ -5,7 +5,7 @@ extends Control
 @onready var line_edit: LineEdit = $VBoxContainer/LineEdit
 @onready var progress_bar: ProgressBar = $VBoxContainer/ProgressBar
 
-var phi_info_api: PhiInfoAPI = null
+var phi_info_api: PhiInfoAPI
 const CLDB_PATH: String = "res://addons/PhiInfo/classdata.tpk" # 需要事先准备好该文件
 
 func _ready() -> void:
@@ -25,6 +25,7 @@ func _on_file_dialog_file_selected(path: String) -> void:
     _run_test(path, false)
 
 func _run_test(path_or_url: String, is_web: bool) -> void:
+    var start = Time.get_ticks_usec()
     # 尝试调用刚才用 C# 编写的接口进行测试
     label.text = "分析中... 请稍候 (Web模式可能较慢)"
     progress_bar.value = 0.0
@@ -57,75 +58,63 @@ func _run_test(path_or_url: String, is_web: bool) -> void:
     var version_info = phi_info_api.GetPhiVersion()
     test_output += "游戏版本: %s (Code: %s)\n" % [version_info["name"], version_info["code"]]
     
-    var songs_json = phi_info_api.GetSongsJson()
-    var test_json = JSON.new()
-    var error = test_json.parse(songs_json)
-    if error == OK:
-        var songs = test_json.data
-        test_output += "共扫描到歌曲数量: %d\n" % songs.size()
-        if songs.size() > 0:
-            var first_song = songs[0]
-            var song_id = first_song["id"]
-            test_output += "首个歌曲 ID: %s \n" % song_id
-            
-            # 测试获取谱面 JSON
-            if first_song.has("levels") and first_song["levels"].size() > 0:
-                var first_level = first_song["levels"].keys()[0]
-                var chart_path = "Assets/Tracks/%s/Chart_%s.json" % [song_id, first_level]
-                var chart_json_str = phi_info_api.GetAssetText(chart_path)
-                if chart_json_str:
-                    test_output += " >> 成功读取谱面文本 (%s), 长度: %d 字符\n" % [first_level, chart_json_str.length()]
-                    print(chart_json_str)
-                else:
-                    test_output += " >> 无法读取谱面文本 (%s)\n" % chart_path
+    var songs = phi_info_api.GetSongs()
+    test_output += "共扫描到歌曲数量: %d\n" % songs.size()
+    if songs.size() > 0:
+        var first_song = songs[randi_range(0, len(songs)-1)]
+        var song_id = first_song["id"]
+        test_output += "随机歌曲 ID: %s \n" % song_id
+        
+        # 测试获取谱面 JSON
+        if first_song.has("levels") and first_song["levels"].size() > 0:
+            var first_level_idx = first_song["levels"].keys()[0] # 这里的 key 通常是 "0", "1" 等字符串
+            var chart_json_str = phi_info_api.GetSongChart(song_id, first_level_idx.to_int())
+            if chart_json_str:
+                test_output += " >> 成功读取谱面文本 (Index:%s), 长度: %d 字符\n" % [first_level_idx, chart_json_str.length()]
+                print(chart_json_str.substr(0,200))
+            else:
+                test_output += " >> 无法读取谱面文本 (Index:%s)\n" % first_level_idx
 
-            # 测试获取音频
-            var music_path = "Assets/Tracks/%s/music.wav" % song_id
-            var audio_stream = phi_info_api.GetAssetMusic(music_path)
-            if audio_stream:
-                test_output += " >> 成功解析音频 (%s), 长度: %.1f 秒\n" % [music_path, audio_stream.get_length()]
-                # 如果场景中有 AudioStreamPlayer, 可直接赋予它并播放
-                if has_node("AudioStreamPlayer"):
-                    var player = get_node("AudioStreamPlayer")
-                    player.stream = audio_stream
-                    player.play()
-            else:
-                test_output += " >> 无法读取音频 (%s)\n" % music_path
-                    
-            # 导出其他信息的统计
-            var chapters_json = phi_info_api.GetChaptersJson()
-            var avatars_json = phi_info_api.GetAvatarsJson()
-            var tips = phi_info_api.GetTips()
-            var collection_json = phi_info_api.GetCollectionJson()
-            var catalog_json = phi_info_api.GetAssetCatalogJson()
-            
-            test_output += "\n--- 更多数据统计 ---\n"
-            test_output += "章节数量: %d\n" % _get_json_count(chapters_json)
-            test_output += "头像数量: %d\n" % _get_json_count(avatars_json)
-            test_output += "Tips 数量: %d\n" % tips.size()
-            test_output += "合集数量: %d\n" % _get_json_count(collection_json)
-            test_output += "资源目录项: %d\n" % _get_json_count(catalog_json)
-            
-            # 测试获取图片
-            var ill_path = "Assets/Tracks/%s/Illustration.jpg" % song_id
-            var image = phi_info_api.GetAssetImage(ill_path)
-            if image:
-                $TextureRect.texture = ImageTexture.create_from_image(image)
-                test_output += " >> 成功解析图片 (%s), %dx%d\n" % [ill_path, image.get_width(), image.get_height()]
-            else:
-                test_output += " >> 无法读取图片 (%s)\n" % ill_path
+        # 测试获取音频
+        var audio_stream = phi_info_api.GetSongMusic(song_id)
+        if audio_stream:
+            test_output += " >> 成功解析音频, 长度: %.1f 秒\n" % audio_stream.get_length()
+            if has_node("AudioStreamPlayer"):
+                var player = get_node("AudioStreamPlayer")
+                player.stream = audio_stream
+                player.play()
+        else:
+            test_output += " >> 无法读取音频\n"
+                
+        # 导出其他信息的统计
+        var chapters = phi_info_api.GetChapters()
+        var avatars = phi_info_api.GetAvatars()
+        var tips = phi_info_api.GetTips()
+        var collection = phi_info_api.GetCollection()
+        var catalog = phi_info_api.GetAssetCatalogData()
+        
+        test_output += "\n--- 更多数据统计 ---\n"
+        test_output += "章节数量: %d\n" % chapters.size()
+        test_output += "头像数量: %d\n" % avatars.size()
+        test_output += "Tips 数量: %d\n" % tips.size()
+        test_output += "合集数量: %d\n" % collection.size()
+        test_output += "资源目录项: %d\n" % catalog.size()
+        
+        # 测试获取图片
+        var image = phi_info_api.GetSongIllustration(song_id)
+        if image:
+            $TextureRect.texture = ImageTexture.create_from_image(image)
+            test_output += " >> 成功解析图片, %dx%d\n" % [image.get_width(), image.get_height()]
+        else:
+            test_output += " >> 无法读取曲绘图片\n"
+        test_output += "用时 %f ms\n" % float((Time.get_ticks_usec()-start)/1000)
     
     label.text = test_output
-
-func _get_json_count(json_str: String) -> int:
-    var j = JSON.new()
-    if j.parse(json_str) == OK:
-        if j.data is Array:
-            return j.data.size()
-        if j.data is Dictionary:
-            return j.data.size()
-    return 0
 
 func _on_init_progress(status: String, progress: float) -> void:
     label.text = status
     progress_bar.value = progress
+
+
+func _on_audio_stream_player_finished() -> void:
+    $AudioStreamPlayer.play()

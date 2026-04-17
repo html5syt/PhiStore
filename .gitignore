@@ -174,3 +174,4 @@ build/
 *.tmp
 
 .obsidian/
+src/nuget.config
