@@ -10,6 +10,8 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_4n5m6")
+request_delay_ms = 0.0
+max_parallel_requests = 1000
 
 [node name="TextureRect" type="TextureRect" parent="." unique_id=912083223]
 layout_mode = 1

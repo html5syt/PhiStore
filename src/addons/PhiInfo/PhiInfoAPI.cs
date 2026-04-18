@@ -8,13 +8,28 @@ using PhiInfo.Core.Asset;
 using PhiInfo.Core.Type;
 using PhiInfo.Processing;
 using SixLabors.ImageSharp;
-using GlobalIReadAt = global::Shua.Zip.IReadAt;
-using GlobalMmapReadAt = global::Shua.Zip.ReadAt.MmapReadAt;
-using GlobalHttpReadAt = global::Shua.Zip.ReadAt.HttpReadAt;
-using GlobalShuaZip = global::Shua.Zip.ShuaZip;
-using GlobalAndroidPackagesDataProvider = global::PhiInfo.Processing.DataProvider.AndroidPackagesDataProvider;
+using Shua.Zip;
+using Shua.Zip.ReadAt;
+using PhiInfo.Processing.DataProvider;
 
 namespace PhiStore.Addons.PhiInfo;
+
+[GlobalClass]
+public partial class AsyncAssetRequest : Godot.RefCounted
+{
+    [Signal]
+    public delegate void CompletedEventHandler(Godot.Variant result);
+
+    public void SetResult(Godot.Variant result)
+    {
+        EmitSignal(SignalName.Completed, result);
+    }
+
+    public void SetError(string message)
+    {
+        EmitSignal(SignalName.Completed, default(Godot.Variant));
+    }
+}
 
 /// <summary>
 /// PhiInfo 数据的核心 Godot 对接接口包装类。
@@ -25,8 +40,40 @@ public partial class PhiInfoAPI : RefCounted
 {
     private PhiInfoContext _context;
 
+    /// <summary>
+    /// 手动释放当前持有的上下文资源并断开流。
+    /// 在不再需要读取资源时，可由 GDScript 主动调用以快速回收内存并关闭文件/网络句柄。
+    /// </summary>
+    public void FreeContext()
+    {
+        if (_context != null)
+        {
+            _context.Dispose();
+            _context = null;
+        }
+    }
+
+    protected override void Dispose(bool disposing)
+    {
+        if (disposing) FreeContext();
+        base.Dispose(disposing);
+    }
+
+    /// <summary>
+    /// 初始化进度状态枚举
+    /// </summary>
+    public enum InitState : int
+    {
+        Starting = 0,
+        ReadingFiles = 1,
+        MountingProvider = 2,
+        BuildingContext = 3,
+        Completed = 4,
+        Error = 5
+    }
+
     [Signal]
-    public delegate void InitializationProgressEventHandler(string status, float progress);
+    public delegate void InitializationProgressEventHandler(int state, float progress);
 
     [Signal]
     public delegate void InitializationCompletedEventHandler(bool success, string errorMsg);
@@ -58,142 +105,89 @@ public partial class PhiInfoAPI : RefCounted
     }
 
     /// <summary>
-    /// 从单个本地 APK 文件及 classdata (cldb) 文件初始化实例。
-    /// 可以被 GDScript 直接调用，如: api.InitFromSingleApk("user://...", "res://...")
+    /// 统一的 Provider 构建辅助函数，用于合并多处重复的文件挂载与实例化逻辑
     /// </summary>
-    /// <param name="apkPath">APK 文件路径</param>
-    /// <param name="cldbPath">classdata.tpk 文件的路径</param>
-    public void InitFromSingleApk(string apkPath, string cldbPath)
+    private AndroidPackagesDataProvider CreateProviders(string[] paths, string cldbPath, bool isWeb)
     {
-        InitFromLocalApk(new[] { apkPath }, cldbPath);
+        var globalCldbPath = ProjectSettings.GlobalizePath(cldbPath);
+        var readAts = paths.Select(path => isWeb ? (IReadAt)new HttpReadAt(path) : new MmapReadAt(ProjectSettings.GlobalizePath(path))).ToArray();
+        var zips = readAts.Select(r => new ShuaZip(r)).ToArray();
+        var cldbStream = System.IO.File.OpenRead(globalCldbPath);
+        return new AndroidPackagesDataProvider(zips, cldbStream);
     }
+
+    /// <summary>
+    /// 从单个本地 APK 文件及 classdata (cldb) 文件初始化实例。
+    /// </summary>
+    public void InitFromSingleApk(string apkPath, string cldbPath) => InitFromLocalApk(new[] { apkPath }, cldbPath);
 
     /// <summary>
     /// 从多个分卷 APK 包及 classdata 文件初始化实例。
     /// </summary>
-    /// <param name="apkPaths">包含主副包在内的多个 APK 路径集合（支持 Godot 协议前缀）</param>
-    /// <param name="cldbPath">classdata.tpk 文件的路径</param>
-    public void InitFromLocalApk(string[] apkPaths, string cldbPath)
-    {
-        var globalCldbPath = ProjectSettings.GlobalizePath(cldbPath);
-        var globalApks = apkPaths.Select(ProjectSettings.GlobalizePath).ToArray();
-
-        var readAts = globalApks.Select(path => (GlobalIReadAt)new GlobalMmapReadAt(path)).ToArray();
-        var zips = readAts.Select(r => new GlobalShuaZip(r)).ToArray();
-        var cldbStream = System.IO.File.OpenRead(globalCldbPath);
-
-        var dp = new GlobalAndroidPackagesDataProvider(zips, cldbStream);
-        _context = new PhiInfoContext(dp, Language.Chinese);
-    }
+    public void InitFromLocalApk(string[] apkPaths, string cldbPath) => _context = new PhiInfoContext(CreateProviders(apkPaths, cldbPath, false), Language.Chinese);
 
     /// <summary>
-    /// 从单个 Web 网络直链及 classdata (cldb) 文件初始化实例。通过 HTTP 的 Range 请求进行流式解包提取资源。
+    /// 从单个 Web 网络直链及 classdata (cldb) 文件初始化实例。
     /// </summary>
-    /// <param name="apkUrl">APK安装包存放的URL直链，服务器须支持带有 Range 请求头的 HTTP 206 状态返回。</param>
-    /// <param name="cldbPath">本地 classdata.tpk 文件的路径</param>
-    public void InitFromSingleWebApk(string apkUrl, string cldbPath)
-    {
-        InitFromWebApk(new[] { apkUrl }, cldbPath);
-    }
+    public void InitFromSingleWebApk(string apkUrl, string cldbPath) => InitFromWebApk(new[] { apkUrl }, cldbPath);
 
     /// <summary>
     /// 从多个 Web 网络直链分卷 APK 及本地 classdata 文件初始化实例，使用 HTTP 的 Range 流式解包。
     /// </summary>
-    /// <param name="apkUrls">包含主副包在内的多个 APK Web 直链集合</param>
-    /// <param name="cldbPath">本地 classdata.tpk 文件的路径</param>
-    public void InitFromWebApk(string[] apkUrls, string cldbPath)
-    {
-        var globalCldbPath = ProjectSettings.GlobalizePath(cldbPath);
-        var readAts = apkUrls.Select(url => (GlobalIReadAt)new GlobalHttpReadAt(url)).ToArray();
-        var zips = readAts.Select(r => new GlobalShuaZip(r)).ToArray();
-        var cldbStream = System.IO.File.OpenRead(globalCldbPath);
-
-        var dp = new GlobalAndroidPackagesDataProvider(zips, cldbStream);
-        _context = new PhiInfoContext(dp, Language.Chinese);
-    }
+    public void InitFromWebApk(string[] apkUrls, string cldbPath) => _context = new PhiInfoContext(CreateProviders(apkUrls, cldbPath, true), Language.Chinese);
 
     /// <summary>
-    /// 使用独立线程非阻塞初始化单个本地 APK 文件。完成后将抛出 InitializationCompleted 信号。
+    /// 使用独立线程非阻塞初始化。
     /// </summary>
-    public void InitFromSingleApkAsync(string apkPath, string cldbPath)
-    {
-        InitFromSingleApkAsync(apkPath, cldbPath, (int)APILanguage.Chinese);
-    }
+    public void InitFromSingleApkAsync(string apkPath, string cldbPath) => InitFromSingleApkAsync(apkPath, cldbPath, (int)APILanguage.Chinese);
+    public void InitFromSingleApkAsync(string apkPath, string cldbPath, int apiLanguage) =>
+        InitAsync(() => CreateProviders(new[] { apkPath }, cldbPath, false), (Language)apiLanguage);
 
-    public void InitFromSingleApkAsync(string apkPath, string cldbPath, int apiLanguage)
+    public void InitFromSingleWebApkAsync(string apkUrl, string cldbPath) => InitFromSingleWebApkAsync(apkUrl, cldbPath, (int)APILanguage.Chinese);
+    public void InitFromSingleWebApkAsync(string apkUrl, string cldbPath, int apiLanguage) =>
+        InitAsync(() => CreateProviders(new[] { apkUrl }, cldbPath, true), (Language)apiLanguage);
+
+    private void InitAsync(Func<AndroidPackagesDataProvider> providerFactory, Language language)
     {
-        Language language = (Language)apiLanguage;
         System.Threading.Tasks.Task.Run(() =>
         {
-            try
+            FreeContext(); // 在新初始化前清理旧上下文及关联的文件流/Http连接
+            for (int i = 0; i < 3; i++)
             {
-                CallDeferred(MethodName.EmitSignal, SignalName.InitializationProgress, "转换本地路径...", 0.1f);
-                var globalCldbPath = ProjectSettings.GlobalizePath(cldbPath);
-                var globalApkPath = ProjectSettings.GlobalizePath(apkPath);
-
-                CallDeferred(MethodName.EmitSignal, SignalName.InitializationProgress, "映射本地文件内存...", 0.3f);
-                var readAt = new GlobalMmapReadAt(globalApkPath);
-                var zip = new GlobalShuaZip(readAt);
-
-                CallDeferred(MethodName.EmitSignal, SignalName.InitializationProgress, "读取 CLDB 文件...", 0.5f);
-                var cldbStream = System.IO.File.OpenRead(globalCldbPath);
-
-                CallDeferred(MethodName.EmitSignal, SignalName.InitializationProgress, "挂载安卓资源包提供者...", 0.6f);
-                var dp = new GlobalAndroidPackagesDataProvider(new[] { zip }, cldbStream);
-
-                CallDeferred(MethodName.EmitSignal, SignalName.InitializationProgress, "构建资源上下文环境(较耗时)...", 0.7f);
-                _context = new PhiInfoContext(dp, language);
-
-                CallDeferred(MethodName.EmitSignal, SignalName.InitializationProgress, "初始化完成！", 1.0f);
-                CallDeferred(MethodName.EmitSignal, SignalName.InitializationCompleted, true, string.Empty);
-            }
-            catch (Exception ex)
-            {
-                CallDeferred(MethodName.EmitSignal, SignalName.InitializationCompleted, false, ex.Message);
+                try
+                {
+                    if (i == 0) CallDeferred(MethodName.EmitSignal, SignalName.InitializationProgress, (int)InitState.Starting, 0.1f);
+                    var dp = providerFactory();
+                    if (i == 0) CallDeferred(MethodName.EmitSignal, SignalName.InitializationProgress, (int)InitState.MountingProvider, 0.6f);
+                    _context = new PhiInfoContext(dp, language);
+                    CallDeferred(MethodName.EmitSignal, SignalName.InitializationProgress, (int)InitState.Completed, 1.0f);
+                    CallDeferred(MethodName.EmitSignal, SignalName.InitializationCompleted, true, string.Empty);
+                    return;
+                }
+                catch (Exception ex)
+                {
+                    if (i == 2)
+                    {
+                        CallDeferred(MethodName.EmitSignal, SignalName.InitializationProgress, (int)InitState.Error, 1.0f);
+                        CallDeferred(MethodName.EmitSignal, SignalName.InitializationCompleted, false, ex.Message);
+                    }
+                    else
+                    {
+                        System.Threading.Thread.Sleep(500);
+                    }
+                }
             }
         });
     }
 
     /// <summary>
-    /// 使用独立线程非阻塞初始化单个网络 Web 链接 APK 文件。完成后将抛出 InitializationCompleted 信号。
+    /// 获取或设置底层的 PhiInfoContext 上下文实例。
+    /// 可以直接传入已有上下文实现快速初始化。
     /// </summary>
-    public void InitFromSingleWebApkAsync(string apkUrl, string cldbPath)
+    public PhiInfoContext Context
     {
-        InitFromSingleWebApkAsync(apkUrl, cldbPath, (int)APILanguage.Chinese);
-    }
-
-    public void InitFromSingleWebApkAsync(string apkUrl, string cldbPath, int apiLanguage)
-    {
-        Language language = (Language)apiLanguage;
-        System.Threading.Tasks.Task.Run(() =>
-        {
-            try
-            {
-                CallDeferred(MethodName.EmitSignal, SignalName.InitializationProgress, "正在解析网络连接与文件头...", 0.1f);
-                var globalCldbPath = ProjectSettings.GlobalizePath(cldbPath);
-
-                var readAt = new GlobalHttpReadAt(apkUrl);
-
-                CallDeferred(MethodName.EmitSignal, SignalName.InitializationProgress, "正在读取 ZIP 树...", 0.3f);
-                var zip = new GlobalShuaZip(readAt);
-
-                CallDeferred(MethodName.EmitSignal, SignalName.InitializationProgress, "读取本地 CLDB 文件...", 0.5f);
-                var cldbStream = System.IO.File.OpenRead(globalCldbPath);
-
-                CallDeferred(MethodName.EmitSignal, SignalName.InitializationProgress, "挂载网络流式解包提供者...", 0.6f);
-                var dp = new GlobalAndroidPackagesDataProvider(new[] { zip }, cldbStream);
-
-                CallDeferred(MethodName.EmitSignal, SignalName.InitializationProgress, "构建元数据流上下文...", 0.7f);
-                _context = new PhiInfoContext(dp, language);
-
-                CallDeferred(MethodName.EmitSignal, SignalName.InitializationProgress, "网络流式解析完成！", 1.0f);
-                CallDeferred(MethodName.EmitSignal, SignalName.InitializationCompleted, true, string.Empty);
-            }
-            catch (Exception ex)
-            {
-                CallDeferred(MethodName.EmitSignal, SignalName.InitializationCompleted, false, ex.Message);
-            }
-        });
+        get => _context;
+        set => _context = value;
     }
 
     /// <summary>
@@ -223,150 +217,159 @@ public partial class PhiInfoAPI : RefCounted
     }
 
     /// <summary>
-    /// 获取所有的歌曲元数据信息。
+    /// 获取歌曲元数据信息。
     /// </summary>
     public Godot.Variant GetSongs() => ToGodotVariant(_context.Info.ExtractSongInfo());
 
     /// <summary>
-    /// 获取合集信息。
+    /// 获取合集元数据信息。
     /// </summary>
     public Godot.Variant GetCollection() => ToGodotVariant(_context.Info.ExtractCollection());
 
     /// <summary>
-    /// 获取头像信息。
+    /// 获取头像元数据信息。
     /// </summary>
     public Godot.Variant GetAvatars() => ToGodotVariant(_context.Info.ExtractAvatars());
 
     /// <summary>
-    /// 获取主线章节信息。
+    /// 获取章节元数据信息。
     /// </summary>
     public Godot.Variant GetChapters() => ToGodotVariant(_context.Info.ExtractChapters());
 
     /// <summary>
-    /// 获取资源目录。
+    /// 获取资源目录数据。
     /// </summary>
     public Godot.Variant GetAssetCatalogData() => ToGodotVariant(GetAssetCatalog());
 
     /// <summary>
-    /// 获取所有的提示信息(Tips)字符串。
+    /// 获取 Tips 信息。
     /// </summary>
     public string[] GetTips() => _context.Info.ExtractTips().ToArray();
 
     /// <summary>
-    /// 获取以上所有数据的归总大类 (AllInfo)。
+    /// 获取所有元数据归总信息。
     /// </summary>
     public Godot.Variant GetAllInfo() => ToGodotVariant(_context.Info.ExtractAllInfo());
 
+    public AsyncAssetRequest GetSongsAsync() => RunAsync(GetSongs);
+    public AsyncAssetRequest GetCollectionAsync() => RunAsync(GetCollection);
+    public AsyncAssetRequest GetAvatarsAsync() => RunAsync(GetAvatars);
+    public AsyncAssetRequest GetChaptersAsync() => RunAsync(GetChapters);
+    public AsyncAssetRequest GetAssetCatalogDataAsync() => RunAsync(GetAssetCatalogData);
+    public AsyncAssetRequest GetTipsAsync() => RunAsync(() => (Godot.Variant)GetTips());
+    public AsyncAssetRequest GetAllInfoAsync() => RunAsync(GetAllInfo);
+
     /// <summary>
-    /// 获取资源版本信息 (PhiVersion)。
+    /// 获取版本信息。
     /// </summary>
-    /// <returns>包含 name 和 code 的字典</returns>
     public Godot.Collections.Dictionary GetPhiVersion()
     {
         var ver = _context.Info.GetPhiVersion();
-        return new Godot.Collections.Dictionary
-        {
-            { "code", ver.code },
-            { "name", ver.name }
-        };
+        return new Godot.Collections.Dictionary { { "code", ver.code }, { "name", ver.name } };
     }
+
+    public AsyncAssetRequest GetPhiVersionAsync() => RunAsync(() => (Godot.Variant)GetPhiVersion());
 
     /// <summary>
     /// 获取资源目录及其路径的字典映射。
-    /// 键为资源标识，值为其底层路径或别名。
     /// </summary>
-    /// <returns>对应的资源目录</returns>
-    public Dictionary<string, string> GetAssetCatalog()
-    {
-        return _context.Catalog.GetAll()
-            .Where(v => v.Key.IsString && v.Value != null && v.Value.Value.IsString)
-            .ToDictionary(
-                v => v.Key.Str!,
-                v => v.Value!.Value.Str
-            );
-    }
+    public Dictionary<string, string> GetAssetCatalog() => _context.Catalog.GetAll()
+        .Where(v => v.Key.IsString && v.Value != null && v.Value.Value.IsString)
+        .ToDictionary(v => v.Key.Str!, v => v.Value!.Value.Str);
 
-    /// <summary>
-    /// 提供曲目名字（ID），获取曲绘 (Illustration)
-    /// </summary>
-    public Godot.Variant GetSongIllustration(string songId)
-    {
-        return GetAsset($"Assets/Tracks/{songId}/Illustration.jpg");
-    }
+    public AsyncAssetRequest GetAssetCatalogAsync() => RunAsync(() => ToGodotVariant(GetAssetCatalog()));
 
-    /// <summary>
-    /// 提供曲目名字（ID），获取背景图 (Background)
-    /// </summary>
-    public Godot.Variant GetSongBackground(string songId)
+    private AsyncAssetRequest RunAsync(Func<Godot.Variant> action)
     {
-        return GetAsset($"Assets/Tracks/{songId}/IllustrationBlur.jpg");
-    }
-
-    /// <summary>
-    /// 提供曲目名字（ID），获取音频 (Music)
-    /// </summary>
-    public Godot.Variant GetSongMusic(string songId)
-    {
-        return GetAsset($"Assets/Tracks/{songId}/music.wav"); // 也可能是 ogg
-    }
-
-    /// <summary>
-    /// 提供曲目名字（ID），获取各个难度的谱面 (Chart JSON)。
-    /// difficulty: 0 -> EZ, 1 -> HD, 2 -> IN, 3 -> AT
-    /// </summary>
-    public Godot.Variant GetSongChart(string songId, int difficulty)
-    {
-        string diffStr = difficulty switch
+        var request = new AsyncAssetRequest();
+        System.Threading.Tasks.Task.Run(() =>
         {
-            0 => "EZ",
-            1 => "HD",
-            2 => "IN",
-            3 => "AT",
-            _ => "IN" // 默认退回到 IN
-        };
-        return GetAsset($"Assets/Tracks/{songId}/Chart_{diffStr}.json");
+            for (int i = 0; i < 3; i++)
+            {
+                try
+                {
+                    request.CallDeferred(AsyncAssetRequest.MethodName.SetResult, action());
+                    return;
+                }
+                catch (Exception ex)
+                {
+                    if (i == 2)
+                    {
+                        request.CallDeferred(AsyncAssetRequest.MethodName.SetError, ex.Message);
+                    }
+                    else
+                    {
+                        System.Threading.Thread.Sleep(500); // 失败时增加重试机制，缓解网络主机强制关闭链接的情况
+                    }
+                }
+            }
+        });
+        return request;
     }
 
     /// <summary>
-    /// 提供收藏品名字，获取指定收藏品纹理/图像
+    /// 提供曲目名字（ID），获取曲绘 (Illustration)。
     /// </summary>
-    public Godot.Variant GetCollectionAsset(string collectionName)
-    {
-        // 可以根据 collectionName 组织拼合
-        return GetAsset(collectionName);
-    }
+    public Godot.Variant GetIllustration(string sid) => GetAsset($"Assets/Tracks/{sid}/Illustration.jpg");
 
     /// <summary>
-    /// 提供头像名字，获取指定头像图片内容
+    /// 提供曲目名字（ID），获取背景图 (Background)。
     /// </summary>
-    public Godot.Variant GetAvatarAsset(string avatarName)
-    {
-        return GetAsset($"avatar.{avatarName}");
-    }
+    public Godot.Variant GetBackground(string sid) => GetAsset($"Assets/Tracks/{sid}/IllustrationBlur.jpg");
 
     /// <summary>
-    /// 参照 PhiInfo CLI 逻辑，统合所有资源类型的提取。
-    /// 根据路径后缀/名称自动推断应该解析为文本、音频还是图像。
+    /// 提供曲目名字（ID），获取音频 (Music)。
     /// </summary>
-    /// <param name="assetPath">资源名或底层路径 (例如 .json, .wav, .jpg, avatar.)</param>
-    /// <returns>返回 Godot 中的 String, AudioStreamOggVorbis 或 Godot.Image</returns>
+    public Godot.Variant GetMusic(string sid) => GetAsset($"Assets/Tracks/{sid}/music.wav");
+
+    /// <summary>
+    /// 提供曲目名字（ID），获取指定难度的谱面 (Chart)。
+    /// </summary>
+    public Godot.Variant GetChart(string sid, int diff) => GetAsset($"Assets/Tracks/{sid}/Chart_{GetDiffStr(diff)}.json");
+
+    /// <summary>
+    /// 获取收藏品资源。
+    /// </summary>
+    public Godot.Variant GetCollectionAsset(string name) => GetAsset(name);
+
+    /// <summary>
+    /// 获取头像资源。
+    /// </summary>
+    public Godot.Variant GetAvatar(string name) => GetAsset($"avatar.{name}");
+
+    public AsyncAssetRequest GetIllustrationAsync(string sid) => GetAssetAsync($"Assets/Tracks/{sid}/Illustration.jpg");
+    public AsyncAssetRequest GetBackgroundAsync(string sid) => GetAssetAsync($"Assets/Tracks/{sid}/IllustrationBlur.jpg");
+    public AsyncAssetRequest GetMusicAsync(string sid) => GetAssetAsync($"Assets/Tracks/{sid}/music.wav");
+    public AsyncAssetRequest GetChartAsync(string sid, int diff) => GetAssetAsync($"Assets/Tracks/{sid}/Chart_{GetDiffStr(diff)}.json");
+    public AsyncAssetRequest GetCollectionAssetAsync(string name) => GetAssetAsync(name);
+    public AsyncAssetRequest GetAvatarAsync(string name) => GetAssetAsync($"avatar.{name}");
+
+    private string GetDiffStr(int diff) => diff switch { 0 => "EZ", 1 => "HD", 2 => "IN", 3 => "AT", _ => "IN" };
+
+    /// <summary>
+    /// 统合解析资源文件。根据路径后缀自动推断类型。
+    /// </summary>
+    /// <param name="assetPath">资源标识或路径</param>
     public Godot.Variant GetAsset(string assetPath)
     {
-        var rawPath = GetRawAssetPath(assetPath);
-        if (rawPath == null) throw new FileNotFoundException($"Catalog missing tracking for {assetPath}");
+        var cat = GetAssetCatalog();
+        if (!cat.TryGetValue(assetPath, out string rawPath))
+        {
+            rawPath = cat.FirstOrDefault(kvp => kvp.Key.Equals(assetPath, StringComparison.OrdinalIgnoreCase)).Value
+                ?? throw new FileNotFoundException($"Catalog missing tracking for {assetPath}");
+        }
 
         if (assetPath.EndsWith(".json", StringComparison.OrdinalIgnoreCase))
         {
-            using var textData = _context.Bundle.Get<UnityText>(rawPath);
-            return Godot.Variant.CreateFrom(textData.Content);
+            using var data = _context.Bundle.Get<UnityText>(rawPath);
+            return Godot.Variant.CreateFrom(data.Content);
         }
 
         if (assetPath.EndsWith(".wav", StringComparison.OrdinalIgnoreCase))
         {
-            var musicData = PhiInfoDecoders.DecoderMusic(_context.Bundle.Get<UnityMusic>(rawPath));
-            if (musicData == null || musicData.Length == 0)
-                throw new InvalidOperationException($"无法解码音频资源: {assetPath}");
-            return Godot.Variant.CreateFrom(AudioStreamOggVorbis.LoadFromBuffer(musicData));
+            var music = PhiInfoDecoders.DecoderMusic(_context.Bundle.Get<UnityMusic>(rawPath));
+            if (music == null || music.Length == 0) throw new InvalidOperationException($"无法解码音频: {assetPath}");
+            return Godot.Variant.CreateFrom(AudioStreamOggVorbis.LoadFromBuffer(music));
         }
 
         if (assetPath.EndsWith(".jpg", StringComparison.OrdinalIgnoreCase) ||
@@ -374,29 +377,14 @@ public partial class PhiInfoAPI : RefCounted
             assetPath.Contains("Illustration", StringComparison.OrdinalIgnoreCase))
         {
             using var image = (SixLabors.ImageSharp.Image<SixLabors.ImageSharp.PixelFormats.Rgb24>)PhiInfoDecoders.DecoderImage(_context.Bundle.Get<UnityImage>(rawPath));
-            if (image == null)
-                throw new InvalidOperationException($"无法解码图像资源: {assetPath}");
+            if (image == null) throw new InvalidOperationException($"无法解码图像: {assetPath}");
 
-            var width = image.Width;
-            var height = image.Height;
-            var data = new byte[width * height * 3]; // Rgb24 每像素3字节
+            var data = new byte[image.Width * image.Height * 3];
             image.CopyPixelDataTo(data);
-
-            var godotImage = Godot.Image.CreateFromData(width, height, false, Godot.Image.Format.Rgb8, data);
-            return Godot.Variant.CreateFrom(godotImage);
+            return Godot.Variant.CreateFrom(Godot.Image.CreateFromData(image.Width, image.Height, false, Godot.Image.Format.Rgb8, data));
         }
-
-        throw new NotSupportedException($"不支持的资源类型或后缀名: {assetPath}");
+        throw new NotSupportedException($"Unsupported asset type: {assetPath}");
     }
 
-    private string GetRawAssetPath(string assetName)
-    {
-        var cat = GetAssetCatalog();
-        if (cat.TryGetValue(assetName, out string val))
-            return val;
-
-        // 兼容传入小写或各种直接路径
-        var lookup = cat.FirstOrDefault(kvp => kvp.Key.Equals(assetName, StringComparison.OrdinalIgnoreCase));
-        return lookup.Value ?? assetName; // 回退原样
-    }
+    public AsyncAssetRequest GetAssetAsync(string assetPath) => RunAsync(() => GetAsset(assetPath));
 }

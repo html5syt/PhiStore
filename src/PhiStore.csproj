@@ -13,8 +13,8 @@
 	</ItemGroup>
 	<ItemGroup>
 		<PackageReference Include="PhigrosLabs.PhiInfo.Core" Version="1.0.0-alpha.1" />
-		<PackageReference Include="PhigrosLabs.PhiInfo.Processing" Version="3.2.2" />
+		<PackageReference Include="PhigrosLabs.PhiInfo.Processing" Version="3.2.3" />
 		<PackageReference Include="PhigrosLibraryCSharp" Version="3.1.4" />
-		<PackageReference Include="Shua.Zip" Version="1.0.0" />
+		<PackageReference Include="Shua.Zip" Version="2.0.0" />
 	</ItemGroup>
 </Project>

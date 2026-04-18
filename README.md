@@ -3,6 +3,8 @@
 </div>
 <h1 align="center">PhiStore</h1>
 
+**WARN: 正在重构，网页版将不可用**
+
 # 简介
 
 尝试使用Godot还原Phigros v1.6.11的商店系统，V2.0版本已开发完成。部分资源（如icon）来自Phigros安装包，**禁止商业及不正当使用。**
