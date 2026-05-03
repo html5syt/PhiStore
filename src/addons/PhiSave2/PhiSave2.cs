@@ -29,6 +29,14 @@ public partial class PhiSave2 : RefCounted
     public delegate void LoginQrCodeReadyEventHandler(string url, int expiresInSeconds, string deviceId, string deviceCode);
 
 	/// <summary>
+	/// OAuth 登录流程准备完成，浏览器可以打开时触发。
+	/// GDScript 端收到此信号后可调用 <c>OS.shell_open(beginUrl)</c> 打开浏览器。
+	/// </summary>
+	/// <param name="beginUrl">用户应在浏览器中打开的授权 URL。</param>
+	[Signal]
+	public delegate void OAuthLoginReadyEventHandler(string beginUrl);
+
+	/// <summary>
 	/// 任意登录流程（QR/OAuth/SessionToken）完成时触发。
 	/// 成功时 errorMessage 为空字符串，失败时 sessionToken/tapTapName/tapTapAvatar 为空。
 	/// </summary>
@@ -59,6 +67,11 @@ public partial class PhiSave2 : RefCounted
 
     private CloudSaveEntry? _cloudEntry;
 
+    // OAuth HTTP 本地回调监听
+    private System.Net.HttpListener? _oauthListener;
+    private int _oauthListenPort = 14514;
+    private bool _oauthListening;
+
     private sealed class CloudSaveEntry
     {
         public required string UserObjectId { get; init; }
@@ -79,6 +92,8 @@ public partial class PhiSave2 : RefCounted
         _decryptedEntries.Clear();
         _entryHeaders.Clear();
         _cloudEntry = null;
+        _pendingCallbackLogin = null;
+        CleanupOAuthListener();
     }
 
 

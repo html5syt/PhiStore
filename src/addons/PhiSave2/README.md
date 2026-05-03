@@ -6,7 +6,9 @@ PhiSave2 — Godot C# 插件使用说明
 - 依赖：`PhigrosLibraryCSharp`（通过 NuGet 引入），Godot 4 C# 环境。
 
 主要功能
-- TapTap 二维码登录 / 回调登录（非阻塞, 返回 AsyncSaveRequest）
+- TapTap 二维码登录（非阻塞, 返回 AsyncSaveRequest，发射 LoginQrCodeReady 信号）
+- TapTap OAuth 回调登录（自动启动本地 HTTP 监听，浏览器授权后自动完成，发射 OAuthLoginReady 信号）
+- SessionToken 直接登录（发射 LoginCompleted 信号）
 - 从云端加载存档并缓存为内存条目（支持读取 summary）
 - 读取/修改单个解密后的存档条目（byte[]）
 - 导出/导入明文 JSON（供 GDScript 层展示或编辑）
@@ -14,9 +16,9 @@ PhiSave2 — Godot C# 插件使用说明
 - 生成/打包/加密本地 ZIP，上传至云端
 
 文件与类参考（快捷导航）
-- `src/addons/PhiSave2/PhiSave2.cs` — 主入口类，保存会话/缓存，提供基础读写、打包、保存接口。
+- `src/addons/PhiSave2/PhiSave2.cs` — 主入口类，保存会话/缓存，提供基础读写、打包、保存接口；定义登录相关信号。
 - `src/addons/PhiSave2/AsyncSaveRequest.cs` — 异步请求封装，带进度/完成信号，供 GDScript 非阻塞调用。
-- `src/addons/PhiSave2/PhiSave2.AuthAndCloud.cs` — 认证、云端加载与上传相关方法（StartQrLoginAsync、BeginCallbackLogin、CompleteCallbackLoginAsync、LoadCloudSaveAsync、UploadToCloudAsync）。
+- `src/addons/PhiSave2/PhiSave2.AuthAndCloud.cs` — 认证、云端加载与上传相关方法（StartQrLoginAsync、StartOAuthLoginAsync、LoadCloudSaveAsync、UploadToCloudAsync）。
 - `src/addons/PhiSave2/PhiSave2.DataAndRks.cs` — 明文导出/导入、可读数据导出、RKS 计算方法（ExportPlainData、ImportPlainData、CalculateRks 等）。
 - `src/addons/PhiSave2/PhiSave2.Internal.cs` — 私有工具方法：上下文缓存、ByteReader 解析、加解密、打包、ToGodotVariant 等。
 - `src/addons/PhiSave2/PhiSaveUploader.cs` — 云端上传实现（分片上传、file token、回调等），已移植并适配 HttpClient。
@@ -25,13 +27,25 @@ PhiSave2 — Godot C# 插件使用说明
 - 创建并初始化：
 ```
     var api = PhiSave2.new()
-    api.InitSession(session_token)
 ```
 - 二维码登录（异步）：
 ```
-    var req = api.StartQrLoginAsync(true, ["public_profile"]) # 返回 AsyncSaveRequest
-    req.connect("completed", Callable(self, "_on_login_completed"))
-    req.connect("progress", Callable(self, "_on_login_progress"))
+    api.connect("login_qr_code_ready", _on_qr_ready)
+    api.connect("login_completed", _on_login_completed)
+    var req = api.start_qr_login_async(true, ["public_profile"])
+```
+- OAuth 登录（自动本地回调，无需手动输入 code）：
+```
+    api.connect("oauth_login_ready", _on_oauth_ready)
+    api.connect("login_completed", _on_login_completed)
+    var req = api.start_oauth_login_async(14514, true, ["public_profile"])
+    
+    func _on_oauth_ready(begin_url):
+        OS.shell_open(begin_url)  # 打开浏览器让用户授权
+```
+- SessionToken 登录：
+```
+    api.login_with_session_token(session_token, "User", false)
 ```
 - 加载云端第 0 个存档并导出可读数据：
 ```

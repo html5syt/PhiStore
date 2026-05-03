@@ -82,76 +82,219 @@ public partial class PhiSave2
     }
 
     /// <summary>
-    /// 开始 OAuth 回调登录流程。内部处理：
-    /// 1) 生成回调登录 URL/State 信息并返回（调用方可据此打开浏览器）；
-    /// 2) 调用方在获得回调 code 后调用 <see cref="CompleteOAuthLoginAsync"/> 即可完成登录。
+    /// 启动 OAuth 登录流程。内部自动处理：
+    /// 1) 在本地启动 HTTP 监听（默认端口 14514）；
+    /// 2) 生成 TapTap 授权 URL 并通过 <see cref="OAuthLoginReadyEventHandler"/> 通知 GDScript 打开浏览器；
+    /// 3) 等待浏览器回调本地端口获取授权 code；
+    /// 4) 自动交换 token、获取 profile、设置会话；
+    /// 5) 通过 <see cref="LoginCompletedEventHandler"/> 通知结果。
+    /// 调用方无需任何额外操作，只需在收到 <c>OAuthLoginReady</c> 信号后调用 <c>OS.shell_open(beginUrl)</c> 即可。
     /// </summary>
-    /// <param name="callbackUrl">回调地址（通常为本地监听地址，如 <c>http://127.0.0.1:14514/authorize</c>）。</param>
+    /// <param name="listenPort">本地监听端口，默认 14514。若被占用会自动尝试 +1。</param>
     /// <param name="useChinaEndpoint">是否使用国内端点。</param>
     /// <param name="permissions">请求的权限数组。</param>
-    /// <returns>包含回调登录所需信息（BeginUrl、RedirectUrl、State、Scope）的 Godot Dictionary。</returns>
-    public Godot.Variant StartOAuthLogin(string callbackUrl, bool useChinaEndpoint = true, string[]? permissions = null)
-    {
-        _pendingCallbackLogin = TapTapHelper.GenerateCallbackLoginUrl(callbackUrl, useChinaEndpoint, permissions);
-        var payload = new
-        {
-            _pendingCallbackLogin.BeginUrl,
-            _pendingCallbackLogin.RedirectUrl,
-            _pendingCallbackLogin.State,
-            _pendingCallbackLogin.Scope
-        };
-        return ToGodotVariant(payload);
-    }
-
-    /// <summary>
-    /// 使用 OAuth 回调返回的 code 完成登录。内部自动交换 token、获取 profile、
-    /// 设置会话并通过 <see cref="LoginCompletedEventHandler"/> 通知结果。
-    /// 同时返回 <see cref="AsyncSaveRequest"/> 供额外监听。
-    /// </summary>
-    /// <param name="code">回调返回的授权 code。</param>
-    /// <param name="useChinaEndpoint">是否使用国内端点。</param>
     /// <returns>用于额外监听进度/完成的 <see cref="AsyncSaveRequest"/>。</returns>
-    public AsyncSaveRequest CompleteOAuthLoginAsync(string code, bool useChinaEndpoint = true)
+    public AsyncSaveRequest StartOAuthLoginAsync(int listenPort = 14514, bool useChinaEndpoint = true, string[]? permissions = null)
     {
         var request = new AsyncSaveRequest();
+        _pendingCallbackLogin = null;
+        _oauthListening = false;
+        _oauthListenPort = listenPort;
+
         Task.Run(async () =>
         {
             try
             {
-                if (_pendingCallbackLogin == null)
+                // 1. 启动本地 HTTP 监听
+                string callbackUrl = $"http://127.0.0.1:{_oauthListenPort}/authorize";
+                _oauthListener = new System.Net.HttpListener();
+                _oauthListener.Prefixes.Add(callbackUrl + "/");
+                try
                 {
-                    string errMsg = "OAuth login data missing. Call StartOAuthLogin first.";
+                    _oauthListener.Start();
+                    _oauthListening = true;
+                }
+                catch (Exception)
+                {
+                    // 端口被占用，尝试 +1
+                    _oauthListenPort = listenPort + 1;
+                    callbackUrl = $"http://127.0.0.1:{_oauthListenPort}/authorize";
+                    _oauthListener = new System.Net.HttpListener();
+                    _oauthListener.Prefixes.Add(callbackUrl + "/");
+                    _oauthListener.Start();
+                    _oauthListening = true;
+                }
+
+                request.CallDeferred(AsyncSaveRequest.MethodName.SetProgress, 0.1f, "generate_url");
+
+                // 2. 生成 TapTap 授权 URL
+                _pendingCallbackLogin = TapTapHelper.GenerateCallbackLoginUrl(callbackUrl, useChinaEndpoint, permissions);
+
+                // 3. 通知 GDScript 打开浏览器
+                CallDeferred(MethodName.EmitSignal, SignalName.OAuthLoginReady, _pendingCallbackLogin.BeginUrl);
+
+                // 4. 等待 HTTP 回调（异步非阻塞）
+                var httpCtx = await _oauthListener.GetContextAsync();
+                string? code = ExtractCodeFromOAuthRequest(httpCtx);
+                httpCtx.Response.StatusCode = 302;
+
+                if (!string.IsNullOrEmpty(code))
+                {
+                    // 成功：重定向到成功页面
+                    httpCtx.Response.RedirectLocation = $"http://127.0.0.1:{_oauthListenPort}/authorize/success";
+                }
+                else
+                {
+                    httpCtx.Response.RedirectLocation = $"http://127.0.0.1:{_oauthListenPort}/authorize/error";
+                }
+                httpCtx.Response.Close();
+
+                // 再返回一个简单页面告知用户可关闭浏览器
+                _ = Task.Run(() => ServeCompletionPage());
+
+                if (string.IsNullOrEmpty(code))
+                {
+                    string errMsg = "OAuth callback missing authorization code.";
                     request.CallDeferred(AsyncSaveRequest.MethodName.SetError, errMsg);
                     CallDeferred(MethodName.EmitSignal, SignalName.LoginCompleted, "", "", "", errMsg);
                     return;
                 }
 
-                TapTapTokenData tokenData = await TapTapHelper.HandleCallbackLogin(_pendingCallbackLogin, code, useChinaEndpoint);
-                TapTapProfileData profile = await TapTapHelper.GetProfile(tokenData.Data, 0, useChinaEndpoint);
-                LCCombinedAuthData combined = new(profile.Data, tokenData.Data);
-                string sessionToken = await LCHelper.LoginAndGetToken(combined, useChinaEndpoint, false);
-
-                string tapTapName = profile.Data.Name;
-                string tapTapAvatar = profile.Data.Avatar;
-                _save = new Save(sessionToken, !useChinaEndpoint);
-                _pendingCallbackLogin = null;
-
-                var result = new
-                {
-                    SessionToken = sessionToken,
-                    TapTapName = tapTapName,
-                    TapTapAvatar = tapTapAvatar
-                };
-                request.CallDeferred(AsyncSaveRequest.MethodName.SetResult, ToGodotVariant(result));
-                CallDeferred(MethodName.EmitSignal, SignalName.LoginCompleted, sessionToken, tapTapName, tapTapAvatar, "");
+                // 5. 用 code 交换 token、获取 profile
+                request.CallDeferred(AsyncSaveRequest.MethodName.SetProgress, 0.5f, "exchange_token");
+                await CompleteOAuthFlowAsync(request, code, useChinaEndpoint);
             }
             catch (Exception ex)
             {
+                CleanupOAuthListener();
                 request.CallDeferred(AsyncSaveRequest.MethodName.SetError, ex.Message);
                 CallDeferred(MethodName.EmitSignal, SignalName.LoginCompleted, "", "", "", ex.Message);
             }
         });
+
         return request;
+    }
+
+    /// <summary>
+    /// 从 HTTP 回调请求中提取授权 code。
+    /// </summary>
+    private static string? ExtractCodeFromOAuthRequest(System.Net.HttpListenerContext ctx)
+    {
+        string? code = null;
+        string? query = ctx.Request.Url?.Query;
+        if (!string.IsNullOrEmpty(query))
+        {
+            var parsed = System.Web.HttpUtility.ParseQueryString(query);
+            code = parsed["code"];
+        }
+        return code;
+    }
+
+    /// <summary>
+    /// 提供授权完成后/出错时的告知页面，让用户知道可以关闭浏览器。
+    /// </summary>
+    private async Task ServeCompletionPage()
+    {
+        try
+        {
+            // 短暂延迟确保第一个响应已发送
+            await Task.Delay(200);
+
+            if (_oauthListener?.IsListening == true)
+            {
+                var ctx = await _oauthListener.GetContextAsync();
+                string html = "<html><head><meta charset='utf-8'><title>授权完成</title>" +
+                              "<style>body{font-family:sans-serif;display:flex;justify-content:center;" +
+                              "align-items:center;height:100vh;margin:0;background:#f5f5f5}" +
+                              ".card{background:white;padding:40px;border-radius:12px;box-shadow:0 2px 12px rgba(0,0,0,0.1);" +
+                              "text-align:center}h1{color:#4CAF50}p{color:#666}}</style>" +
+                              "</head><body><div class='card'>" +
+                              "<h1>✓ 授权完成</h1><p>你可以安全地关闭此页面了。</p></div></body></html>";
+
+                byte[] buffer = System.Text.Encoding.UTF8.GetBytes(html);
+                ctx.Response.StatusCode = 200;
+                ctx.Response.ContentType = "text/html; charset=utf-8";
+                ctx.Response.ContentLength64 = buffer.Length;
+                await ctx.Response.OutputStream.WriteAsync(buffer, 0, buffer.Length);
+                ctx.Response.OutputStream.Close();
+            }
+        }
+        catch
+        {
+            // 忽略——可能用户已关闭浏览器或监听已停止
+        }
+        finally
+        {
+            CleanupOAuthListener();
+        }
+    }
+
+    /// <summary>
+    /// 内部：用 code 完成 OAuth 交换（token + profile + session）。
+    /// </summary>
+    private async Task CompleteOAuthFlowAsync(AsyncSaveRequest request, string code, bool useChinaEndpoint)
+    {
+        try
+        {
+            if (_pendingCallbackLogin == null)
+            {
+                string errMsg = "OAuth login data missing.";
+                request.CallDeferred(AsyncSaveRequest.MethodName.SetError, errMsg);
+                CallDeferred(MethodName.EmitSignal, SignalName.LoginCompleted, "", "", "", errMsg);
+                return;
+            }
+
+            TapTapTokenData tokenData = await TapTapHelper.HandleCallbackLogin(_pendingCallbackLogin, code, useChinaEndpoint);
+
+            request.CallDeferred(AsyncSaveRequest.MethodName.SetProgress, 0.7f, "profile");
+            TapTapProfileData profile = await TapTapHelper.GetProfile(tokenData.Data, 0, useChinaEndpoint);
+
+            request.CallDeferred(AsyncSaveRequest.MethodName.SetProgress, 0.9f, "session");
+            LCCombinedAuthData combined = new(profile.Data, tokenData.Data);
+            string sessionToken = await LCHelper.LoginAndGetToken(combined, useChinaEndpoint, false);
+
+            string tapTapName = profile.Data.Name;
+            string tapTapAvatar = profile.Data.Avatar;
+            _save = new Save(sessionToken, !useChinaEndpoint);
+            _pendingCallbackLogin = null;
+
+            var result = new
+            {
+                SessionToken = sessionToken,
+                TapTapName = tapTapName,
+                TapTapAvatar = tapTapAvatar
+            };
+
+            request.CallDeferred(AsyncSaveRequest.MethodName.SetResult, ToGodotVariant(result));
+            CallDeferred(MethodName.EmitSignal, SignalName.LoginCompleted, sessionToken, tapTapName, tapTapAvatar, "");
+        }
+        catch (Exception ex)
+        {
+            CleanupOAuthListener();
+            request.CallDeferred(AsyncSaveRequest.MethodName.SetError, ex.Message);
+            CallDeferred(MethodName.EmitSignal, SignalName.LoginCompleted, "", "", "", ex.Message);
+        }
+    }
+
+    /// <summary>
+    /// 清理 OAuth HTTP 监听器。
+    /// </summary>
+    private void CleanupOAuthListener()
+    {
+        try
+        {
+            if (_oauthListener != null && _oauthListener.IsListening)
+            {
+                _oauthListener.Stop();
+                _oauthListener.Close();
+            }
+        }
+        catch
+        {
+            // 忽略
+        }
+        _oauthListener = null;
+        _oauthListening = false;
     }
 
     /// <summary>
