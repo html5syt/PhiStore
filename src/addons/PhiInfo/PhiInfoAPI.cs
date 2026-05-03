@@ -38,6 +38,7 @@ public partial class AsyncAssetRequest : Godot.RefCounted
 [GlobalClass]
 public partial class PhiInfoAPI : RefCounted
 {
+    // --- 定义&初始化部分 ---
     private PhiInfoContext _context;
 
     /// <summary>
@@ -103,6 +104,28 @@ public partial class PhiInfoAPI : RefCounted
     {
         _context = context ?? throw new ArgumentNullException(nameof(context));
     }
+
+    /// <summary>
+    /// 资源类型枚举（GDScript 与 C# 均可使用，写法参考 `APILanguage`）。
+    /// - `Illustration`: 曲绘（主要高清图）
+    /// - `Background`: 曲绘模糊/背景图
+    /// - `Music`: 音频文件
+    /// - `Chart`: 谱面 JSON
+    /// - `CollectionAsset`: 收藏品或自定义资源路径
+    /// - `Avatar`: 头像资源
+    /// </summary>
+    public enum ResourceType : int
+    {
+        Illustration = 0,
+        IllustrationBlur = 1,
+        IllustrationLowRes = 2,
+        Music = 3,
+        Chart = 4,
+        CollectionAsset = 5,
+        Avatar = 6
+    }
+
+    // --- 加载apk部分 ---
 
     /// <summary>
     /// 统一的 Provider 构建辅助函数，用于合并多处重复的文件挂载与实例化逻辑
@@ -199,6 +222,8 @@ public partial class PhiInfoAPI : RefCounted
         set => _context.Language = value;
     }
 
+    // --- 获取metadata部分 ---
+
     /// <summary>
     /// 获取所有支持的语言列表。
     /// </summary>
@@ -209,20 +234,12 @@ public partial class PhiInfoAPI : RefCounted
     }
 
     /// <summary>
-    /// 将 C# 对象序列化并解析为 Godot 原生的 Variant (包含 Dictionary/Array) 返回
-    /// </summary>
-    private Godot.Variant ToGodotVariant(object obj)
-    {
-        return Godot.Json.ParseString(System.Text.Json.JsonSerializer.Serialize(obj));
-    }
-
-    /// <summary>
     /// 获取歌曲元数据信息。
     /// </summary>
     public Godot.Variant GetSongs() => ToGodotVariant(_context.Info.ExtractSongInfo());
 
     /// <summary>
-    /// 获取合集元数据信息。
+    /// 获取收集品元数据信息。
     /// </summary>
     public Godot.Variant GetCollection() => ToGodotVariant(_context.Info.ExtractCollection());
 
@@ -247,7 +264,7 @@ public partial class PhiInfoAPI : RefCounted
     public string[] GetTips() => _context.Info.ExtractTips().ToArray();
 
     /// <summary>
-    /// 获取所有元数据归总信息。
+    /// 获取所有元数据信息。
     /// </summary>
     public Godot.Variant GetAllInfo() => ToGodotVariant(_context.Info.ExtractAllInfo());
 
@@ -279,70 +296,74 @@ public partial class PhiInfoAPI : RefCounted
 
     public AsyncAssetRequest GetAssetCatalogAsync() => RunAsync(() => ToGodotVariant(GetAssetCatalog()));
 
-    private AsyncAssetRequest RunAsync(Func<Godot.Variant> action)
+    // --- 获取资源部分 --- 
+
+    /// <summary>
+    /// 统一资源请求入口。
+    /// </summary>
+    public Godot.Variant GetResource(string sid, ResourceType type, int diff)
     {
-        var request = new AsyncAssetRequest();
-        System.Threading.Tasks.Task.Run(() =>
-        {
-            for (int i = 0; i < 3; i++)
-            {
-                try
-                {
-                    request.CallDeferred(AsyncAssetRequest.MethodName.SetResult, action());
-                    return;
-                }
-                catch (Exception ex)
-                {
-                    if (i == 2)
-                    {
-                        request.CallDeferred(AsyncAssetRequest.MethodName.SetError, ex.Message);
-                    }
-                    else
-                    {
-                        System.Threading.Thread.Sleep(500); // 失败时增加重试机制，缓解网络主机强制关闭链接的情况
-                    }
-                }
-            }
-        });
-        return request;
+        var path = BuildResourcePath(sid, type, diff);
+        return GetAsset(path);
     }
 
     /// <summary>
-    /// 提供曲目名字（ID），获取曲绘 (Illustration)。
+    /// 统一资源请求入口：不指定难度时使用默认值。
     /// </summary>
-    public Godot.Variant GetIllustration(string sid) => GetAsset($"Assets/Tracks/{sid}/Illustration.jpg");
+    public Godot.Variant GetResource(string sid, ResourceType type) => GetResource(sid, type, -1);
 
     /// <summary>
-    /// 提供曲目名字（ID），获取背景图 (Background)。
+    /// 统一资源请求入口：接受整型类型值（例如通过 `PhiInfoAPI.ResourceType` 常量集合传入）。
     /// </summary>
-    public Godot.Variant GetBackground(string sid) => GetAsset($"Assets/Tracks/{sid}/IllustrationBlur.jpg");
+    public Godot.Variant GetResource(string sid, int type, int diff) => GetResource(sid, (ResourceType)type, diff);
+    public Godot.Variant GetResource(string sid, int type) => GetResource(sid, (ResourceType)type, -1);
 
     /// <summary>
-    /// 提供曲目名字（ID），获取音频 (Music)。
+    /// 统一资源请求入口：异步版本。
     /// </summary>
-    public Godot.Variant GetMusic(string sid) => GetAsset($"Assets/Tracks/{sid}/music.wav");
+    public AsyncAssetRequest GetResourceAsync(string sid, ResourceType type, int diff)
+        => GetAssetAsync(BuildResourcePath(sid, type, diff));
 
     /// <summary>
-    /// 提供曲目名字（ID），获取指定难度的谱面 (Chart)。
+    /// 统一资源请求入口：异步版本，不指定 diff 时使用默认值。
     /// </summary>
-    public Godot.Variant GetChart(string sid, int diff) => GetAsset($"Assets/Tracks/{sid}/Chart_{GetDiffStr(diff)}.json");
+    public AsyncAssetRequest GetResourceAsync(string sid, ResourceType type) => GetResourceAsync(sid, type, -1);
 
     /// <summary>
-    /// 获取收藏品资源。
+    /// 统一资源请求入口：异步版本，接受整型类型值（例如通过 `PhiInfoAPI.ResourceType` 常量集合传入）。
     /// </summary>
-    public Godot.Variant GetCollectionAsset(string name) => GetAsset(name);
+    public AsyncAssetRequest GetResourceAsync(string sid, int type, int diff) => GetResourceAsync(sid, (ResourceType)type, diff);
+    public AsyncAssetRequest GetResourceAsync(string sid, int type) => GetResourceAsync(sid, type, -1);
 
     /// <summary>
-    /// 获取头像资源。
+    /// 根据 `sid` 与 `ResourceType` 构建内部查询路径。
+    /// 对于 `CollectionAsset`，输入的 `sid` 被视作资源名称。
     /// </summary>
-    public Godot.Variant GetAvatar(string name) => GetAsset($"avatar.{name}");
-
-    public AsyncAssetRequest GetIllustrationAsync(string sid) => GetAssetAsync($"Assets/Tracks/{sid}/Illustration.jpg");
-    public AsyncAssetRequest GetBackgroundAsync(string sid) => GetAssetAsync($"Assets/Tracks/{sid}/IllustrationBlur.jpg");
-    public AsyncAssetRequest GetMusicAsync(string sid) => GetAssetAsync($"Assets/Tracks/{sid}/music.wav");
-    public AsyncAssetRequest GetChartAsync(string sid, int diff) => GetAssetAsync($"Assets/Tracks/{sid}/Chart_{GetDiffStr(diff)}.json");
-    public AsyncAssetRequest GetCollectionAssetAsync(string name) => GetAssetAsync(name);
-    public AsyncAssetRequest GetAvatarAsync(string name) => GetAssetAsync($"avatar.{name}");
+    private string BuildResourcePath(string sidOrName, ResourceType type, int diff)
+    {
+        switch (type)
+        {
+            case ResourceType.Illustration:
+                return $"Assets/Tracks/{sidOrName}/Illustration.jpg";
+            case ResourceType.IllustrationBlur:
+                return $"Assets/Tracks/{sidOrName}/IllustrationBlur.jpg";
+            case ResourceType.IllustrationLowRes:
+                return $"Assets/Tracks/{sidOrName}/IllustrationLowRes.jpg";
+            case ResourceType.Music:
+                return $"Assets/Tracks/{sidOrName}/music.wav";
+            case ResourceType.Chart:
+                {
+                    var d = diff < 0 ? 2 : diff; // 默认使用 "IN"
+                    return $"Assets/Tracks/{sidOrName}/Chart_{GetDiffStr(d)}.json";
+                }
+            case ResourceType.CollectionAsset:
+                return sidOrName;
+            case ResourceType.Avatar:
+                return $"avatar.{sidOrName}";
+            default:
+                throw new NotSupportedException($"Unsupported resource type: {type}");
+        }
+    }
 
     private string GetDiffStr(int diff) => diff switch { 0 => "EZ", 1 => "HD", 2 => "IN", 3 => "AT", _ => "IN" };
 
@@ -387,4 +408,42 @@ public partial class PhiInfoAPI : RefCounted
     }
 
     public AsyncAssetRequest GetAssetAsync(string assetPath) => RunAsync(() => GetAsset(assetPath));
+
+    // --- 其他工具函数 ---
+
+    /// <summary>
+    /// 将 C# 对象序列化并解析为 Godot 原生的 Variant (包含 Dictionary/Array) 返回。
+    /// </summary>
+    private Godot.Variant ToGodotVariant(object obj)
+    {
+        return Godot.Json.ParseString(System.Text.Json.JsonSerializer.Serialize(obj));
+    }
+    // 
+    private AsyncAssetRequest RunAsync(Func<Godot.Variant> action)
+    {
+        var request = new AsyncAssetRequest();
+        System.Threading.Tasks.Task.Run(() =>
+        {
+            for (int i = 0; i < 3; i++)
+            {
+                try
+                {
+                    request.CallDeferred(AsyncAssetRequest.MethodName.SetResult, action());
+                    return;
+                }
+                catch (Exception ex)
+                {
+                    if (i == 2)
+                    {
+                        request.CallDeferred(AsyncAssetRequest.MethodName.SetError, ex.Message);
+                    }
+                    else
+                    {
+                        System.Threading.Thread.Sleep(500); // 失败时增加重试机制，缓解网络主机强制关闭链接的情况
+                    }
+                }
+            }
+        });
+        return request;
+    }
 }

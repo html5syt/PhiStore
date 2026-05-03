@@ -8,6 +8,17 @@ extends Control
 var phi_info_api: PhiInfoAPI
 const CLDB_PATH: String = "res://addons/PhiInfo/classdata.tpk" # 需要事先准备好该文件
 
+# 本地资源类型枚举：将被作为 int 传入 C# 的 `GetResource`/`GetResourceAsync`
+enum ResourceType {
+    Illustration = 0,
+    IllustrationBlur = 1,
+    IllustrationLowRes = 2,
+    Music = 3,
+    Chart = 4,
+    CollectionAsset = 5,
+    Avatar = 6,
+}
+
 # 并发与请求控制变量
 @export_group("Request Control")
 @export var request_delay_ms: float = 200.0  # 每次请求后的强制等待时间
@@ -88,7 +99,7 @@ func _run_test(path_or_url: String, is_web: bool) -> void:
         # 测试获取谱面 JSON
         if first_song.has("levels") and first_song["levels"].size() > 0:
             var first_level_idx = first_song["levels"].keys()[0] # 这里的 key 通常是 "0", "1" 等字符串
-            var chart_json_str = await _call_controlled_async(func(): return phi_info_api.GetChartAsync(song_id, first_level_idx.to_int()))
+            var chart_json_str = await async_get_resource(song_id, ResourceType.Chart, first_level_idx.to_int())
             if chart_json_str:
                 test_output += " >> 成功读取谱面文本 (Index:%s), 长度: %d 字符\n" % [first_level_idx, chart_json_str.length()]
                 print(chart_json_str.substr(0,200))
@@ -96,7 +107,7 @@ func _run_test(path_or_url: String, is_web: bool) -> void:
                 test_output += " >> 无法读取谱面文本 (Index:%s)\n" % first_level_idx
 
         # 测试获取音频
-        var audio_stream = await _call_controlled_async(func(): return phi_info_api.GetMusicAsync(song_id))
+        var audio_stream = await async_get_resource(song_id, ResourceType.Music)
         if audio_stream:
             test_output += " >> 成功解析音频, 长度: %.1f 秒\n" % audio_stream.get_length()
             if has_node("AudioStreamPlayer"):
@@ -130,7 +141,7 @@ func _run_test(path_or_url: String, is_web: bool) -> void:
             print("随机 收藏品: ", str(rand_col).substr(0, 200))
         
         # 测试获取图片
-        var image = await _call_controlled_async(func(): return phi_info_api.GetIllustrationAsync(song_id))
+        var image = await async_get_resource(song_id, ResourceType.Illustration)
         if image:
             $TextureRect.texture = ImageTexture.create_from_image(image)
             test_output += " >> 成功解析图片, %dx%d\n" % [image.get_width(), image.get_height()]
@@ -153,6 +164,10 @@ func _on_init_progress(state: int, progress: float) -> void:
         
     #label.text = test_output
     progress_bar.value = progress
+
+## 简洁的资源异步请求封装：隐藏 Callable 包装，直接返回资源结果
+func async_get_resource(sid: String, rtype: int, diff: int = -1) -> Variant:
+    return await _call_controlled_async(func(): return phi_info_api.GetResourceAsync(sid, rtype, diff))
 
 ## 通用异步请求控制器，提供并发限制和延时等待功能
 ## 防止请求速率过快（特别是在并发较高或网络解包模式下）
