@@ -28,6 +28,7 @@ ExConfig/GameVersionInt=131
 [autoload]
 
 SceneTransitionRect="*res://addons/fade/TransitionManager.tscn"
+GodotTDS="*uid://bbngnxwbhi8hq"
 
 [display]
 
@@ -43,7 +44,7 @@ project/assembly_name="PhiStore"
 
 [editor_plugins]
 
-enabled=PackedStringArray()
+enabled=PackedStringArray("res://addons/GodotTDS/plugin.cfg", "res://addons/autoscroll_container/plugin.cfg", "res://addons/qr_code/plugin.cfg")
 
 [gui]
 

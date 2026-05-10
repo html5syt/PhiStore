@@ -4,13 +4,14 @@ using System.IO;
 using System.Linq;
 using Godot;
 using PhiInfo.Core;
-using PhiInfo.Core.Asset;
 using PhiInfo.Core.Type;
 using PhiInfo.Processing;
-using SixLabors.ImageSharp;
+using Shua.UA.Core.Asset;
 using Shua.Zip;
 using Shua.Zip.ReadAt;
 using PhiInfo.Processing.DataProvider;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
 
 namespace PhiStore.Addons.PhiInfo;
 
@@ -39,7 +40,8 @@ public partial class AsyncAssetRequest : Godot.RefCounted
 public partial class PhiInfoAPI : RefCounted
 {
     // --- 定义&初始化部分 ---
-    private PhiInfoContext _context;
+    private PhiInfoContext? _context;
+    private Language _currentLanguage = Language.zh_cn;
 
     /// <summary>
     /// 手动释放当前持有的上下文资源并断开流。
@@ -47,11 +49,8 @@ public partial class PhiInfoAPI : RefCounted
     /// </summary>
     public void FreeContext()
     {
-        if (_context != null)
-        {
-            _context.Dispose();
-            _context = null;
-        }
+        _context?.Dispose();
+        _context = null;
     }
 
     protected override void Dispose(bool disposing)
@@ -128,15 +127,32 @@ public partial class PhiInfoAPI : RefCounted
     // --- 加载apk部分 ---
 
     /// <summary>
-    /// 统一的 Provider 构建辅助函数，用于合并多处重复的文件挂载与实例化逻辑
+    /// 统一的 Provider 构建辅助函数，用于合并多处重复的文件挂载与实例化逻辑。
     /// </summary>
-    private AndroidPackagesDataProvider CreateProviders(string[] paths, string cldbPath, bool isWeb)
+    private static IDataProvider CreateProvider(string[] paths, string cldbPath, bool isWeb)
     {
         var globalCldbPath = ProjectSettings.GlobalizePath(cldbPath);
-        var readAts = paths.Select(path => isWeb ? (IReadAt)new HttpReadAt(path) : new MmapReadAt(ProjectSettings.GlobalizePath(path))).ToArray();
+        var readAts = paths
+            .Select(path => isWeb
+                ? (IReadAt)new HttpReadAt(path)
+                : new MmapReadAt(ProjectSettings.GlobalizePath(path)))
+            .ToArray();
         var zips = readAts.Select(r => new ShuaZip(r)).ToArray();
-        var cldbStream = System.IO.File.OpenRead(globalCldbPath);
+        var cldbStream = File.OpenRead(globalCldbPath);
         return new AndroidPackagesDataProvider(zips, cldbStream);
+    }
+
+    private static PhiInfoContext CreateContext(IDataProvider provider)
+    {
+        try
+        {
+            return new PhiInfoContext(provider);
+        }
+        catch
+        {
+            provider.Dispose();
+            throw;
+        }
     }
 
     /// <summary>
@@ -147,7 +163,11 @@ public partial class PhiInfoAPI : RefCounted
     /// <summary>
     /// 从多个分卷 APK 包及 classdata 文件初始化实例。
     /// </summary>
-    public void InitFromLocalApk(string[] apkPaths, string cldbPath) => _context = new PhiInfoContext(CreateProviders(apkPaths, cldbPath, false), Language.Chinese);
+    public void InitFromLocalApk(string[] apkPaths, string cldbPath)
+    {
+        _currentLanguage = Language.zh_cn;
+        _context = CreateContext(CreateProvider(apkPaths, cldbPath, false));
+    }
 
     /// <summary>
     /// 从单个 Web 网络直链及 classdata (cldb) 文件初始化实例。
@@ -157,20 +177,30 @@ public partial class PhiInfoAPI : RefCounted
     /// <summary>
     /// 从多个 Web 网络直链分卷 APK 及本地 classdata 文件初始化实例，使用 HTTP 的 Range 流式解包。
     /// </summary>
-    public void InitFromWebApk(string[] apkUrls, string cldbPath) => _context = new PhiInfoContext(CreateProviders(apkUrls, cldbPath, true), Language.Chinese);
+    public void InitFromWebApk(string[] apkUrls, string cldbPath)
+    {
+        _currentLanguage = Language.zh_cn;
+        _context = CreateContext(CreateProvider(apkUrls, cldbPath, true));
+    }
 
     /// <summary>
     /// 使用独立线程非阻塞初始化。
     /// </summary>
     public void InitFromSingleApkAsync(string apkPath, string cldbPath) => InitFromSingleApkAsync(apkPath, cldbPath, (int)APILanguage.Chinese);
-    public void InitFromSingleApkAsync(string apkPath, string cldbPath, int apiLanguage) =>
-        InitAsync(() => CreateProviders(new[] { apkPath }, cldbPath, false), (Language)apiLanguage);
+    public void InitFromSingleApkAsync(string apkPath, string cldbPath, int apiLanguage)
+    {
+        _currentLanguage = ConvertApiLanguage(apiLanguage);
+        InitAsync(() => CreateProvider(new[] { apkPath }, cldbPath, false));
+    }
 
     public void InitFromSingleWebApkAsync(string apkUrl, string cldbPath) => InitFromSingleWebApkAsync(apkUrl, cldbPath, (int)APILanguage.Chinese);
-    public void InitFromSingleWebApkAsync(string apkUrl, string cldbPath, int apiLanguage) =>
-        InitAsync(() => CreateProviders(new[] { apkUrl }, cldbPath, true), (Language)apiLanguage);
+    public void InitFromSingleWebApkAsync(string apkUrl, string cldbPath, int apiLanguage)
+    {
+        _currentLanguage = ConvertApiLanguage(apiLanguage);
+        InitAsync(() => CreateProvider(new[] { apkUrl }, cldbPath, true));
+    }
 
-    private void InitAsync(Func<AndroidPackagesDataProvider> providerFactory, Language language)
+    private void InitAsync(Func<IDataProvider> providerFactory)
     {
         System.Threading.Tasks.Task.Run(() =>
         {
@@ -182,7 +212,7 @@ public partial class PhiInfoAPI : RefCounted
                     if (i == 0) CallDeferred(MethodName.EmitSignal, SignalName.InitializationProgress, (int)InitState.Starting, 0.1f);
                     var dp = providerFactory();
                     if (i == 0) CallDeferred(MethodName.EmitSignal, SignalName.InitializationProgress, (int)InitState.MountingProvider, 0.6f);
-                    _context = new PhiInfoContext(dp, language);
+                    _context = CreateContext(dp);
                     CallDeferred(MethodName.EmitSignal, SignalName.InitializationProgress, (int)InitState.Completed, 1.0f);
                     CallDeferred(MethodName.EmitSignal, SignalName.InitializationCompleted, true, string.Empty);
                     return;
@@ -209,8 +239,8 @@ public partial class PhiInfoAPI : RefCounted
     /// </summary>
     public PhiInfoContext Context
     {
-        get => _context;
-        set => _context = value;
+        get => _context ?? throw new InvalidOperationException("PhiInfoAPI context is not initialized.");
+        set => _context = value ?? throw new ArgumentNullException(nameof(value));
     }
 
     /// <summary>
@@ -218,9 +248,22 @@ public partial class PhiInfoAPI : RefCounted
     /// </summary>
     public Language CurrentLanguage
     {
-        get => _context.Language;
-        set => _context.Language = value;
+        get => _currentLanguage;
+        set => _currentLanguage = value;
     }
+
+    private static Language ConvertApiLanguage(int apiLanguage) => apiLanguage switch
+    {
+        (int)APILanguage.Chinese => Language.zh_cn,
+        (int)APILanguage.TraditionalChinese => Language.zh_tw,
+        (int)APILanguage.English => Language.en,
+        (int)APILanguage.Japanese => Language.ja,
+        (int)APILanguage.Korean => Language.ko,
+        _ => Language.zh_cn
+    };
+
+    private PhiInfoContext EnsureContext()
+        => _context ?? throw new InvalidOperationException("PhiInfoAPI context is not initialized.");
 
     // --- 获取metadata部分 ---
 
@@ -234,67 +277,92 @@ public partial class PhiInfoAPI : RefCounted
     }
 
     /// <summary>
-    /// 获取歌曲元数据信息。
+    /// 获取歌曲元数据信息（C# 原生类型）。
     /// </summary>
-    public Godot.Variant GetSongs() => ToGodotVariant(_context.Info.ExtractSongInfo());
+    public List<SongInfo> GetSongsData() => EnsureContext().Info.ExtractSongs();
 
     /// <summary>
-    /// 获取收集品元数据信息。
+    /// 获取歌曲元数据信息（Godot Variant）。
     /// </summary>
-    public Godot.Variant GetCollection() => ToGodotVariant(_context.Info.ExtractCollection());
+    public Godot.Variant GetSongs() => Godot.Variant.CreateFrom(ConvertSongInfoList(GetSongsData()));
 
     /// <summary>
-    /// 获取头像元数据信息。
+    /// 获取收集品元数据信息（C# 原生类型）。
     /// </summary>
-    public Godot.Variant GetAvatars() => ToGodotVariant(_context.Info.ExtractAvatars());
+    public List<Folder> GetCollectionData() => EnsureContext().Info.ExtractCollection();
 
     /// <summary>
-    /// 获取章节元数据信息。
+    /// 获取收集品元数据信息（Godot Variant）。
     /// </summary>
-    public Godot.Variant GetChapters() => ToGodotVariant(_context.Info.ExtractChapters());
+    public Godot.Variant GetCollection() => Godot.Variant.CreateFrom(ConvertFolderList(GetCollectionData()));
 
     /// <summary>
-    /// 获取资源目录数据。
+    /// 获取头像元数据信息（C# 原生类型）。
     /// </summary>
-    public Godot.Variant GetAssetCatalogData() => ToGodotVariant(GetAssetCatalog());
+    public List<Avatar> GetAvatarsData() => EnsureContext().Info.ExtractAvatars();
 
     /// <summary>
-    /// 获取 Tips 信息。
+    /// 获取头像元数据信息（Godot Variant）。
     /// </summary>
-    public string[] GetTips() => _context.Info.ExtractTips().ToArray();
+    public Godot.Variant GetAvatars() => Godot.Variant.CreateFrom(ConvertAvatarList(GetAvatarsData()));
 
     /// <summary>
-    /// 获取所有元数据信息。
+    /// 获取章节元数据信息（C# 原生类型）。
     /// </summary>
-    public Godot.Variant GetAllInfo() => ToGodotVariant(_context.Info.ExtractAllInfo());
+    public List<ChapterInfo> GetChaptersData() => EnsureContext().Info.ExtractChapters();
+
+    /// <summary>
+    /// 获取章节元数据信息（Godot Variant）。
+    /// </summary>
+    public Godot.Variant GetChapters() => Godot.Variant.CreateFrom(ConvertChapterInfoList(GetChaptersData()));
+
+    /// <summary>
+    /// 获取资源目录数据（C# 原生类型）。
+    /// </summary>
+    public Dictionary<string, string> GetAssetCatalogData() => new(EnsureContext().Asset.Catalog);
+
+    /// <summary>
+    /// 获取 Tips 信息（包含所有语言的原生字典数据）。
+    /// </summary>
+    public Dictionary<Language, List<string>> GetTipsData() => EnsureContext().Info.ExtractTips();
+
+    public string[] GetTips() => SelectTips(GetTipsData(), CurrentLanguage);
+
+    /// <summary>
+    /// 获取所有元数据信息（C# 原生类型）。
+    /// </summary>
+    public AllInfo GetAllInfoData() => EnsureContext().Info.ExtractAllInfo();
+
+    /// <summary>
+    /// 获取所有元数据信息（Godot Variant）。
+    /// </summary>
+    public Godot.Variant GetAllInfo() => Godot.Variant.CreateFrom(ConvertAllInfo(GetAllInfoData()));
 
     public AsyncAssetRequest GetSongsAsync() => RunAsync(GetSongs);
     public AsyncAssetRequest GetCollectionAsync() => RunAsync(GetCollection);
     public AsyncAssetRequest GetAvatarsAsync() => RunAsync(GetAvatars);
     public AsyncAssetRequest GetChaptersAsync() => RunAsync(GetChapters);
-    public AsyncAssetRequest GetAssetCatalogDataAsync() => RunAsync(GetAssetCatalogData);
-    public AsyncAssetRequest GetTipsAsync() => RunAsync(() => (Godot.Variant)GetTips());
+    public AsyncAssetRequest GetTipsAsync() => RunAsync(() => Godot.Variant.CreateFrom(GetTips()));
     public AsyncAssetRequest GetAllInfoAsync() => RunAsync(GetAllInfo);
 
     /// <summary>
     /// 获取版本信息。
     /// </summary>
-    public Godot.Collections.Dictionary GetPhiVersion()
-    {
-        var ver = _context.Info.GetPhiVersion();
-        return new Godot.Collections.Dictionary { { "code", ver.code }, { "name", ver.name } };
-    }
-
-    public AsyncAssetRequest GetPhiVersionAsync() => RunAsync(() => (Godot.Variant)GetPhiVersion());
+    public PhiVersion GetPhiVersionData() => EnsureContext().Info.GetPhiVersion();
 
     /// <summary>
-    /// 获取资源目录及其路径的字典映射。
+    /// 获取版本信息（Godot Variant）。
     /// </summary>
-    public Dictionary<string, string> GetAssetCatalog() => _context.Catalog.GetAll()
-        .Where(v => v.Key.IsString && v.Value != null && v.Value.Value.IsString)
-        .ToDictionary(v => v.Key.Str!, v => v.Value!.Value.Str);
+    public Godot.Collections.Dictionary GetPhiVersion() => ConvertPhiVersion(GetPhiVersionData());
 
-    public AsyncAssetRequest GetAssetCatalogAsync() => RunAsync(() => ToGodotVariant(GetAssetCatalog()));
+    public AsyncAssetRequest GetPhiVersionAsync() => RunAsync(() => Godot.Variant.CreateFrom(GetPhiVersion()));
+
+    /// <summary>
+    /// 获取资源目录及其路径的字典映射（Godot Variant）。
+    /// </summary>
+    public Godot.Collections.Dictionary GetAssetCatalog() => ConvertAssetCatalog(GetAssetCatalogData());
+
+    public AsyncAssetRequest GetAssetCatalogAsync() => RunAsync(() => Godot.Variant.CreateFrom(GetAssetCatalog()));
 
     // --- 获取资源部分 --- 
 
@@ -373,22 +441,22 @@ public partial class PhiInfoAPI : RefCounted
     /// <param name="assetPath">资源标识或路径</param>
     public Godot.Variant GetAsset(string assetPath)
     {
-        var cat = GetAssetCatalog();
-        if (!cat.TryGetValue(assetPath, out string rawPath))
+        var catalog = GetAssetCatalogData();
+        if (!catalog.TryGetValue(assetPath, out var rawPath))
         {
-            rawPath = cat.FirstOrDefault(kvp => kvp.Key.Equals(assetPath, StringComparison.OrdinalIgnoreCase)).Value
+            rawPath = catalog.FirstOrDefault(kvp => kvp.Key.Equals(assetPath, StringComparison.OrdinalIgnoreCase)).Value
                 ?? throw new FileNotFoundException($"Catalog missing tracking for {assetPath}");
         }
 
         if (assetPath.EndsWith(".json", StringComparison.OrdinalIgnoreCase))
         {
-            using var data = _context.Bundle.Get<UnityText>(rawPath);
+            using var data = EnsureContext().Asset.Get<UnityText>(rawPath);
             return Godot.Variant.CreateFrom(data.Content);
         }
 
         if (assetPath.EndsWith(".wav", StringComparison.OrdinalIgnoreCase))
         {
-            var music = PhiInfoDecoders.DecoderMusic(_context.Bundle.Get<UnityMusic>(rawPath));
+            var music = PhiInfoDecoders.DecoderMusic(EnsureContext().Asset.Get<UnityMusic>(rawPath));
             if (music == null || music.Length == 0) throw new InvalidOperationException($"无法解码音频: {assetPath}");
             return Godot.Variant.CreateFrom(AudioStreamOggVorbis.LoadFromBuffer(music));
         }
@@ -397,12 +465,17 @@ public partial class PhiInfoAPI : RefCounted
             assetPath.StartsWith("avatar.", StringComparison.OrdinalIgnoreCase) ||
             assetPath.Contains("Illustration", StringComparison.OrdinalIgnoreCase))
         {
-            using var image = (SixLabors.ImageSharp.Image<SixLabors.ImageSharp.PixelFormats.Rgb24>)PhiInfoDecoders.DecoderImage(_context.Bundle.Get<UnityImage>(rawPath));
-            if (image == null) throw new InvalidOperationException($"无法解码图像: {assetPath}");
+            using var image = PhiInfoDecoders.DecoderImage(EnsureContext().Asset.Get<UnityImage>(rawPath));
+            using var normalized = image.CloneAs<Rgba32>();
 
-            var data = new byte[image.Width * image.Height * 3];
-            image.CopyPixelDataTo(data);
-            return Godot.Variant.CreateFrom(Godot.Image.CreateFromData(image.Width, image.Height, false, Godot.Image.Format.Rgb8, data));
+            var data = new byte[normalized.Width * normalized.Height * 4];
+            normalized.CopyPixelDataTo(data);
+            return Godot.Variant.CreateFrom(Godot.Image.CreateFromData(
+                normalized.Width,
+                normalized.Height,
+                false,
+                Godot.Image.Format.Rgba8,
+                data));
         }
         throw new NotSupportedException($"Unsupported asset type: {assetPath}");
     }
@@ -412,13 +485,173 @@ public partial class PhiInfoAPI : RefCounted
     // --- 其他工具函数 ---
 
     /// <summary>
-    /// 将 C# 对象序列化并解析为 Godot 原生的 Variant (包含 Dictionary/Array) 返回。
+    /// 选择当前语言对应的 Tips 列表，找不到时回退到简体中文或第一组数据。
     /// </summary>
-    private Godot.Variant ToGodotVariant(object obj)
+    private string[] SelectTips(Dictionary<Language, List<string>> tips, Language language)
     {
-        return Godot.Json.ParseString(System.Text.Json.JsonSerializer.Serialize(obj));
+        if (tips.TryGetValue(language, out var selected) && selected.Count > 0)
+            return selected.ToArray();
+
+        if (tips.TryGetValue(Language.zh_cn, out var fallback) && fallback.Count > 0)
+            return fallback.ToArray();
+
+        var first = tips.Values.FirstOrDefault(list => list.Count > 0);
+        return first?.ToArray() ?? [];
     }
-    // 
+
+    private static Godot.Collections.Dictionary ConvertPhiVersion(PhiVersion version)
+    {
+        return new Godot.Collections.Dictionary
+        {
+            { "code", (long)version.code },
+            { "name", version.name }
+        };
+    }
+
+    private static Godot.Collections.Array ConvertSongInfoList(IEnumerable<SongInfo> songs)
+        => ConvertArray(songs, song => Godot.Variant.CreateFrom(ConvertSongInfo(song)));
+
+    private static Godot.Collections.Dictionary ConvertSongInfo(SongInfo song)
+    {
+        return new Godot.Collections.Dictionary
+        {
+            { "id", song.id },
+            { "key", song.key },
+            { "name", song.name },
+            { "composer", song.composer },
+            { "illustrator", song.illustrator },
+            { "preview_time", song.preview_time },
+            { "preview_end_time", song.preview_end_time },
+            { "levels", Godot.Variant.CreateFrom(ConvertSongLevelDictionary(song.levels)) }
+        };
+    }
+
+    private static Godot.Collections.Dictionary ConvertSongLevelDictionary(Dictionary<string, SongLevel> levels)
+        => ConvertDictionary(
+            levels,
+            levelKey => Godot.Variant.CreateFrom(levelKey),
+            level => Godot.Variant.CreateFrom(ConvertSongLevel(level)));
+
+    private static Godot.Collections.Dictionary ConvertSongLevel(SongLevel level)
+    {
+        return new Godot.Collections.Dictionary
+        {
+            { "charter", level.charter },
+            { "difficulty", level.difficulty }
+        };
+    }
+
+    private static Godot.Collections.Array ConvertFolderList(IEnumerable<Folder> folders)
+        => ConvertArray(folders, folder => Godot.Variant.CreateFrom(ConvertFolder(folder)));
+
+    private static Godot.Collections.Dictionary ConvertFolder(Folder folder)
+    {
+        return new Godot.Collections.Dictionary
+        {
+            { "title", Godot.Variant.CreateFrom(ConvertLanguageStringDictionary(folder.title)) },
+            { "sub_title", Godot.Variant.CreateFrom(ConvertLanguageStringDictionary(folder.sub_title)) },
+            { "cover", folder.cover },
+            { "files", Godot.Variant.CreateFrom(ConvertFileItemList(folder.files)) }
+        };
+    }
+
+    private static Godot.Collections.Array ConvertFileItemList(IEnumerable<FileItem> files)
+        => ConvertArray(files, file => Godot.Variant.CreateFrom(ConvertFileItem(file)));
+
+    private static Godot.Collections.Dictionary ConvertFileItem(FileItem fileItem)
+    {
+        return new Godot.Collections.Dictionary
+        {
+            { "key", fileItem.key },
+            { "sub_index", fileItem.sub_index },
+            { "name", Godot.Variant.CreateFrom(ConvertLanguageStringDictionary(fileItem.name)) },
+            { "date", fileItem.date },
+            { "supervisor", Godot.Variant.CreateFrom(ConvertLanguageStringDictionary(fileItem.supervisor)) },
+            { "category", fileItem.category },
+            { "content", Godot.Variant.CreateFrom(ConvertLanguageStringDictionary(fileItem.content)) },
+            { "properties", Godot.Variant.CreateFrom(ConvertLanguageStringDictionary(fileItem.properties)) }
+        };
+    }
+
+    private static Godot.Collections.Array ConvertAvatarList(IEnumerable<Avatar> avatars)
+        => ConvertArray(avatars, avatar => Godot.Variant.CreateFrom(ConvertAvatar(avatar)));
+
+    private static Godot.Collections.Dictionary ConvertAvatar(Avatar avatar)
+    {
+        return new Godot.Collections.Dictionary
+        {
+            { "name", avatar.name },
+            { "addressable_key", avatar.addressable_key }
+        };
+    }
+
+    private static Godot.Collections.Array ConvertChapterInfoList(IEnumerable<ChapterInfo> chapters)
+        => ConvertArray(chapters, chapter => Godot.Variant.CreateFrom(ConvertChapterInfo(chapter)));
+
+    private static Godot.Collections.Dictionary ConvertChapterInfo(ChapterInfo chapter)
+    {
+        return new Godot.Collections.Dictionary
+        {
+            { "code", chapter.code },
+            { "banner", chapter.banner },
+            { "song_ids", Godot.Variant.CreateFrom(ConvertStringArray(chapter.song_ids)) }
+        };
+    }
+
+    private static Godot.Collections.Dictionary ConvertAllInfo(AllInfo allInfo)
+    {
+        return new Godot.Collections.Dictionary
+        {
+            { "version", Godot.Variant.CreateFrom(ConvertPhiVersion(allInfo.version)) },
+            { "songs", Godot.Variant.CreateFrom(ConvertSongInfoList(allInfo.songs)) },
+            { "collection", Godot.Variant.CreateFrom(ConvertFolderList(allInfo.collection)) },
+            { "avatars", Godot.Variant.CreateFrom(ConvertAvatarList(allInfo.avatars)) },
+            { "tips", Godot.Variant.CreateFrom(ConvertLanguageTipDictionary(allInfo.tips)) },
+            { "chapters", Godot.Variant.CreateFrom(ConvertChapterInfoList(allInfo.chapters)) }
+        };
+    }
+
+    private static Godot.Collections.Dictionary ConvertLanguageTipDictionary(Dictionary<Language, List<string>> tips)
+        => ConvertDictionary(
+            tips,
+            language => Godot.Variant.CreateFrom(language.ToString()),
+            values => Godot.Variant.CreateFrom(ConvertStringArray(values)));
+
+    private static Godot.Collections.Dictionary ConvertLanguageStringDictionary(Dictionary<Language, string> values)
+        => ConvertDictionary(
+            values,
+            language => Godot.Variant.CreateFrom(language.ToString()),
+            value => Godot.Variant.CreateFrom(value));
+
+    private static Godot.Collections.Dictionary ConvertAssetCatalog(Dictionary<string, string> catalog)
+        => ConvertDictionary(
+            catalog,
+            key => Godot.Variant.CreateFrom(key),
+            value => Godot.Variant.CreateFrom(value));
+
+    private static Godot.Collections.Array ConvertStringArray(IEnumerable<string> values)
+        => ConvertArray(values, value => Godot.Variant.CreateFrom(value));
+
+    private static Godot.Collections.Array ConvertArray<T>(IEnumerable<T> values, Func<T, Godot.Variant> converter)
+    {
+        var array = new Godot.Collections.Array();
+        foreach (var value in values)
+            array.Add(converter(value));
+        return array;
+    }
+
+    private static Godot.Collections.Dictionary ConvertDictionary<TKey, TValue>(
+        IEnumerable<KeyValuePair<TKey, TValue>> values,
+        Func<TKey, Godot.Variant> keyConverter,
+        Func<TValue, Godot.Variant> valueConverter)
+        where TKey : notnull
+    {
+        var dictionary = new Godot.Collections.Dictionary();
+        foreach (var (key, value) in values)
+            dictionary[keyConverter(key)] = valueConverter(value);
+        return dictionary;
+    }
+
     private AsyncAssetRequest RunAsync(Func<Godot.Variant> action)
     {
         var request = new AsyncAssetRequest();

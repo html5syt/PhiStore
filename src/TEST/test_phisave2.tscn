@@ -1,0 +1,267 @@
+[gd_scene format=3 uid="uid://jmd5odb5es5u"]
+
+[ext_resource type="Script" uid="uid://c4j5dku4se5m1" path="res://TEST/test_phisave2.gd" id="1_ojcby"]
+[ext_resource type="Script" uid="uid://dynulhnyq5hpq" path="res://addons/qr_code/qr_code_rect.gd" id="2_4l3p2"]
+
+[node name="TestPhiSave2" type="Control" unique_id=560608145]
+layout_mode = 3
+anchors_preset = 0
+script = ExtResource("1_ojcby")
+
+[node name="MainPanel" type="Panel" parent="." unique_id=927722345]
+layout_mode = 1
+scale = Vector2(1.5, 1.5)
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MainPanel" unique_id=349662896]
+layout_mode = 1
+
+[node name="TitleLabel" type="Label" parent="MainPanel/VBoxContainer" unique_id=2108293010]
+layout_mode = 2
+size_flags_horizontal = 2
+size_flags_vertical = 0
+theme_override_font_sizes/font_size = 24
+text = "PhiSave2 Test Scene"
+
+[node name="StatusLabel" type="Label" parent="MainPanel/VBoxContainer" unique_id=21285078]
+layout_mode = 2
+size_flags_horizontal = 2
+size_flags_vertical = 0
+theme_override_font_sizes/font_size = 14
+text = "Status: Ready"
+
+[node name="SessionTokenLabel" type="Label" parent="MainPanel/VBoxContainer" unique_id=136709237]
+layout_mode = 2
+size_flags_horizontal = 2
+size_flags_vertical = 0
+text = "Not logged in"
+
+[node name="HSeparator1" type="HSeparator" parent="MainPanel/VBoxContainer" unique_id=290410079]
+layout_mode = 2
+size_flags_vertical = 2
+
+[node name="LoginContainer" type="VBoxContainer" parent="MainPanel/VBoxContainer" unique_id=156805676]
+layout_mode = 2
+size_flags_horizontal = 2
+size_flags_vertical = 0
+
+[node name="LoginLabel" type="Label" parent="MainPanel/VBoxContainer/LoginContainer" unique_id=1469203644]
+layout_mode = 2
+size_flags_horizontal = 2
+size_flags_vertical = 0
+theme_override_font_sizes/font_size = 12
+text = "Login Methods:"
+
+[node name="QRLoginButton" type="Button" parent="MainPanel/VBoxContainer/LoginContainer" unique_id=394339002]
+layout_mode = 2
+size_flags_horizontal = 2
+text = "QR Code Login"
+
+[node name="OAuthLoginButton" type="Button" parent="MainPanel/VBoxContainer/LoginContainer" unique_id=1277129679]
+layout_mode = 2
+size_flags_horizontal = 2
+text = "OAuth Login"
+
+[node name="TokenInputContainer" type="HBoxContainer" parent="MainPanel/VBoxContainer/LoginContainer" unique_id=651717203]
+layout_mode = 2
+size_flags_horizontal = 2
+
+[node name="Label" type="Label" parent="MainPanel/VBoxContainer/LoginContainer/TokenInputContainer" unique_id=1707562048]
+layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 1
+text = "Session Token:"
+
+[node name="TokenInput" type="LineEdit" parent="MainPanel/VBoxContainer/LoginContainer/TokenInputContainer" unique_id=1167982987]
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "Paste your session token here"
+
+[node name="InitTokenButton" type="Button" parent="MainPanel/VBoxContainer/LoginContainer/TokenInputContainer" unique_id=1980478714]
+layout_mode = 2
+size_flags_horizontal = 0
+text = "Init"
+
+[node name="QRCodePanel" type="Panel" parent="MainPanel/VBoxContainer" unique_id=1387974077]
+visible = false
+custom_minimum_size = Vector2(300, 300)
+layout_mode = 2
+size_flags_horizontal = 2
+size_flags_vertical = 0
+
+[node name="QRCodeContainer" type="VBoxContainer" parent="MainPanel/VBoxContainer/QRCodePanel" unique_id=385181656]
+layout_mode = 1
+
+[node name="QRCodeLabel" type="Label" parent="MainPanel/VBoxContainer/QRCodePanel/QRCodeContainer" unique_id=1659214587]
+layout_mode = 2
+size_flags_horizontal = 2
+size_flags_vertical = 0
+theme_override_font_sizes/font_size = 12
+text = "QR Code:"
+
+[node name="QRCodeRect" type="TextureRect" parent="MainPanel/VBoxContainer/QRCodePanel" unique_id=1951086703]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+expand_mode = 1
+stretch_mode = 5
+script = ExtResource("2_4l3p2")
+mode = 4
+error_correction = 0
+use_eci = true
+eci_value = 3
+data = ""
+auto_version = true
+auto_mask_pattern = true
+light_module_color = Color(1, 1, 1, 1)
+dark_module_color = Color(0, 0, 0, 1)
+auto_module_px_size = true
+quiet_zone_size = 4
+metadata/_custom_type_script = "uid://dynulhnyq5hpq"
+
+[node name="OAuthLinkButton" type="Button" parent="MainPanel/VBoxContainer" unique_id=1927788945]
+visible = false
+layout_mode = 2
+size_flags_horizontal = 2
+text = "Open OAuth Link"
+
+[node name="HSeparator2" type="HSeparator" parent="MainPanel/VBoxContainer" unique_id=1578870149]
+layout_mode = 2
+size_flags_vertical = 2
+
+[node name="SaveManagementLabel" type="Label" parent="MainPanel/VBoxContainer" unique_id=1378814094]
+layout_mode = 2
+size_flags_horizontal = 2
+size_flags_vertical = 0
+theme_override_font_sizes/font_size = 12
+text = "Save Management:"
+
+[node name="DownloadButton" type="Button" parent="MainPanel/VBoxContainer" unique_id=692386536]
+visible = false
+layout_mode = 2
+size_flags_horizontal = 2
+text = "Download Save from Cloud"
+
+[node name="CheckConflictButton" type="Button" parent="MainPanel/VBoxContainer" unique_id=1849023894]
+visible = false
+layout_mode = 2
+size_flags_horizontal = 2
+text = "Check for Conflicts"
+
+[node name="SaveLocalButton" type="Button" parent="MainPanel/VBoxContainer" unique_id=466795257]
+visible = false
+layout_mode = 2
+size_flags_horizontal = 2
+text = "Save to Local (Encrypted)"
+
+[node name="LoadLocalButton" type="Button" parent="MainPanel/VBoxContainer" unique_id=1041371479]
+visible = false
+layout_mode = 2
+size_flags_horizontal = 2
+text = "Load from Local (Encrypted)"
+
+[node name="ExportJsonButton" type="Button" parent="MainPanel/VBoxContainer" unique_id=782699571]
+visible = false
+layout_mode = 2
+size_flags_horizontal = 2
+text = "Export as JSON"
+
+[node name="CalculateRKSButton" type="Button" parent="MainPanel/VBoxContainer" unique_id=892912164]
+visible = false
+layout_mode = 2
+size_flags_horizontal = 2
+text = "Calculate RKS"
+
+[node name="HSeparator3" type="HSeparator" parent="MainPanel/VBoxContainer" unique_id=112821853]
+layout_mode = 2
+size_flags_vertical = 2
+
+[node name="ConflictPanel" type="Panel" parent="MainPanel/VBoxContainer" unique_id=1862831570]
+visible = false
+layout_mode = 2
+size_flags_horizontal = 2
+size_flags_vertical = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MainPanel/VBoxContainer/ConflictPanel" unique_id=585933827]
+layout_mode = 1
+offset_left = 10.0
+offset_top = 10.0
+offset_right = -10.0
+offset_bottom = -10.0
+
+[node name="ConflictLabel" type="Label" parent="MainPanel/VBoxContainer/ConflictPanel/VBoxContainer" unique_id=446557211]
+layout_mode = 2
+size_flags_horizontal = 2
+size_flags_vertical = 0
+theme_override_font_sizes/font_size = 14
+text = "Save Conflict Detected!"
+
+[node name="ConflictDescription" type="Label" parent="MainPanel/VBoxContainer/ConflictPanel/VBoxContainer" unique_id=1748458263]
+layout_mode = 2
+size_flags_horizontal = 2
+size_flags_vertical = 0
+text = "Differences detected. Choose a resolution strategy:"
+
+[node name="DiffLabel" type="Label" parent="MainPanel/VBoxContainer/ConflictPanel/VBoxContainer" unique_id=683436174]
+layout_mode = 2
+size_flags_horizontal = 2
+size_flags_vertical = 0
+theme_override_font_sizes/font_size = 11
+text = "Differences:"
+
+[node name="DiffList" type="ItemList" parent="MainPanel/VBoxContainer/ConflictPanel/VBoxContainer" unique_id=1068303746]
+custom_minimum_size = Vector2(0, 100)
+layout_mode = 2
+size_flags_horizontal = 2
+size_flags_vertical = 3
+
+[node name="ResolutionLabel" type="Label" parent="MainPanel/VBoxContainer/ConflictPanel/VBoxContainer" unique_id=1676309193]
+layout_mode = 2
+size_flags_horizontal = 2
+size_flags_vertical = 0
+theme_override_font_sizes/font_size = 11
+text = "Choose resolution:"
+
+[node name="ButtonHBox" type="HBoxContainer" parent="MainPanel/VBoxContainer/ConflictPanel/VBoxContainer" unique_id=25884074]
+layout_mode = 2
+size_flags_horizontal = 2
+size_flags_vertical = 0
+
+[node name="MergeButton" type="Button" parent="MainPanel/VBoxContainer/ConflictPanel/VBoxContainer/ButtonHBox" unique_id=42829658]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Merge Both"
+
+[node name="KeepLocalButton" type="Button" parent="MainPanel/VBoxContainer/ConflictPanel/VBoxContainer/ButtonHBox" unique_id=29050994]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Keep Local (Upload)"
+
+[node name="KeepCloudButton" type="Button" parent="MainPanel/VBoxContainer/ConflictPanel/VBoxContainer/ButtonHBox" unique_id=1031180599]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Keep Cloud (Download)"
+
+[node name="HSeparator4" type="HSeparator" parent="MainPanel/VBoxContainer" unique_id=800105772]
+layout_mode = 2
+size_flags_vertical = 2
+
+[node name="LogLabel" type="Label" parent="MainPanel/VBoxContainer" unique_id=105615401]
+layout_mode = 2
+size_flags_horizontal = 2
+size_flags_vertical = 0
+theme_override_font_sizes/font_size = 12
+text = "Log Output:"
+
+[node name="ScrollContainer" type="ScrollContainer" parent="MainPanel/VBoxContainer" unique_id=961188180]
+custom_minimum_size = Vector2(0, 150)
+layout_mode = 2
+size_flags_horizontal = 2
+size_flags_vertical = 3
+
+[node name="LogText" type="TextEdit" parent="MainPanel/VBoxContainer/ScrollContainer" unique_id=1501230934]
+layout_mode = 2
+size_flags_horizontal = 2
+size_flags_vertical = 2
