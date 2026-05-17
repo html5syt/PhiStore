@@ -25,10 +25,22 @@ public class PhiSaveData
     public Dictionary<string, GameKeyFlag> Keys { get; set; } = new();
 
     /// <summary>
+    /// 完整解析出的 Summary 数据片段
+    /// </summary>
+    [JsonIgnore]
+    public Summary? GameSummary { get; set; }
+
+    /// <summary>
     /// 缓存的 RKS 值，仅用于上传 Summary
     /// </summary>
     [JsonIgnore]
     public float SummaryRks { get; set; }
+
+    /// <summary>
+    /// 内存存档的修改（创建）时间。在需要与云端对比时作为本地存档的修改时间。
+    /// </summary>
+    [JsonIgnore]
+    public System.DateTime ModifiedAt { get; set; } = System.DateTime.UtcNow;
 
     /// <summary>
     /// 从 SaveContext 提取全部数据
@@ -50,6 +62,7 @@ public class PhiSaveData
         var summary = ctx.ReadSummary();
         if (summary != null)
         {
+            data.GameSummary = summary;
             data.SummaryRks = summary.Rks;
         }
 

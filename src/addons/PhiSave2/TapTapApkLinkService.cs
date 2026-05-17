@@ -1,4 +1,3 @@
-#nullable enable
 using System;
 using System.IO;
 using System.Net.Http;
@@ -9,7 +8,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Godot;
 
-namespace PhiStore.Testing;
+namespace PhiStore.Addons.PhiSave2;
 
 [GlobalClass]
 public partial class TapTapApkLinkRequest : RefCounted

@@ -6,7 +6,6 @@ using Godot;
 using PhigrosLibraryCSharp.CloudSave.Login;
 using PhiStore.Addons.PhiSave2.Internal;
 using PhiStore.Addons.PhiSave2.Models;
-using PhiStore.Testing;
 
 namespace PhiStore.Addons.PhiSave2;
 
@@ -44,6 +43,11 @@ public partial class PhiSave2API : RefCounted
     private string _oldObjId = string.Empty;
 
     public PhiSaveData? CurrentSave => _service.CurrentSave;
+
+    /// <summary>
+    /// 设置自定义云端服务器地址。
+    /// </summary>
+    public void SetCloudServer(string server) => _service.SetCloudServer(server);
 
     /// <summary>
     /// GDScript 辅助方法：检查当前是否加载了存档到内存
@@ -103,22 +107,31 @@ public partial class PhiSave2API : RefCounted
     /// <summary>
     /// 使用已有的 Session Token 初始化
     /// </summary>
-    public void InitWithSessionToken(string token)
+    public void InitWithSessionToken(string token, string clientId = "", string clientSecret = "")
     {
-        _service.Initialize(token);
+        // Fallback to defaults if not provided to support Phigros cloud
+        if (string.IsNullOrEmpty(clientId)) clientId = PhiSave2Service.DefaultClientId;
+        if (string.IsNullOrEmpty(clientSecret)) clientSecret = PhiSave2Service.DefaultClientKey;
+        _service.Initialize(token, clientId, clientSecret);
     }
 
     /// <summary>
     /// 使用 OAuth 授权码流程并在本地端口接收回调。
-    /// 返回需要在浏览器中打开的授权 URL。登录成功/失败通过信号 `OAuthLoginResult` 返回。
+    /// 简化版本：现在支持默认参数运行，无需强制传入凭据。
+    /// 登录成功/失败通过信号 `OAuthLoginResult` 返回。
     /// </summary>
-    public void StartOAuthLogin(int port, string authEndpoint, string tokenEndpoint, string clientId, string clientSecret, string scope = "")
+    public void StartOAuthLogin(int port = 0, string? authEndpoint = null, string? tokenEndpoint = null, string? clientId = null, string? clientSecret = null, string scope = "")
     {
         Task.Run(async () =>
         {
             try
             {
-                var url = await _service.StartOAuthFlowAsync(port, authEndpoint, tokenEndpoint, clientId, clientSecret, scope);
+                var target_auth = authEndpoint ?? "https://accounts.taptap.com/authorize";
+                var target_token = tokenEndpoint ?? "https://accounts.tapapis.cn/oauth2/v1/token";
+                var target_id = clientId ?? PhiSave2Service.DefaultClientId;
+                var target_secret = clientSecret ?? PhiSave2Service.DefaultClientKey;
+
+                var url = await _service.StartOAuthFlowAsync(port, target_auth, target_token, target_id, target_secret, scope);
                 CallDeferred(MethodName.EmitSignal, SignalName.OAuthUrlGenerated, url);
 
                 // wait for login result up to 60s
@@ -246,6 +259,7 @@ public partial class PhiSave2API : RefCounted
                 var local = _service.CurrentSave;
                 var (cloud, fileId, objId) = await _service.GetCloudSaveCopyAsync();
                 var diffs = await _service.DiffSavesAsync(local, cloud);
+
                 var arr = new Godot.Collections.Array();
                 foreach (var d in diffs)
                 {
@@ -258,7 +272,14 @@ public partial class PhiSave2API : RefCounted
                     diffDict["cloud_acc"] = d.CloudAcc.HasValue ? d.CloudAcc.Value : -1f;
                     arr.Add(diffDict);
                 }
-                request.Resolve(arr);
+
+                var result = new Godot.Collections.Dictionary();
+                result["score_diffs"] = arr;
+
+                result["local_summary"] = SerializeSummaryToGD(local?.GameSummary);
+                result["cloud_summary"] = SerializeSummaryToGD(cloud?.GameSummary);
+
+                request.Resolve(result);
             }
             catch (Exception ex)
             {
@@ -266,6 +287,17 @@ public partial class PhiSave2API : RefCounted
             }
         });
         return request;
+    }
+
+    private Godot.Collections.Dictionary SerializeSummaryToGD(PhigrosLibraryCSharp.CloudSave.Summary? sum)
+    {
+        var dict = new Godot.Collections.Dictionary();
+        if (sum == null) return dict;
+        dict["gameVersion"] = sum.GameVersion;
+        dict["rks"] = sum.Rks;
+        dict["avatar"] = sum.Avatar ?? "";
+        dict["challenge"] = (int)sum.Challenge.RawCode;
+        return dict;
     }
 
     /// <summary>
@@ -324,9 +356,10 @@ public partial class PhiSave2API : RefCounted
     }
 
     /// <summary>
-    /// 使用 AES+Gzip 将当前缓存(CurrentSave)持久化到本地 user:// 目录
+    /// 将内存中的 PhiSaveData 保存到本地加密文件。
+    /// 支持传入自定义密钥和 IV 供调试。
     /// </summary>
-    public string SaveToLocal(string path, byte[] key, byte[] iv)
+    public string SaveToLocal(string path, byte[]? key = null, byte[]? iv = null)
     {
         if (_service.CurrentSave is null) return "No save in memory.";
         try
@@ -343,8 +376,9 @@ public partial class PhiSave2API : RefCounted
 
     /// <summary>
     /// 从本地文件加载加密的存档到当前内存缓存(CurrentSave)
+    /// 支持传入自定义密钥和 IV 供调试。
     /// </summary>
-    public string LoadFromLocal(string path, byte[] key, byte[] iv)
+    public string LoadFromLocal(string path, byte[]? key = null, byte[]? iv = null)
     {
         try
         {
@@ -369,7 +403,26 @@ public partial class PhiSave2API : RefCounted
     public string ExportJson()
     {
         if (_service.CurrentSave is null) return "{}";
-        return JsonSerializer.Serialize(_service.CurrentSave, PhiSaveJsonContext.Default.PhiSaveData);
+        return PhiSaveJsonCompat.Serialize(_service.CurrentSave);
+    }
+
+    /// <summary>
+    /// 导出 JSON 存档到文件
+    /// </summary>
+    public string ExportJsonToFile(string path)
+    {
+        try
+        {
+            var json = ExportJson();
+            if (json == "{}") return "No save in memory";
+            var globalPath = ProjectSettings.GlobalizePath(path);
+            System.IO.File.WriteAllText(globalPath, json);
+            return "OK";
+        }
+        catch (Exception ex)
+        {
+            return ex.Message;
+        }
     }
 
     /// <summary>
@@ -379,13 +432,31 @@ public partial class PhiSave2API : RefCounted
     {
         try
         {
-            var imported = (PhiSaveData?)JsonSerializer.Deserialize(jsonString, typeof(PhiSaveData), PhiSaveJsonContext.Default);
+            var imported = PhiSaveJsonCompat.Deserialize(jsonString);
             if (imported != null)
             {
                 _service.CurrentSave = imported;
                 return "OK";
             }
             return "Parse error";
+        }
+        catch (Exception ex)
+        {
+            return ex.Message;
+        }
+    }
+
+    /// <summary>
+    /// 从 JSON 明文文件导入存档状态
+    /// </summary>
+    public string ImportJsonFromFile(string path)
+    {
+        try
+        {
+            var globalPath = ProjectSettings.GlobalizePath(path);
+            if (!System.IO.File.Exists(globalPath)) return "JSON file not found";
+            var content = System.IO.File.ReadAllText(globalPath);
+            return ImportJson(content);
         }
         catch (Exception ex)
         {
@@ -408,10 +479,8 @@ public partial class PhiSave2API : RefCounted
             var diffEnum = songScoreEntry.Difficulty;
             int diffIdx = (int)diffEnum;
 
-            string searchKey = $"{songId}_{diffIdx}";
-            if (difficulties.ContainsKey(searchKey))
+            if (TryResolveDifficulty(difficulties, songId, diffIdx, diffEnum.ToString(), out var diffNum))
             {
-                float diffNum = (float)difficulties[searchKey];
                 if (diffNum > 0f)
                 {
                     items.Add(new DifficultyItem
@@ -427,8 +496,61 @@ public partial class PhiSave2API : RefCounted
         if (_service.CurrentSave != null)
         {
             _service.CurrentSave.SummaryRks = result;
+            if (_service.CurrentSave.GameSummary != null)
+            {
+                _service.CurrentSave.GameSummary.Rks = result;
+            }
         }
         return result;
+    }
+
+    private static bool TryResolveDifficulty(Godot.Collections.Dictionary difficulties, string songId, int diffIdx, string diffName, out float diffNum)
+    {
+        diffNum = 0f;
+
+        // Primary expected key format.
+        var key = $"{songId}_{diffIdx}";
+        if (TryGetDifficultyValue(difficulties, key, out diffNum)) return true;
+
+        // Compatibility: string difficulty names from different data sources.
+        if (!string.IsNullOrWhiteSpace(diffName))
+        {
+            key = $"{songId}_{diffName}";
+            if (TryGetDifficultyValue(difficulties, key, out diffNum)) return true;
+
+            var upper = diffName.ToUpperInvariant();
+            key = $"{songId}_{upper}";
+            if (TryGetDifficultyValue(difficulties, key, out diffNum)) return true;
+        }
+
+        // Compatibility aliases for common chart labels.
+        string? alias = diffIdx switch
+        {
+            0 => "EZ",
+            1 => "HD",
+            2 => "IN",
+            3 => "AT",
+            4 => "LEGACY",
+            _ => null
+        };
+
+        if (!string.IsNullOrEmpty(alias))
+        {
+            key = $"{songId}_{alias}";
+            if (TryGetDifficultyValue(difficulties, key, out diffNum)) return true;
+        }
+
+        return false;
+    }
+
+    private static bool TryGetDifficultyValue(Godot.Collections.Dictionary difficulties, string key, out float value)
+    {
+        value = 0f;
+        if (!difficulties.ContainsKey(key)) return false;
+
+        var v = difficulties[key];
+        value = (float)v.AsDouble();
+        return true;
     }
 
     /// <summary>

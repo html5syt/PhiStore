@@ -45,9 +45,15 @@ public static class PhiSaveUploader
     {
         public string name { get; set; } = string.Empty;
         public string __type { get; set; } = string.Empty;
-        public Dictionary<string, object> ACL { get; set; } = new();
+        public Dictionary<string, AclPermission> ACL { get; set; } = new();
         public string prefix { get; set; } = string.Empty;
         public FileTokenMeta metaData { get; set; }
+    }
+
+    public class AclPermission
+    {
+        public bool read { get; set; }
+        public bool write { get; set; }
     }
 
     public class CompleteUploadRequest
@@ -72,7 +78,7 @@ public static class PhiSaveUploader
         public string summary { get; set; } = string.Empty;
         public UpdateSummaryDate modifiedAt { get; set; } = new();
         public UpdateSummaryPointer gameFile { get; set; } = new();
-        public Dictionary<string, object> ACL { get; set; } = new();
+        public Dictionary<string, AclPermission> ACL { get; set; } = new();
         public UpdateSummaryPointer user { get; set; } = new();
     }
 
@@ -118,7 +124,7 @@ public static class PhiSaveUploader
         {
             name = ".save",
             __type = "File",
-            ACL = new Dictionary<string, object>(),
+            ACL = new Dictionary<string, AclPermission>(),
             prefix = "gamesaves",
             metaData = new FileTokenMeta(
                 Convert.ToHexString(MD5.HashData(packedSaveBuffer)),
@@ -126,7 +132,7 @@ public static class PhiSaveUploader
                 packedSaveBuffer.Length
             )
         };
-        fileTokenRequest.ACL["userObjectId"] = new
+        fileTokenRequest.ACL[userObjectId] = new AclPermission
         {
             read = true,
             write = true
@@ -221,17 +227,17 @@ public static class PhiSaveUploader
                 objectId = userObjectId
             }
         };
-        requestData.ACL[userObjectId] = new
+        requestData.ACL[userObjectId] = new AclPermission
         {
             read = true,
             write = true,
         };
         string url = @"https://rak3ffdi.cloud.tds1.tapapis.cn/1.1/classes/_GameSave";
-        HttpMethod method = HttpMethod.Put;
+        HttpMethod method = HttpMethod.Post;
         if (!string.IsNullOrEmpty(oldSaveObjectId))
         {
             url += $"/{oldSaveObjectId}";
-            method = HttpMethod.Post;
+            method = HttpMethod.Put;
         }
         var c3 = new StringContent(JsonSerializer.Serialize(requestData, PhiSaveJsonContext.Default.UpdateSummaryRequest), Encoding.UTF8, "application/json");
         HttpRequestMessage request = new(method, url)

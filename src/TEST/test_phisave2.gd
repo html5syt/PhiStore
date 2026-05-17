@@ -27,8 +27,14 @@ extends Control
 @onready var check_conflict_button: Button = $MainPanel/VBoxContainer/CheckConflictButton
 @onready var save_local_button: Button = $MainPanel/VBoxContainer/SaveLocalButton
 @onready var load_local_button: Button = $MainPanel/VBoxContainer/LoadLocalButton
+@onready var upload_button: Button = $MainPanel/VBoxContainer/UploadButton
+@onready var conflict_upload_button: Button = $MainPanel/VBoxContainer/ConflictUploadButton
 @onready var export_json_button: Button = $MainPanel/VBoxContainer/ExportJsonButton
+@onready var import_json_button: Button = $MainPanel/VBoxContainer/ImportJsonButton
 @onready var calculate_rks_button: Button = $MainPanel/VBoxContainer/CalculateRKSButton
+@onready var aes_key_input: LineEdit = $MainPanel/VBoxContainer/AesKeyContainer/AesKeyInput
+@onready var aes_iv_input: LineEdit = $MainPanel/VBoxContainer/AesIvContainer/AesIvInput
+@onready var random_crypto_button: Button = $MainPanel/VBoxContainer/RandomCryptoButton
 
 # Service & Data
 var phi_save2_api: PhiSave2API
@@ -41,10 +47,10 @@ const CLDB_PATH: String = "res://addons/PhiInfo/classdata.tpk"
 
 # OAuth Configuration (example values, should be updated with real credentials)
 var oauth_port: int = 8080
-var oauth_auth_endpoint: String = "https://accounts.taptap.cn/oauth/authorize"
-var oauth_token_endpoint: String = "https://accounts.taptap.cn/oauth/token"
-var oauth_client_id: String = "client_id_here"
-var oauth_client_secret: String = "client_secret_here"
+var oauth_auth_endpoint: String = "https://accounts.taptap.com/authorize"
+var oauth_token_endpoint: String = "https://accounts.tapapis.cn/oauth2/v1/token"
+var oauth_client_id: String = "rAK3FfdieFob2Nn8Am"
+var oauth_client_secret: String = "Qr9AEqtuoSVS3zeD6iVbM4ZC0AtkJcQ89tywVyi0"
 
 # State tracking
 var is_logged_in: bool = false
@@ -56,12 +62,8 @@ var _pending_requests: Array = []
 
 func _ready() -> void:
     phi_save2_api = PhiSave2API.new()
-    
-    # Generate encryption keys for local save
-    var keys = phi_save2_api.GenerateLocalKeys()
-    _log("Encryption Keys and iv: " + str(keys))
-    encryption_key = keys[0]
-    encryption_iv = keys[1]
+
+    _set_random_crypto_inputs()
     
     # Connect all signals
     _connect_signals()
@@ -88,8 +90,12 @@ func _connect_signals() -> void:
     check_conflict_button.pressed.connect(_on_check_conflict_pressed)
     save_local_button.pressed.connect(_on_save_local_pressed)
     load_local_button.pressed.connect(_on_load_local_pressed)
+    upload_button.pressed.connect(_on_upload_pressed)
+    conflict_upload_button.pressed.connect(_on_conflict_upload_pressed)
     export_json_button.pressed.connect(_on_export_json_pressed)
+    import_json_button.pressed.connect(_on_import_json_pressed)
     calculate_rks_button.pressed.connect(_on_calculate_rks_pressed)
+    random_crypto_button.pressed.connect(_on_random_crypto_pressed)
     
     # Conflict resolution buttons
     merge_button.pressed.connect(_on_merge_pressed)
@@ -107,7 +113,8 @@ func _on_oauth_login_pressed() -> void:
     _log("Starting OAuth login...")
     status_label.text = "OAuth login in progress..."
     login_method_container.visible = false
-    phi_save2_api.StartOAuthLogin(oauth_port, oauth_auth_endpoint, oauth_token_endpoint,
+    # Pass 0 to automatically select an available port
+    phi_save2_api.StartOAuthLogin(0, oauth_auth_endpoint, oauth_token_endpoint,
                                     oauth_client_id, oauth_client_secret, "")
 
 func _on_init_token_pressed() -> void:
@@ -116,7 +123,7 @@ func _on_init_token_pressed() -> void:
         _log("ERROR: Token input is empty!")
         return
     _log("Initializing with session token...")
-    phi_save2_api.InitWithSessionToken(token)
+    phi_save2_api.InitWithSessionToken(token,oauth_client_id,oauth_client_secret)
     is_logged_in = true
     _on_login_success(token, "unknown")
 
@@ -247,11 +254,18 @@ func _show_conflict_resolution() -> void:
     
     var diff_request = phi_save2_api.DiffWithCloud()
     _hold_request(diff_request)
-    diff_request.Completed.connect(func(diffs: Array):
+    diff_request.Completed.connect(func(result: Dictionary):
+        var diffs: Array = result.get("score_diffs", [])
+        var local_sum: Dictionary = result.get("local_summary", {})
+        var cloud_sum: Dictionary = result.get("cloud_summary", {})
+        
         current_diff_list = diffs
         diff_list.clear()
 
         var conflict_text = "Found %d differences:\n" % diffs.size()
+        conflict_text += "Local Summary -> GameVer: %s | Rks: %.4f | Avatar: %s\n" % [local_sum.get("gameVersion", "0"), local_sum.get("rks", 0.0), local_sum.get("avatar", "")]
+        conflict_text += "Cloud Summary -> GameVer: %s | Rks: %.4f | Avatar: %s\n\n" % [cloud_sum.get("gameVersion", "0"), cloud_sum.get("rks", 0.0), cloud_sum.get("avatar", "")]
+        
         for diff in diffs:
             var song_id = diff.get("songId", "unknown")
             var difficulty = diff.get("difficulty", -1)
@@ -337,6 +351,7 @@ func _on_save_local_pressed() -> void:
         return
     
     _log("Saving current save to local encrypted file...")
+    _update_crypto_from_inputs()
     var result = phi_save2_api.SaveToLocal(local_save_path, encryption_key, encryption_iv)
     
     if result == "OK":
@@ -348,6 +363,7 @@ func _on_save_local_pressed() -> void:
 
 func _on_load_local_pressed() -> void:
     _log("Loading save from local encrypted file...")
+    _update_crypto_from_inputs()
     var result = phi_save2_api.LoadFromLocal(local_save_path, encryption_key, encryption_iv)
     
     if result == "OK":
@@ -358,16 +374,130 @@ func _on_load_local_pressed() -> void:
         _log("✗ Load failed: %s" % result)
         status_label.text = "Load failed: %s" % result
 
+func _on_upload_pressed() -> void:
+    if not has_save_downloaded:
+        _log("ERROR: Please download a cloud save first to obtain old object ids.")
+        return
+
+    _log("Uploading current save to cloud...")
+    status_label.text = "Uploading save..."
+
+    var upload_request = phi_save2_api.UploadSaveAsync(old_save_game_file_object_id, old_save_object_id)
+    _hold_request(upload_request)
+    upload_request.Completed.connect(func(_result):
+        _log("✓ Save uploaded successfully")
+        status_label.text = "Upload complete"
+        _update_ui_state()
+        _release_request(upload_request)
+    )
+    upload_request.Error.connect(func(error):
+        _log("✗ Upload failed: %s" % error)
+        status_label.text = "Upload failed: %s" % error
+        _release_request(upload_request)
+    )
+
+func _on_conflict_upload_pressed() -> void:
+    if not has_save_downloaded:
+        _log("ERROR: Please download a save first before testing conflict upload.")
+        return
+
+    _log("Testing conflict upload path (keep local and upload)...")
+    status_label.text = "Testing conflict upload..."
+
+    var upload_request = phi_save2_api.KeepLocalAndUpload(old_save_game_file_object_id, old_save_object_id)
+    _hold_request(upload_request)
+    upload_request.Completed.connect(func(_result):
+        _log("✓ Conflict upload path completed successfully")
+        status_label.text = "Conflict upload complete"
+        conflict_resolution_panel.visible = false
+        _update_ui_state()
+        _release_request(upload_request)
+    )
+    upload_request.Error.connect(func(error):
+        _log("✗ Conflict upload failed: %s" % error)
+        status_label.text = "Conflict upload failed: %s" % error
+        _release_request(upload_request)
+    )
+
 func _on_export_json_pressed() -> void:
     if not phi_save2_api.HasCurrentSave():
         _log("ERROR: No save in memory!")
         return
     
     _log("Exporting save as JSON...")
-    var json_str = phi_save2_api.ExportJson()
-    _log("JSON Export (first 500 chars):")
-    _log(json_str.substr(0, 500) + "...")
-    status_label.text = "JSON exported"
+    var export_path = "user://phi_save_export.json"
+    var result = phi_save2_api.ExportJsonToFile(export_path)
+    
+    if result == "OK":
+        _log("✓ JSON exported to: %s" % export_path)
+        _log("  Unicode 已按明文导出（非 \\uXXXX）")
+        status_label.text = "JSON exported to file"
+        
+        # Also print sample to log
+        var json_str = phi_save2_api.ExportJson()
+        _log("JSON Preview (first 200 chars): " + json_str.substr(0, 200) + "...")
+    else:
+        _log("✗ Export failed: %s" % result)
+
+func _on_import_json_pressed() -> void:
+    var import_path = "user://phi_save_export.json"
+    _log("Importing JSON save from: %s" % import_path)
+    var result = phi_save2_api.ImportJsonFromFile(import_path)
+    if result == "OK":
+        _log("✓ JSON import successful")
+        status_label.text = "JSON import complete"
+        if current_difficulties.is_empty():
+            _log("WARNING: Difficulty data is not loaded yet, local RKS cannot be recalculated.")
+        else:
+            var recalculated_rks = phi_save2_api.CalculateInMemoryRks(current_difficulties)
+            _log("✓ Local RKS recalculated after import: %.2f" % recalculated_rks)
+        _update_ui_state()
+    else:
+        _log("✗ JSON import failed: %s" % result)
+        status_label.text = "JSON import failed"
+
+func _on_random_crypto_pressed() -> void:
+    _set_random_crypto_inputs()
+
+func _set_random_crypto_inputs() -> void:
+    var keys = phi_save2_api.GenerateLocalKeys()
+    var key_ba := PackedByteArray(keys[0])
+    var iv_ba := PackedByteArray(keys[1])
+    encryption_key = key_ba
+    encryption_iv = iv_ba
+    aes_key_input.text = key_ba.hex_encode()
+    aes_iv_input.text = iv_ba.hex_encode()
+    _log("Encryption Key: " + aes_key_input.text + "\nIV: " + aes_iv_input.text)
+
+func _update_crypto_from_inputs() -> void:
+    var key_hex = aes_key_input.text.strip_edges()
+    var iv_hex = aes_iv_input.text.strip_edges()
+
+    var parsed_key = _hex_to_bytes(key_hex)
+    var parsed_iv = _hex_to_bytes(iv_hex)
+
+    if parsed_key.size() == 32:
+        encryption_key = parsed_key
+    else:
+        _log("WARNING: AES key must be 32 bytes (64 hex chars). Keep previous key.")
+
+    if parsed_iv.size() == 16:
+        encryption_iv = parsed_iv
+    else:
+        _log("WARNING: AES iv must be 16 bytes (32 hex chars). Keep previous iv.")
+
+func _hex_to_bytes(hex_text: String) -> PackedByteArray:
+    var s = hex_text.replace(" ", "").replace("\n", "").replace("\t", "")
+    if s.length() % 2 != 0:
+        return PackedByteArray()
+
+    var out := PackedByteArray()
+    for i in range(0, s.length(), 2):
+        var pair = s.substr(i, 2)
+        if not pair.is_valid_hex_number(false):
+            return PackedByteArray()
+        out.append(pair.hex_to_int())
+    return out
 
 func _on_calculate_rks_pressed() -> void:
     if not phi_save2_api.HasCurrentSave():
@@ -399,9 +529,12 @@ func _load_phi_info() -> void:
         var init_source = apk_path
         if use_web_apk:
             var apk_request = phi_save2_api.GetTapTapApkLinkAsync(165287)
+            _hold_request(apk_request)
             var apk_result = await apk_request.Completed
+            _release_request(apk_request)
+            
             # apk_result is directly a Dictionary, not an Array
-            var apk_data = apk_result
+            var apk_data: Dictionary = apk_result
             var apk_url = apk_data.get("download_url", "")
             var apk_file_name = apk_data.get("file_name", "")
             _log("✓ TapTap APK URL resolved")
@@ -436,7 +569,8 @@ func _load_phi_info() -> void:
                 for idx in levels.keys():
                     var level = levels[idx]
                     var difficulty = level.get("difficulty", 0.0)
-                    var key = "%s_%s" % [song_id, idx]
+                    var idx_num = _normalize_diff_idx(idx)
+                    var key = "%s_%d" % [song_id, idx_num]
                     current_difficulties[key] = difficulty
             
             _log("✓ Loaded %d difficulty entries" % current_difficulties.size())
@@ -450,11 +584,16 @@ func _update_ui_state() -> void:
     check_conflict_button.visible = is_logged_in and has_save_downloaded
     save_local_button.visible = is_logged_in
     load_local_button.visible = is_logged_in
+    upload_button.visible = is_logged_in and has_save_downloaded
+    conflict_upload_button.visible = is_logged_in and has_save_downloaded
     export_json_button.visible = is_logged_in
+    import_json_button.visible = is_logged_in
     calculate_rks_button.visible = is_logged_in
     save_local_button.disabled = not phi_save2_api.HasCurrentSave()
     export_json_button.disabled = not phi_save2_api.HasCurrentSave()
     calculate_rks_button.disabled = not phi_save2_api.HasCurrentSave()
+    upload_button.disabled = not has_save_downloaded
+    conflict_upload_button.disabled = not has_save_downloaded
     check_conflict_button.disabled = not has_save_downloaded
     conflict_resolution_panel.visible = false
 
@@ -480,3 +619,21 @@ func _call_phi_info_async(request_callable: Callable) -> Variant:
     var request = request_callable.call()
     var result = await request.Completed
     return result
+
+func _normalize_diff_idx(raw_idx: Variant) -> int:
+    if typeof(raw_idx) == TYPE_INT:
+        return raw_idx
+    var s = str(raw_idx).to_upper()
+    match s:
+        "EZ", "EASY":
+            return 0
+        "HD", "HARD":
+            return 1
+        "IN", "INSANE":
+            return 2
+        "AT", "ANOTHER":
+            return 3
+        "LEGACY":
+            return 4
+        _:
+            return int(raw_idx)

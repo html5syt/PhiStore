@@ -10,7 +10,6 @@ script = ExtResource("1_ojcby")
 
 [node name="MainPanel" type="Panel" parent="." unique_id=927722345]
 layout_mode = 1
-scale = Vector2(1.5, 1.5)
 
 [node name="VBoxContainer" type="VBoxContainer" parent="MainPanel" unique_id=349662896]
 layout_mode = 1
@@ -72,6 +71,7 @@ size_flags_vertical = 1
 text = "Session Token:"
 
 [node name="TokenInput" type="LineEdit" parent="MainPanel/VBoxContainer/LoginContainer/TokenInputContainer" unique_id=1167982987]
+custom_minimum_size = Vector2(300, 0)
 layout_mode = 2
 size_flags_horizontal = 3
 placeholder_text = "Paste your session token here"
@@ -138,6 +138,43 @@ size_flags_vertical = 0
 theme_override_font_sizes/font_size = 12
 text = "Save Management:"
 
+[node name="AesKeyContainer" type="HBoxContainer" parent="MainPanel/VBoxContainer" unique_id=2113377001]
+layout_mode = 2
+size_flags_horizontal = 2
+
+[node name="AesKeyLabel" type="Label" parent="MainPanel/VBoxContainer/AesKeyContainer" unique_id=2113377002]
+layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 1
+text = "AES Key (hex):"
+
+[node name="AesKeyInput" type="LineEdit" parent="MainPanel/VBoxContainer/AesKeyContainer" unique_id=2113377003]
+custom_minimum_size = Vector2(500, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "64 hex chars (32 bytes)"
+
+[node name="AesIvContainer" type="HBoxContainer" parent="MainPanel/VBoxContainer" unique_id=2113377004]
+layout_mode = 2
+size_flags_horizontal = 2
+
+[node name="AesIvLabel" type="Label" parent="MainPanel/VBoxContainer/AesIvContainer" unique_id=2113377005]
+layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 1
+text = "AES IV (hex):"
+
+[node name="AesIvInput" type="LineEdit" parent="MainPanel/VBoxContainer/AesIvContainer" unique_id=2113377006]
+custom_minimum_size = Vector2(500, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "32 hex chars (16 bytes)"
+
+[node name="RandomCryptoButton" type="Button" parent="MainPanel/VBoxContainer" unique_id=2113377007]
+layout_mode = 2
+size_flags_horizontal = 2
+text = "Generate Random AES Key/IV"
+
 [node name="DownloadButton" type="Button" parent="MainPanel/VBoxContainer" unique_id=692386536]
 visible = false
 layout_mode = 2
@@ -162,11 +199,29 @@ layout_mode = 2
 size_flags_horizontal = 2
 text = "Load from Local (Encrypted)"
 
+[node name="UploadButton" type="Button" parent="MainPanel/VBoxContainer" unique_id=2113377009]
+visible = false
+layout_mode = 2
+size_flags_horizontal = 2
+text = "Upload Save to Cloud"
+
+[node name="ConflictUploadButton" type="Button" parent="MainPanel/VBoxContainer" unique_id=2113377010]
+visible = false
+layout_mode = 2
+size_flags_horizontal = 2
+text = "Test Conflict Upload"
+
 [node name="ExportJsonButton" type="Button" parent="MainPanel/VBoxContainer" unique_id=782699571]
 visible = false
 layout_mode = 2
 size_flags_horizontal = 2
 text = "Export as JSON"
+
+[node name="ImportJsonButton" type="Button" parent="MainPanel/VBoxContainer" unique_id=2113377008]
+visible = false
+layout_mode = 2
+size_flags_horizontal = 2
+text = "Import JSON from File"
 
 [node name="CalculateRKSButton" type="Button" parent="MainPanel/VBoxContainer" unique_id=892912164]
 visible = false

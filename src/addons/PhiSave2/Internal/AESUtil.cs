@@ -67,13 +67,20 @@ public static class AESUtil
     }
 
     /// <summary>
+    /// 后备默认密钥和IV（用于 key/iv 为 null 时）
+    /// 警告：仅限调试或方便使用，生产环境应使用随机生成的密钥并安全存储。
+    /// </summary>
+    private static readonly byte[] FallbackKey = System.Text.Encoding.UTF8.GetBytes("PhiStore-PhiSave2-AES256-Key-88"); // 32 bytes
+    private static readonly byte[] FallbackIV = System.Text.Encoding.UTF8.GetBytes("PhiSave2-IV-Safe"); // 16 bytes
+
+    /// <summary>
     /// 将对象序列化为 JSON 文本，加密并保存到指定路径
     /// </summary>
-    public static void SaveEncrypted(string filePath, PhiSaveData data, byte[] key, byte[] iv)
+    public static void SaveEncrypted(string filePath, PhiSaveData data, byte[]? key, byte[]? iv)
     {
-        var jsonText = JsonSerializer.Serialize(data, PhiSaveJsonContext.Default.PhiSaveData);
+        var jsonText = PhiSaveJsonCompat.Serialize(data);
         var rawData = System.Text.Encoding.UTF8.GetBytes(jsonText);
-        var encryptedData = Encrypt(rawData, key, iv);
+        var encryptedData = Encrypt(rawData, key ?? FallbackKey, iv ?? FallbackIV);
 
         var dir = Path.GetDirectoryName(filePath);
         if (!string.IsNullOrEmpty(dir) && !Directory.Exists(dir))
@@ -86,13 +93,13 @@ public static class AESUtil
     /// <summary>
     /// 从指定路径读取并解密 JSON 文本，反序列化为对象
     /// </summary>
-    public static PhiSaveData? LoadDecrypted(string filePath, byte[] key, byte[] iv)
+    public static PhiSaveData? LoadDecrypted(string filePath, byte[]? key, byte[]? iv)
     {
         if (!File.Exists(filePath)) return default;
 
         var encryptedData = File.ReadAllBytes(filePath);
-        var rawData = Decrypt(encryptedData, key, iv);
+        var rawData = Decrypt(encryptedData, key ?? FallbackKey, iv ?? FallbackIV);
         var jsonText = System.Text.Encoding.UTF8.GetString(rawData);
-        return JsonSerializer.Deserialize(jsonText, PhiSaveJsonContext.Default.PhiSaveData);
+        return PhiSaveJsonCompat.Deserialize(jsonText);
     }
 }

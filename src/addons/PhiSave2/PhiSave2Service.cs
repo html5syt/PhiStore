@@ -5,8 +5,8 @@ using System.IO.Compression;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
-using System.Net.Http;
 using System.Net.Http.Headers;
+using Godot;
 using PhigrosLibraryCSharp.CloudSave;
 using PhigrosLibraryCSharp.CloudSave.Login;
 using PhiStore.Addons.PhiSave2.Models;
@@ -20,8 +20,14 @@ namespace PhiStore.Addons.PhiSave2;
 /// </summary>
 public class PhiSave2Service : IDisposable
 {
+    public const string DefaultClientId = "rAK3FfdieFob2Nn8Am";
+    public const string DefaultClientKey = "Qr9AEqtuoSVS3zeD6iVbM4ZC0AtkJcQ89tywVyi0";
+
     private string _sessionToken = string.Empty;
     private string _userObjectId = string.Empty;
+    private string _clientId = string.Empty;
+    private string _clientSecret = string.Empty;
+    private string? _customCloudServer = null;
     private Save? _saveObj = null;
 
     public PhiSaveData? CurrentSave { get; set; }
@@ -31,6 +37,21 @@ public class PhiSave2Service : IDisposable
 
     public bool IsLoggedIn => _saveObj != null;
 
+    /// <summary>
+    /// 设置自定义云端服务器地址。如果不设置，将根据 ClientId 自动生成默认 TapTap 域名。
+    /// </summary>
+    public void SetCloudServer(string? server)
+    {
+        _customCloudServer = server?.TrimEnd('/');
+    }
+
+    private string GetCloudServerUrl(string clientId)
+    {
+        if (!string.IsNullOrEmpty(_customCloudServer)) return _customCloudServer;
+        var cloudPrefix = clientId.Length >= 8 ? clientId.Substring(0, 8).ToLower() : clientId.ToLower();
+        return $"https://{cloudPrefix}.cloud.tds1.tapapis.cn";
+    }
+
     // ====== Conflict/metadata types ======
     public record SaveMetadata(DateTime? LocalModifiedUtc, DateTime? CloudModifiedUtc, float LocalRks, float CloudRks);
 
@@ -39,26 +60,73 @@ public class PhiSave2Service : IDisposable
     /// <summary>
     /// 初始化 Save 对象
     /// </summary>
-    public void Initialize(string token)
+    public void Initialize(string token, string clientId, string clientSecret)
     {
         _sessionToken = token;
-        _saveObj = new Save(token, true);
+        _clientId = clientId;
+        _clientSecret = clientSecret;
+
+        // 1. 根据 ClientId 长度和 customServer 判断是否为国际服
+        bool isInternational = clientId.Length == 20;
+
+        _saveObj = new Save(token, isInternational);
+
+        // 2. 如果提供了自定义 ClientId/Secret，则修正默认 Header
+        if (!string.IsNullOrEmpty(clientId))
+        {
+            _saveObj.Client.DefaultRequestHeaders.Remove("X-LC-Id");
+            _saveObj.Client.DefaultRequestHeaders.Add("X-LC-Id", clientId);
+        }
+        if (!string.IsNullOrEmpty(clientSecret))
+        {
+            _saveObj.Client.DefaultRequestHeaders.Remove("X-LC-Key");
+            _saveObj.Client.DefaultRequestHeaders.Add("X-LC-Key", clientSecret);
+        }
+
+        // 3. 如果设置了自定义服务器地址，使用 RequestHandler 进行重定向
+        if (!string.IsNullOrEmpty(_customCloudServer))
+        {
+            var targetBase = _customCloudServer.TrimEnd('/');
+            _saveObj.RequestHandler = async (s, req) =>
+            {
+                var original = req.RequestUri;
+                if (original != null)
+                {
+                    var builder = new UriBuilder(targetBase)
+                    {
+                        Path = original.AbsolutePath,
+                        Query = original.Query
+                    };
+                    req.RequestUri = builder.Uri;
+                }
+                return await s.Client.SendAsync(req);
+            };
+        }
     }
 
     private async Task<string> FetchUserObjectIdFromServerAsync()
     {
         if (string.IsNullOrWhiteSpace(_sessionToken)) return string.Empty;
 
-        using var client = new HttpClient();
+        using var client = new System.Net.Http.HttpClient();
         client.DefaultRequestHeaders.Accept.Clear();
         client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
         client.DefaultRequestHeaders.Add("X-LC-Session", _sessionToken);
 
+        if (!string.IsNullOrEmpty(_clientId)) client.DefaultRequestHeaders.Add("X-LC-Id", _clientId);
+        if (!string.IsNullOrEmpty(_clientSecret)) client.DefaultRequestHeaders.Add("X-LC-Key", _clientSecret);
+
         try
         {
-            var url = Save.CloudServerAddress.TrimEnd('/') + "/1.1/users/me";
+            var baseUrl = !string.IsNullOrEmpty(_customCloudServer) ? _customCloudServer : Save.CloudServerAddress;
+            var url = baseUrl.TrimEnd('/') + "/1.1/users/me";
             var resp = await client.GetAsync(url);
-            if (!resp.IsSuccessStatusCode) return string.Empty;
+            if (!resp.IsSuccessStatusCode)
+            {
+                var err = await resp.Content.ReadAsStringAsync();
+                GD.PrintErr($"FetchUserObjectId failed: {resp.StatusCode} - {err}");
+                return string.Empty;
+            }
             var txt = await resp.Content.ReadAsStringAsync();
             using var doc = JsonDocument.Parse(txt);
             var root = doc.RootElement;
@@ -91,7 +159,7 @@ public class PhiSave2Service : IDisposable
         var profileData = profile?.Data ?? throw new InvalidOperationException("TapTap profile data was empty.");
         _userObjectId = ExtractObjectId(profileData);
         var token = await LCHelper.LoginAndGetToken(new LCCombinedAuthData(profileData, taptapData.Data));
-        Initialize(token);
+        Initialize(token, DefaultClientId, DefaultClientKey);
         // If profile did not include an object id, try LeanCloud users/me endpoint as a fallback
         if (string.IsNullOrWhiteSpace(_userObjectId))
         {
@@ -123,12 +191,54 @@ public class PhiSave2Service : IDisposable
         }
 
         var container = await _saveObj.GetSaveInfoFromCloudAsync();
-        if (container.Results.Count == 0) throw new Exception("No cloud save found");
+        if (container.Results.Count == 0)
+        {
+            // 如果初步查询为空，尝试显式获取一次用户信息并重试。
+            // 某些情况下，Session Token 需要激活或 User ID 需要明确加载。
+            if (string.IsNullOrWhiteSpace(_userObjectId))
+            {
+                _userObjectId = await FetchUserObjectIdFromServerAsync();
+            }
+            container = await _saveObj.GetSaveInfoFromCloudAsync();
+            if (container.Results.Count == 0)
+            {
+                throw new Exception("No cloud save found for this account. Ensure your server selection and game account match.");
+            }
+        }
 
-        var info = container.Results[0];
-        _userObjectId = info.User.ObjectId;
+        var targetIndex = -1;
+        SaveContext? ctx = null;
+        Exception? lastContextError = null;
+        for (var i = 0; i < container.Results.Count; i++)
+        {
+            try
+            {
+                var candidateCtx = await _saveObj.GetSaveContextAsync(i);
+                if (candidateCtx != null)
+                {
+                    targetIndex = i;
+                    ctx = candidateCtx;
+                    break;
+                }
+            }
+            catch (Exception ex)
+            {
+                lastContextError = ex;
+            }
+        }
 
-        var ctx = await _saveObj.GetSaveContextAsync(0);
+        if (targetIndex < 0 || ctx == null)
+        {
+            var detail = lastContextError != null ? $" Last error: {lastContextError.Message}" : string.Empty;
+            throw new Exception("Failed to load any cloud save context from server." + detail);
+        }
+
+        var info = container.Results[targetIndex];
+        if (!string.IsNullOrWhiteSpace(info?.User?.ObjectId))
+        {
+            _userObjectId = info.User.ObjectId;
+        }
+
         CurrentSave = PhiSaveData.FromSaveContext(ctx);
         // populate user object id from returned info if still missing
         try
@@ -158,16 +268,15 @@ public class PhiSave2Service : IDisposable
     {
         DateTime? localTime = null;
         float localRks = 0f;
-        if (!string.IsNullOrEmpty(localFilePath) && File.Exists(localFilePath))
+
+        if (CurrentSave != null)
+        {
+            localTime = CurrentSave.ModifiedAt;
+            localRks = CurrentSave.SummaryRks;
+        }
+        else if (!string.IsNullOrEmpty(localFilePath) && File.Exists(localFilePath))
         {
             localTime = File.GetLastWriteTimeUtc(localFilePath);
-            // try to load and extract Rks if possible
-            try
-            {
-                // attempt to decrypt using no key here is impossible; so prefer CurrentSave
-                if (CurrentSave != null) localRks = CurrentSave.SummaryRks;
-            }
-            catch { }
         }
         else if (CurrentSave != null)
         {
@@ -182,14 +291,48 @@ public class PhiSave2Service : IDisposable
             if (container.Results.Count > 0)
             {
                 var info = container.Results[0];
+                cloudTime = await FetchCloudModifiedUtcFromRawAsync();
                 try
                 {
-                    var mod = info.ModifiedAt;
-                    if (mod != null)
+                    if (cloudTime == null)
                     {
-                        // best-effort: use ToString() representation
-                        string? timestr = mod.ToString();
-                        if (!string.IsNullOrEmpty(timestr) && DateTime.TryParse(timestr, out var parsed)) cloudTime = parsed.ToUniversalTime();
+                        var mod = info.ModifiedAt;
+                        if (mod != null)
+                        {
+                            // Fallback approach: use ToString() and try to extract an ISO timestamp, or parse directly
+                            var timestr = mod.ToString();
+                            if (!string.IsNullOrEmpty(timestr))
+                            {
+                                try
+                                {
+                                    // Try to locate an "iso" field without regex to avoid escaping issues
+                                    var isoKey = "\"iso\"";
+                                    var idx = timestr.IndexOf(isoKey, StringComparison.OrdinalIgnoreCase);
+                                    if (idx >= 0)
+                                    {
+                                        var colon = timestr.IndexOf(':', idx + isoKey.Length);
+                                        if (colon >= 0)
+                                        {
+                                            var firstQuote = timestr.IndexOf('"', colon + 1);
+                                            if (firstQuote >= 0)
+                                            {
+                                                var secondQuote = timestr.IndexOf('"', firstQuote + 1);
+                                                if (secondQuote > firstQuote)
+                                                {
+                                                    var iso = timestr.Substring(firstQuote + 1, secondQuote - firstQuote - 1);
+                                                    if (DateTime.TryParse(iso, out var parsedF)) cloudTime = parsedF.ToUniversalTime();
+                                                }
+                                            }
+                                        }
+                                    }
+                                    else if (DateTime.TryParse(timestr, out var parsedF2))
+                                    {
+                                        cloudTime = parsedF2.ToUniversalTime();
+                                    }
+                                }
+                                catch { }
+                            }
+                        }
                     }
                 }
                 catch { }
@@ -213,77 +356,32 @@ public class PhiSave2Service : IDisposable
 
     private static string ExtractObjectId(object? profileData)
     {
-        if (profileData == null)
-        {
-            return string.Empty;
-        }
-
         if (profileData is IDictionary<string, object?> dict)
         {
-            if (TryGetDictionaryString(dict, "objectId", out var objectId) ||
-                TryGetDictionaryString(dict, "ObjectId", out objectId) ||
-                TryGetDictionaryString(dict, "userObjectId", out objectId) ||
-                TryGetDictionaryString(dict, "UserObjectId", out objectId))
+            foreach (var key in new[] { "objectId", "ObjectId", "userObjectId", "UserObjectId" })
             {
-                return objectId;
+                if (dict.TryGetValue(key, out var val) && val is string s && !string.IsNullOrWhiteSpace(s))
+                    return s;
             }
         }
-
-        if (profileData is JsonElement element)
+        else if (profileData is JsonElement elem || (profileData is string txt && TryParseJson(text: txt, out elem)))
         {
-            foreach (var name in new[] { "objectId", "ObjectId", "userObjectId", "UserObjectId" })
+            if (elem.ValueKind == JsonValueKind.Object)
             {
-                if (element.ValueKind == JsonValueKind.Object && element.TryGetProperty(name, out var value) && value.ValueKind == JsonValueKind.String)
+                foreach (var key in new[] { "objectId", "ObjectId", "userObjectId", "UserObjectId" })
                 {
-                    var extracted = value.GetString();
-                    if (!string.IsNullOrWhiteSpace(extracted))
-                    {
-                        return extracted;
-                    }
+                    if (elem.TryGetProperty(key, out var val) && val.ValueKind == JsonValueKind.String)
+                        return val.GetString() ?? string.Empty;
                 }
             }
         }
-
-        var text = profileData.ToString();
-        if (!string.IsNullOrWhiteSpace(text))
-        {
-            try
-            {
-                using var document = JsonDocument.Parse(text);
-                var root = document.RootElement;
-                foreach (var name in new[] { "objectId", "ObjectId", "userObjectId", "UserObjectId" })
-                {
-                    if (root.ValueKind == JsonValueKind.Object && root.TryGetProperty(name, out var value) && value.ValueKind == JsonValueKind.String)
-                    {
-                        var extracted = value.GetString();
-                        if (!string.IsNullOrWhiteSpace(extracted))
-                        {
-                            return extracted;
-                        }
-                    }
-                }
-            }
-            catch { }
-        }
-
         return string.Empty;
     }
 
-    private static bool TryGetDictionaryString(IDictionary<string, object?> dict, string key, out string value)
+    private static bool TryParseJson(string text, out JsonElement element)
     {
-        value = string.Empty;
-        if (!dict.TryGetValue(key, out var raw) || raw == null)
-        {
-            return false;
-        }
-
-        if (raw is string str && !string.IsNullOrWhiteSpace(str))
-        {
-            value = str;
-            return true;
-        }
-
-        return false;
+        element = default;
+        try { element = JsonDocument.Parse(text).RootElement; return true; } catch { return false; }
     }
 
     /// <summary>
@@ -390,14 +488,33 @@ public class PhiSave2Service : IDisposable
     /// 启动本地 HTTP 回调监听并返回将要在浏览器打开的授权 URL。
     /// 调用方需在浏览器中打开返回的 URL。方法会在成功交换 token 后返回 session token。
     /// </summary>
+    /// <summary>
+    /// 开始 OAuth 流程。如果传入的 port 为 0，则自动选择一个可用端口。
+    /// </summary>
     public async Task<string> StartOAuthFlowAsync(int port, string authEndpoint, string tokenEndpoint, string clientId, string clientSecret, string scope = "", string state = "phistore_state")
     {
+        if (port <= 0)
+        {
+            var listenerForPort = new System.Net.Sockets.TcpListener(System.Net.IPAddress.Loopback, 0);
+            listenerForPort.Start();
+            port = ((System.Net.IPEndPoint)listenerForPort.LocalEndpoint).Port;
+            listenerForPort.Stop();
+        }
+
+        // Generate PKCE parameters
+        var codeVerifier = GenerateRandomString(64);
+        var codeChallenge = ComputePKCEChallenge(codeVerifier);
+
         var redirectUri = $"http://localhost:{port}/callback/";
-        var url = authEndpoint + "?response_type=code" + "&client_id=" + Uri.EscapeDataString(clientId) + "&redirect_uri=" + Uri.EscapeDataString(redirectUri) + "&scope=" + Uri.EscapeDataString(scope) + "&state=" + Uri.EscapeDataString(state);
+        var url = authEndpoint + "?response_type=code" + "&client_id=" + Uri.EscapeDataString(clientId) +
+                  "&redirect_uri=" + Uri.EscapeDataString(redirectUri) + "&scope=" + Uri.EscapeDataString(scope) +
+                  "&state=" + Uri.EscapeDataString(state) +
+                  "&code_challenge=" + Uri.EscapeDataString(codeChallenge) +
+                  "&code_challenge_method=S256"; // Removed &flow=pc_localhost
 
         // start listener
         var listener = new System.Net.HttpListener();
-        listener.Prefixes.Add($"http://localhost:{port}/callback/");
+        listener.Prefixes.Add(redirectUri);
         listener.Start();
 
         // fire-and-forget accept one request then exchange
@@ -410,47 +527,97 @@ public class PhiSave2Service : IDisposable
                 var res = ctx.Response;
                 var q = req.QueryString;
                 var code = q["code"];
+                var error = q["error"];
                 var returnedState = q["state"];
 
                 // respond simple HTML
-                var bytes = System.Text.Encoding.UTF8.GetBytes("<html><body>Received. You can close this window.</body></html>");
+                var responseHtml = "<html><head><meta charset=\"UTF-8\"></head><body>已收到授权。您可以关闭此窗口。</body></html>";
+                if (!string.IsNullOrEmpty(error))
+                {
+                    responseHtml = $"<html><head><meta charset=\"UTF-8\"></head><body>登录已取消或失败: {error}。您可以关闭此窗口。</body></html>";
+                }
+                var bytes = System.Text.Encoding.UTF8.GetBytes(responseHtml);
                 res.ContentType = "text/html";
                 res.ContentLength64 = bytes.Length;
                 await res.OutputStream.WriteAsync(bytes, 0, bytes.Length);
                 res.Close();
 
+                if (!string.IsNullOrEmpty(error))
+                {
+                    throw new OperationCanceledException($"OAuth login canceled: {error}");
+                }
+
                 if (!string.IsNullOrEmpty(code))
                 {
                     // exchange code for token
                     using var http = new System.Net.Http.HttpClient();
-                    var form = new System.Net.Http.FormUrlEncodedContent(new[] {
-                        new KeyValuePair<string,string>("grant_type","authorization_code"),
-                        new KeyValuePair<string,string>("code", code),
-                        new KeyValuePair<string,string>("client_id", clientId),
-                        new KeyValuePair<string,string>("client_secret", clientSecret),
-                        new KeyValuePair<string,string>("redirect_uri", redirectUri)
-                    });
+                    var dict = new Dictionary<string, string>
+                    {
+                        { "grant_type", "authorization_code" },
+                        { "code", code },
+                        { "client_id", clientId },
+                        { "secret_type", "hmac-sha-1" },
+                        { "redirect_uri", redirectUri },
+                        { "code_verifier", codeVerifier }
+                    };
+                    var form = new System.Net.Http.FormUrlEncodedContent(dict);
                     var resp = await http.PostAsync(tokenEndpoint, form);
-                    resp.EnsureSuccessStatusCode();
+
+                    if (!resp.IsSuccessStatusCode)
+                    {
+                        var errorBody = await resp.Content.ReadAsStringAsync();
+                        throw new Exception($"Token exchange failed: {resp.StatusCode} - {errorBody}");
+                    }
+
                     var json = await resp.Content.ReadAsStringAsync();
-                    // try to parse access_token
                     try
                     {
-                        using var doc = System.Text.Json.JsonDocument.Parse(json);
-                        if (doc.RootElement.TryGetProperty("access_token", out var tok))
+                        var taptapData = JsonSerializer.Deserialize(json, PhiSaveJsonContext.Default.TapTapTokenData);
+                        if (taptapData?.Data == null) throw new Exception("Invalid TapTap token response.");
+
+                        var profile = await TapTapHelper.GetProfile(taptapData.Data);
+                        if (profile?.Data == null) throw new Exception("Failed to fetch TapTap profile for OAuth login.");
+
+                        var sessionToken = await LCHelper.LoginAndGetToken(new LCCombinedAuthData(profile.Data, taptapData.Data));
+
+                        if (!string.IsNullOrEmpty(sessionToken))
                         {
-                            var token = tok.GetString() ?? string.Empty;
-                            Initialize(token);
+                            Initialize(sessionToken, DefaultClientId, DefaultClientKey);
+                        }
+                        else
+                        {
+                            throw new Exception("Failed to exchange TapTap token for LeanCloud session.");
                         }
                     }
-                    catch { }
+                    catch (Exception ex)
+                    {
+                        GD.PrintErr($"OAuth token simplification error: {ex}");
+                    }
                 }
             }
-            catch { }
+            catch (Exception ex)
+            {
+                GD.PrintErr($"OAuth exchange background task error: {ex}");
+            }
             finally { try { listener.Stop(); } catch { } }
         });
 
         return url;
+    }
+
+    private static string GenerateRandomString(int length)
+    {
+        const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+        var random = new Random();
+        return new string(Enumerable.Repeat(chars, length).Select(s => s[random.Next(s.Length)]).ToArray());
+    }
+
+    private static string ComputePKCEChallenge(string verifier)
+    {
+        using var sha256 = System.Security.Cryptography.SHA256.Create();
+        var hashed = sha256.ComputeHash(System.Text.Encoding.UTF8.GetBytes(verifier));
+        var base64 = Convert.ToBase64String(hashed);
+        return base64.Replace("+", "-").Replace("/", "_").Replace("=", "");
     }
 
     /// <summary>
@@ -460,9 +627,29 @@ public class PhiSave2Service : IDisposable
     {
         if (_saveObj == null || CurrentSave == null) throw new InvalidOperationException("Missing state");
 
+        if (string.IsNullOrWhiteSpace(_userObjectId) && !string.IsNullOrWhiteSpace(_sessionToken))
+        {
+            try
+            {
+                var fetched = await FetchUserObjectIdFromServerAsync();
+                if (!string.IsNullOrWhiteSpace(fetched)) _userObjectId = fetched;
+            }
+            catch { }
+        }
+
         // 获取原有的 SaveInfo 以构建上下文
         var container = await _saveObj.GetSaveInfoFromCloudAsync();
         var originalInfo = container.Results.FirstOrDefault();
+
+        if (string.IsNullOrWhiteSpace(_userObjectId) && !string.IsNullOrWhiteSpace(originalInfo?.User?.ObjectId))
+        {
+            _userObjectId = originalInfo.User.ObjectId;
+        }
+
+        if (string.IsNullOrWhiteSpace(_userObjectId))
+        {
+            throw new InvalidOperationException("Missing user object id for upload.");
+        }
 
         var ctx = new SaveContext(new Dictionary<string, SaveContext.Entry>(), originalInfo!);
         CurrentSave.WriteToContext(ctx);
@@ -531,9 +718,73 @@ public class PhiSave2Service : IDisposable
         if (_saveObj == null) throw new InvalidOperationException("Not initialized");
         var container = await _saveObj.GetSaveInfoFromCloudAsync();
         if (container.Results.Count == 0) return (null, null, null);
-        var info = container.Results[0];
-        var ctx = await _saveObj.GetSaveContextAsync(0);
+        var targetIndex = -1;
+        SaveContext? ctx = null;
+        for (var i = 0; i < container.Results.Count; i++)
+        {
+            try
+            {
+                var candidateCtx = await _saveObj.GetSaveContextAsync(i);
+                if (candidateCtx != null)
+                {
+                    targetIndex = i;
+                    ctx = candidateCtx;
+                    break;
+                }
+            }
+            catch
+            {
+                // Skip broken save info entries.
+            }
+        }
+        if (targetIndex < 0 || ctx == null) return (null, null, null);
+        var info = container.Results[targetIndex];
         var copy = PhiSaveData.FromSaveContext(ctx);
         return (copy, info.GameFile?.ObjectId, info.ObjectId);
+    }
+
+    private async Task<DateTime?> FetchCloudModifiedUtcFromRawAsync()
+    {
+        if (_saveObj == null) return null;
+
+        try
+        {
+            var baseUrl = !string.IsNullOrEmpty(_customCloudServer) ? _customCloudServer : Save.CloudServerAddress;
+            var url = baseUrl.TrimEnd('/') + "/1.1/classes/_GameSave?limit=1";
+            var resp = await _saveObj.Client.GetAsync(url);
+            if (!resp.IsSuccessStatusCode) return null;
+
+            var txt = await resp.Content.ReadAsStringAsync();
+            using var doc = JsonDocument.Parse(txt);
+            var root = doc.RootElement;
+            if (!root.TryGetProperty("results", out var results) || results.ValueKind != JsonValueKind.Array || results.GetArrayLength() == 0)
+            {
+                return null;
+            }
+
+            var first = results[0];
+            if (!first.TryGetProperty("modifiedAt", out var modifiedAtElement)) return null;
+
+            if (modifiedAtElement.ValueKind == JsonValueKind.String)
+            {
+                var s = modifiedAtElement.GetString();
+                if (!string.IsNullOrEmpty(s) && DateTime.TryParse(s, out var parsed)) return parsed.ToUniversalTime();
+                return null;
+            }
+
+            if (modifiedAtElement.ValueKind == JsonValueKind.Object
+                && modifiedAtElement.TryGetProperty("iso", out var isoElement)
+                && isoElement.ValueKind == JsonValueKind.String)
+            {
+                var iso = isoElement.GetString();
+                if (!string.IsNullOrEmpty(iso) && DateTime.TryParse(iso, out var parsedIso)) return parsedIso.ToUniversalTime();
+            }
+        }
+        catch
+        {
+            // Keep metadata retrieval best-effort.
+        }
+
+        return null;
     }
 }
