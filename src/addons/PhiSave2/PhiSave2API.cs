@@ -249,6 +249,8 @@ public partial class PhiSave2API : RefCounted
     /// <summary>
     /// 获取本地(内存)与云端存档差异（主要song scores）
     /// </summary>
+    
+    // TODO: diff包含更多维度，如data等
     public AsyncPhiSaveRequest DiffWithCloud()
     {
         var request = new AsyncPhiSaveRequest();
