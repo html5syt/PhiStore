@@ -14,18 +14,20 @@ namespace PhiStore.Addons.PhiSave2.Internal;
 /// </summary>
 public static class PhiSaveJsonCompat
 {
+    // Use a cached JsonSerializerContext instance configured with our custom converters
+    // and pass JsonTypeInfo to JsonSerializer to remain AOT/trimming-safe.
+    private static readonly PhiSaveJsonContext SharedContext = new PhiSaveJsonContext(CreateOptions());
+
     public static string Serialize(PhiSaveData data)
     {
-        var ctx = new PhiSaveJsonContext(CreateOptions());
-        var json = JsonSerializer.Serialize(data, ctx.PhiSaveData);
+        var json = JsonSerializer.Serialize(data, SharedContext.PhiSaveData);
         return UnescapeUnicodeEscapes(json);
     }
 
     public static PhiSaveData? Deserialize(string json)
     {
         var normalized = NormalizeInputJson(json);
-        var ctx = new PhiSaveJsonContext(CreateOptions());
-        return JsonSerializer.Deserialize(normalized, ctx.PhiSaveData);
+        return (PhiSaveData?)JsonSerializer.Deserialize(normalized, SharedContext.PhiSaveData);
     }
 
     public static string NormalizeInputJson(string raw)
@@ -42,6 +44,7 @@ public static class PhiSaveJsonCompat
             IncludeFields = true
         };
 
+        // Keep explicit converters for backward-compatibility; source-gen TypeInfoResolver is used for AOT.
         options.Converters.Add(new SongScoreJsonConverter());
         options.Converters.Add(new GameRecordJsonConverter());
         options.Converters.Add(new GameSettingsJsonConverter());
@@ -350,14 +353,30 @@ public static class PhiSaveJsonCompat
             using var doc = JsonDocument.ParseValue(ref reader);
             var root = doc.RootElement;
             var typeByte = (byte)GetInt(root, "Type", 0);
-            var payload = GetULong(root, "Payload", 0UL);
-
             var bytes = new List<byte>();
-            for (var bit = 0; bit < 8; bit++)
+
+            if (TryGetProperty(root, "Flags", out var flagsNode) && flagsNode.ValueKind == JsonValueKind.Object)
             {
-                if ((typeByte & (1 << bit)) != 0)
+                foreach (var flag in GetGameKeyFlagEntries(typeByte))
                 {
-                    bytes.Add((byte)((payload >> (bit * 8)) & 0xFF));
+                    if (!TryGetProperty(flagsNode, flag.Name, out var value))
+                    {
+                        bytes.Add(0);
+                        continue;
+                    }
+
+                    bytes.Add(ReadFlagByte(flag.Name, value));
+                }
+            }
+            else
+            {
+                var payload = GetULong(root, "Payload", 0UL);
+                for (var bit = 0; bit < 8; bit++)
+                {
+                    if ((typeByte & (1 << bit)) != 0)
+                    {
+                        bytes.Add((byte)((payload >> (bit * 8)) & 0xFF));
+                    }
                 }
             }
 
@@ -369,9 +388,62 @@ public static class PhiSaveJsonCompat
             writer.WriteStartObject();
             writer.WritePropertyName("Type");
             writer.WriteNumberValue((int)value.Type);
-            writer.WritePropertyName("Payload");
-            writer.WriteNumberValue(value.Payload);
+            writer.WritePropertyName("Flags");
+            writer.WriteStartObject();
+            var payloadBytes = new List<byte>(GetGameKeyFlagPayloadBytes((byte)value.Type, value.Payload));
+            var index = 0;
+            foreach (var flag in GetGameKeyFlagEntries((byte)value.Type))
+            {
+                var flagValue = index < payloadBytes.Count ? payloadBytes[index] : (byte)0;
+                index++;
+
+                writer.WritePropertyName(flag.Name);
+                if (flag.IsNumeric)
+                {
+                    writer.WriteNumberValue(flagValue);
+                }
+                else
+                {
+                    writer.WriteBooleanValue(flagValue != 0);
+                }
+            }
             writer.WriteEndObject();
+            writer.WriteEndObject();
+        }
+
+        private static IEnumerable<(string Name, bool IsNumeric)> GetGameKeyFlagEntries(byte typeByte)
+        {
+            if ((typeByte & (1 << 0)) != 0) yield return ("HasReadCollectionPieceCount", true);
+            if ((typeByte & (1 << 1)) != 0) yield return ("HasUnlockedSingle", false);
+            if ((typeByte & (1 << 2)) != 0) yield return ("HasUnlockedCollectionPieceCount", true);
+            if ((typeByte & (1 << 3)) != 0) yield return ("HasUnlockedIllustration", false);
+            if ((typeByte & (1 << 4)) != 0) yield return ("HasUnlockedAvatar", false);
+        }
+
+        private static IEnumerable<byte> GetGameKeyFlagPayloadBytes(byte typeByte, ulong payload)
+        {
+            for (var bit = 0; bit < 8; bit++)
+            {
+                if ((typeByte & (1 << bit)) != 0)
+                {
+                    yield return (byte)((payload >> (bit * 8)) & 0xFF);
+                }
+            }
+        }
+
+        private static byte ReadFlagByte(string name, JsonElement value)
+        {
+            if (value.ValueKind == JsonValueKind.True) return 1;
+            if (value.ValueKind == JsonValueKind.False) return 0;
+            if (value.ValueKind == JsonValueKind.Number && value.TryGetByte(out var b)) return b;
+            if (value.ValueKind == JsonValueKind.String)
+            {
+                var text = value.GetString();
+                if (bool.TryParse(text, out var boolValue)) return (byte)(boolValue ? 1 : 0);
+                if (byte.TryParse(text, out var parsedByte)) return parsedByte;
+            }
+
+            return name.Contains("Count", StringComparison.OrdinalIgnoreCase) ? (byte)0 : (byte)0;
         }
     }
 

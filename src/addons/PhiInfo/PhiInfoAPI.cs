@@ -47,6 +47,7 @@ public partial class PhiInfoAPI : RefCounted
     /// 手动释放当前持有的上下文资源并断开流。
     /// 在不再需要读取资源时，可由 GDScript 主动调用以快速回收内存并关闭文件/网络句柄。
     /// </summary>
+    private readonly PhiInfoService _service = new PhiInfoService();
     public void FreeContext()
     {
         _context?.Dispose();
@@ -113,47 +114,14 @@ public partial class PhiInfoAPI : RefCounted
     /// - `CollectionAsset`: 收藏品或自定义资源路径
     /// - `Avatar`: 头像资源
     /// </summary>
-    public enum ResourceType : int
-    {
-        Illustration = 0,
-        IllustrationBlur = 1,
-        IllustrationLowRes = 2,
-        Music = 3,
-        Chart = 4,
-        CollectionAsset = 5,
-        Avatar = 6
-    }
+    // Shared ResourceType is declared in PhiInfoService.cs.
 
     // --- 加载apk部分 ---
 
     /// <summary>
     /// 统一的 Provider 构建辅助函数，用于合并多处重复的文件挂载与实例化逻辑。
     /// </summary>
-    private static IDataProvider CreateProvider(string[] paths, string cldbPath, bool isWeb)
-    {
-        var globalCldbPath = ProjectSettings.GlobalizePath(cldbPath);
-        var readAts = paths
-            .Select(path => isWeb
-                ? (IReadAt)new HttpReadAt(path)
-                : new MmapReadAt(ProjectSettings.GlobalizePath(path)))
-            .ToArray();
-        var zips = readAts.Select(r => new ShuaZip(r)).ToArray();
-        var cldbStream = File.OpenRead(globalCldbPath);
-        return new AndroidPackagesDataProvider(zips, cldbStream);
-    }
-
-    private static PhiInfoContext CreateContext(IDataProvider provider)
-    {
-        try
-        {
-            return new PhiInfoContext(provider);
-        }
-        catch
-        {
-            provider.Dispose();
-            throw;
-        }
-    }
+    // Provider/context initialization is handled by PhiInfoService (non-Godot). API should remain a thin Godot wrapper.
 
     /// <summary>
     /// 从单个本地 APK 文件及 classdata (cldb) 文件初始化实例。
@@ -166,7 +134,10 @@ public partial class PhiInfoAPI : RefCounted
     public void InitFromLocalApk(string[] apkPaths, string cldbPath)
     {
         _currentLanguage = Language.zh_cn;
-        _context = CreateContext(CreateProvider(apkPaths, cldbPath, false));
+        var globalApks = apkPaths.Select(p => ProjectSettings.GlobalizePath(p)).ToArray();
+        var globalCldb = ProjectSettings.GlobalizePath(cldbPath);
+        _service.InitFromLocalApk(globalApks, globalCldb);
+        _context = _service.Context;
     }
 
     /// <summary>
@@ -180,7 +151,9 @@ public partial class PhiInfoAPI : RefCounted
     public void InitFromWebApk(string[] apkUrls, string cldbPath)
     {
         _currentLanguage = Language.zh_cn;
-        _context = CreateContext(CreateProvider(apkUrls, cldbPath, true));
+        var globalCldb = ProjectSettings.GlobalizePath(cldbPath);
+        _service.InitFromWebApk(apkUrls, globalCldb);
+        _context = _service.Context;
     }
 
     /// <summary>
@@ -190,48 +163,27 @@ public partial class PhiInfoAPI : RefCounted
     public void InitFromSingleApkAsync(string apkPath, string cldbPath, int apiLanguage)
     {
         _currentLanguage = ConvertApiLanguage(apiLanguage);
-        InitAsync(() => CreateProvider(new[] { apkPath }, cldbPath, false));
+        _service.InitFromLocalApkAsync(
+            ProjectSettings.GlobalizePath(apkPath),
+            ProjectSettings.GlobalizePath(cldbPath),
+            (s, p) => CallDeferred(MethodName.EmitSignal, SignalName.InitializationProgress, s, p),
+            (success, error) => CallDeferred(MethodName.EmitSignal, SignalName.InitializationCompleted, success, error)
+        );
     }
 
     public void InitFromSingleWebApkAsync(string apkUrl, string cldbPath) => InitFromSingleWebApkAsync(apkUrl, cldbPath, (int)APILanguage.Chinese);
     public void InitFromSingleWebApkAsync(string apkUrl, string cldbPath, int apiLanguage)
     {
         _currentLanguage = ConvertApiLanguage(apiLanguage);
-        InitAsync(() => CreateProvider(new[] { apkUrl }, cldbPath, true));
+        _service.InitFromWebApkAsync(
+            apkUrl,
+            ProjectSettings.GlobalizePath(cldbPath),
+            (s, p) => CallDeferred(MethodName.EmitSignal, SignalName.InitializationProgress, s, p),
+            (success, error) => CallDeferred(MethodName.EmitSignal, SignalName.InitializationCompleted, success, error)
+        );
     }
 
-    private void InitAsync(Func<IDataProvider> providerFactory)
-    {
-        System.Threading.Tasks.Task.Run(() =>
-        {
-            FreeContext(); // 在新初始化前清理旧上下文及关联的文件流/Http连接
-            for (int i = 0; i < 3; i++)
-            {
-                try
-                {
-                    if (i == 0) CallDeferred(MethodName.EmitSignal, SignalName.InitializationProgress, (int)InitState.Starting, 0.1f);
-                    var dp = providerFactory();
-                    if (i == 0) CallDeferred(MethodName.EmitSignal, SignalName.InitializationProgress, (int)InitState.MountingProvider, 0.6f);
-                    _context = CreateContext(dp);
-                    CallDeferred(MethodName.EmitSignal, SignalName.InitializationProgress, (int)InitState.Completed, 1.0f);
-                    CallDeferred(MethodName.EmitSignal, SignalName.InitializationCompleted, true, string.Empty);
-                    return;
-                }
-                catch (Exception ex)
-                {
-                    if (i == 2)
-                    {
-                        CallDeferred(MethodName.EmitSignal, SignalName.InitializationProgress, (int)InitState.Error, 1.0f);
-                        CallDeferred(MethodName.EmitSignal, SignalName.InitializationCompleted, false, ex.Message);
-                    }
-                    else
-                    {
-                        System.Threading.Thread.Sleep(500);
-                    }
-                }
-            }
-        });
-    }
+    // Initialization flow uses PhiInfoService's async helpers; keep API simple and use service for engine-agnostic work.
 
     /// <summary>
     /// 获取或设置底层的 PhiInfoContext 上下文实例。
@@ -273,13 +225,13 @@ public partial class PhiInfoAPI : RefCounted
     /// <returns>所有的 Language 枚举列表</returns>
     public List<Language> GetSupportedLanguages()
     {
-        return Enum.GetValues<Language>().ToList();
+        return _service.GetSupportedLanguages().ToList();
     }
 
     /// <summary>
     /// 获取歌曲元数据信息（C# 原生类型）。
     /// </summary>
-    public List<SongInfo> GetSongsData() => EnsureContext().Info.ExtractSongs();
+    public List<SongInfo> GetSongsData() => _service.GetSongsData();
 
     /// <summary>
     /// 获取歌曲元数据信息（Godot Variant）。
@@ -289,7 +241,7 @@ public partial class PhiInfoAPI : RefCounted
     /// <summary>
     /// 获取收集品元数据信息（C# 原生类型）。
     /// </summary>
-    public List<Folder> GetCollectionData() => EnsureContext().Info.ExtractCollection();
+    public List<Folder> GetCollectionData() => _service.GetCollectionData();
 
     /// <summary>
     /// 获取收集品元数据信息（Godot Variant）。
@@ -299,7 +251,7 @@ public partial class PhiInfoAPI : RefCounted
     /// <summary>
     /// 获取头像元数据信息（C# 原生类型）。
     /// </summary>
-    public List<Avatar> GetAvatarsData() => EnsureContext().Info.ExtractAvatars();
+    public List<Avatar> GetAvatarsData() => _service.GetAvatarsData();
 
     /// <summary>
     /// 获取头像元数据信息（Godot Variant）。
@@ -309,7 +261,7 @@ public partial class PhiInfoAPI : RefCounted
     /// <summary>
     /// 获取章节元数据信息（C# 原生类型）。
     /// </summary>
-    public List<ChapterInfo> GetChaptersData() => EnsureContext().Info.ExtractChapters();
+    public List<ChapterInfo> GetChaptersData() => _service.GetChaptersData();
 
     /// <summary>
     /// 获取章节元数据信息（Godot Variant）。
@@ -319,19 +271,19 @@ public partial class PhiInfoAPI : RefCounted
     /// <summary>
     /// 获取资源目录数据（C# 原生类型）。
     /// </summary>
-    public Dictionary<string, string> GetAssetCatalogData() => new(EnsureContext().Asset.Catalog);
+    public Dictionary<string, string> GetAssetCatalogData() => _service.GetAssetCatalogData();
 
     /// <summary>
     /// 获取 Tips 信息（包含所有语言的原生字典数据）。
     /// </summary>
-    public Dictionary<Language, List<string>> GetTipsData() => EnsureContext().Info.ExtractTips();
+    public Dictionary<Language, List<string>> GetTipsData() => _service.GetTipsData();
 
     public string[] GetTips() => SelectTips(GetTipsData(), CurrentLanguage);
 
     /// <summary>
     /// 获取所有元数据信息（C# 原生类型）。
     /// </summary>
-    public AllInfo GetAllInfoData() => EnsureContext().Info.ExtractAllInfo();
+    public AllInfo GetAllInfoData() => _service.GetAllInfoData();
 
     /// <summary>
     /// 获取所有元数据信息（Godot Variant）。
@@ -348,7 +300,7 @@ public partial class PhiInfoAPI : RefCounted
     /// <summary>
     /// 获取版本信息。
     /// </summary>
-    public PhiVersion GetPhiVersionData() => EnsureContext().Info.GetPhiVersion();
+    public PhiVersion GetPhiVersionData() => _service.GetPhiVersionData();
 
     /// <summary>
     /// 获取版本信息（Godot Variant）。
@@ -371,7 +323,7 @@ public partial class PhiInfoAPI : RefCounted
     /// </summary>
     public Godot.Variant GetResource(string sid, ResourceType type, int diff)
     {
-        var path = BuildResourcePath(sid, type, diff);
+        var path = _service.BuildResourcePath(sid, type, diff);
         return GetAsset(path);
     }
 
@@ -390,7 +342,7 @@ public partial class PhiInfoAPI : RefCounted
     /// 统一资源请求入口：异步版本。
     /// </summary>
     public AsyncAssetRequest GetResourceAsync(string sid, ResourceType type, int diff)
-        => GetAssetAsync(BuildResourcePath(sid, type, diff));
+        => GetAssetAsync(_service.BuildResourcePath(sid, type, diff));
 
     /// <summary>
     /// 统一资源请求入口：异步版本，不指定 diff 时使用默认值。
@@ -403,37 +355,7 @@ public partial class PhiInfoAPI : RefCounted
     public AsyncAssetRequest GetResourceAsync(string sid, int type, int diff) => GetResourceAsync(sid, (ResourceType)type, diff);
     public AsyncAssetRequest GetResourceAsync(string sid, int type) => GetResourceAsync(sid, type, -1);
 
-    /// <summary>
-    /// 根据 `sid` 与 `ResourceType` 构建内部查询路径。
-    /// 对于 `CollectionAsset`，输入的 `sid` 被视作资源名称。
-    /// </summary>
-    private string BuildResourcePath(string sidOrName, ResourceType type, int diff)
-    {
-        switch (type)
-        {
-            case ResourceType.Illustration:
-                return $"Assets/Tracks/{sidOrName}/Illustration.jpg";
-            case ResourceType.IllustrationBlur:
-                return $"Assets/Tracks/{sidOrName}/IllustrationBlur.jpg";
-            case ResourceType.IllustrationLowRes:
-                return $"Assets/Tracks/{sidOrName}/IllustrationLowRes.jpg";
-            case ResourceType.Music:
-                return $"Assets/Tracks/{sidOrName}/music.wav";
-            case ResourceType.Chart:
-                {
-                    var d = diff < 0 ? 2 : diff; // 默认使用 "IN"
-                    return $"Assets/Tracks/{sidOrName}/Chart_{GetDiffStr(d)}.json";
-                }
-            case ResourceType.CollectionAsset:
-                return sidOrName;
-            case ResourceType.Avatar:
-                return $"avatar.{sidOrName}";
-            default:
-                throw new NotSupportedException($"Unsupported resource type: {type}");
-        }
-    }
-
-    private string GetDiffStr(int diff) => diff switch { 0 => "EZ", 1 => "HD", 2 => "IN", 3 => "AT", _ => "IN" };
+    // Path building and raw asset extraction moved to PhiInfoService (engine-agnostic).
 
     /// <summary>
     /// 统合解析资源文件。根据路径后缀自动推断类型。
@@ -441,43 +363,31 @@ public partial class PhiInfoAPI : RefCounted
     /// <param name="assetPath">资源标识或路径</param>
     public Godot.Variant GetAsset(string assetPath)
     {
-        var catalog = GetAssetCatalogData();
-        if (!catalog.TryGetValue(assetPath, out var rawPath))
+        var raw = _service.GetRawAsset(assetPath);
+        switch (raw.Type)
         {
-            rawPath = catalog.FirstOrDefault(kvp => kvp.Key.Equals(assetPath, StringComparison.OrdinalIgnoreCase)).Value
-                ?? throw new FileNotFoundException($"Catalog missing tracking for {assetPath}");
+            case PhiInfoService.RawAssetResult.Kind.JsonString:
+                return Godot.Variant.CreateFrom(raw.Json ?? string.Empty);
+            case PhiInfoService.RawAssetResult.Kind.MusicBytes:
+                var music = raw.Music ?? Array.Empty<byte>();
+                if (music.Length == 0) throw new InvalidOperationException($"无法解码音频: {assetPath}");
+                return Godot.Variant.CreateFrom(AudioStreamOggVorbis.LoadFromBuffer(music));
+            case PhiInfoService.RawAssetResult.Kind.Image:
+                {
+                    if (raw.Image == null) throw new InvalidOperationException($"无法解码图片: {assetPath}");
+                    using var normalized = raw.Image.CloneAs<Rgba32>();
+                    var data = new byte[normalized.Width * normalized.Height * 4];
+                    normalized.CopyPixelDataTo(data);
+                    return Godot.Variant.CreateFrom(Godot.Image.CreateFromData(
+                        normalized.Width,
+                        normalized.Height,
+                        false,
+                        Godot.Image.Format.Rgba8,
+                        data));
+                }
+            default:
+                throw new NotSupportedException($"Unsupported asset type: {assetPath}");
         }
-
-        if (assetPath.EndsWith(".json", StringComparison.OrdinalIgnoreCase))
-        {
-            using var data = EnsureContext().Asset.Get<UnityText>(rawPath);
-            return Godot.Variant.CreateFrom(data.Content);
-        }
-
-        if (assetPath.EndsWith(".wav", StringComparison.OrdinalIgnoreCase))
-        {
-            var music = PhiInfoDecoders.DecoderMusic(EnsureContext().Asset.Get<UnityMusic>(rawPath));
-            if (music == null || music.Length == 0) throw new InvalidOperationException($"无法解码音频: {assetPath}");
-            return Godot.Variant.CreateFrom(AudioStreamOggVorbis.LoadFromBuffer(music));
-        }
-
-        if (assetPath.EndsWith(".jpg", StringComparison.OrdinalIgnoreCase) ||
-            assetPath.StartsWith("avatar.", StringComparison.OrdinalIgnoreCase) ||
-            assetPath.Contains("Illustration", StringComparison.OrdinalIgnoreCase))
-        {
-            using var image = PhiInfoDecoders.DecoderImage(EnsureContext().Asset.Get<UnityImage>(rawPath));
-            using var normalized = image.CloneAs<Rgba32>();
-
-            var data = new byte[normalized.Width * normalized.Height * 4];
-            normalized.CopyPixelDataTo(data);
-            return Godot.Variant.CreateFrom(Godot.Image.CreateFromData(
-                normalized.Width,
-                normalized.Height,
-                false,
-                Godot.Image.Format.Rgba8,
-                data));
-        }
-        throw new NotSupportedException($"Unsupported asset type: {assetPath}");
     }
 
     public AsyncAssetRequest GetAssetAsync(string assetPath) => RunAsync(() => GetAsset(assetPath));

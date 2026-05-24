@@ -18,6 +18,8 @@
 		<PackageReference Include="PhigrosLabs.PhiInfo.Processing" Version="5.0.0" />
 		<PackageReference Include="PhigrosLibraryCSharp" Version="4.2.0" />
 		<PackageReference Include="Shua.Zip" Version="2.1.0" />
+		<!-- Explicitly override Microsoft.Bcl.Memory to avoid known vulnerable transitive version -->
+		<PackageReference Include="Microsoft.Bcl.Memory" Version="9.0.1" PrivateAssets="all" />
 	</ItemGroup>
 	<PropertyGroup>
  <Nullable>enable</Nullable>

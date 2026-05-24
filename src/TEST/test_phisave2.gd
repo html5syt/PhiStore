@@ -1,12 +1,12 @@
 extends Control
 
 # UI Components
-@onready var main_panel: Panel = $MainPanel
+@onready var main_panel: ScrollContainer = $MainPanel
 @onready var status_label: Label = $MainPanel/VBoxContainer/StatusLabel
 @onready var log_text: TextEdit = $MainPanel/VBoxContainer/ScrollContainer/LogText
 @onready var login_method_container: VBoxContainer = $MainPanel/VBoxContainer/LoginContainer
 @onready var qr_code_panel: Panel = $MainPanel/VBoxContainer/QRCodePanel
-@onready var qr_code_rect: TextureRect = $MainPanel/VBoxContainer/QRCodePanel/QRCodeRect
+@onready var qr_code_rect: TextureRect = $MainPanel/VBoxContainer/QRCodePanel/QRCodeContainer/QRCodeRect
 @onready var oauth_link_button: Button = $MainPanel/VBoxContainer/OAuthLinkButton
 @onready var conflict_resolution_panel: Panel = $MainPanel/VBoxContainer/ConflictPanel
 @onready var diff_list: ItemList = $MainPanel/VBoxContainer/ConflictPanel/VBoxContainer/DiffList
@@ -182,7 +182,8 @@ func _on_oauth_url_generated(url: String) -> void:
 
 func _on_oauth_login_result(success: bool, token_or_error: String) -> void:
     if success:
-        _on_login_success(token_or_error, "taptap_user")
+        _log("OAuth login flow completed (session token received).")
+        status_label.text = "OAuth login complete"
     else:
         _on_login_failed(token_or_error)
 
@@ -256,6 +257,7 @@ func _show_conflict_resolution() -> void:
     _hold_request(diff_request)
     diff_request.Completed.connect(func(result: Dictionary):
         var diffs: Array = result.get("score_diffs", [])
+        var full_diffs: Array = result.get("full_diffs", [])
         var local_sum: Dictionary = result.get("local_summary", {})
         var cloud_sum: Dictionary = result.get("cloud_summary", {})
         
@@ -265,6 +267,12 @@ func _show_conflict_resolution() -> void:
         var conflict_text = "Found %d differences:\n" % diffs.size()
         conflict_text += "Local Summary -> GameVer: %s | Rks: %.4f | Avatar: %s\n" % [local_sum.get("gameVersion", "0"), local_sum.get("rks", 0.0), local_sum.get("avatar", "")]
         conflict_text += "Cloud Summary -> GameVer: %s | Rks: %.4f | Avatar: %s\n\n" % [cloud_sum.get("gameVersion", "0"), cloud_sum.get("rks", 0.0), cloud_sum.get("avatar", "")]
+
+        if full_diffs.size() > 0:
+            conflict_text += "Full Save Differences: %d items\n" % full_diffs.size()
+            for fd in full_diffs:
+                conflict_text += "  [%s] %s\n" % [fd.get("type", "unknown"), fd.get("path", "")]
+            conflict_text += "\n"
         
         for diff in diffs:
             var song_id = diff.get("songId", "unknown")
@@ -292,7 +300,7 @@ func _on_merge_pressed() -> void:
     _log("Executing merge strategy...")
     status_label.text = "Merging saves..."
     
-    var merge_request = phi_save2_api.MergeWithCloud()
+    var merge_request = phi_save2_api.MergeWithCloudToLocal(local_save_path)
     _hold_request(merge_request)
     merge_request.Completed.connect(func(_result):
         _log("✓ Saves merged successfully")
@@ -519,7 +527,7 @@ func _load_phi_info() -> void:
         phi_info_api = PhiInfoAPI.new()
     
     # Try to load from installed APK first, otherwise fetch TapTap web link in C# and use it
-    var apk_path = "user://phigros_installed.apk"
+    var apk_path = "user://com.PigeonGames.Phigros-127.apk"
     var use_web_apk = not FileAccess.file_exists(apk_path)
     if use_web_apk:
         _log("No local APK found, resolving TapTap download URL via C# helper...")
@@ -584,16 +592,16 @@ func _update_ui_state() -> void:
     check_conflict_button.visible = is_logged_in and has_save_downloaded
     save_local_button.visible = is_logged_in
     load_local_button.visible = is_logged_in
-    upload_button.visible = is_logged_in and has_save_downloaded
-    conflict_upload_button.visible = is_logged_in and has_save_downloaded
+    upload_button.visible = is_logged_in and phi_save2_api.HasCurrentSave()
+    conflict_upload_button.visible = is_logged_in and phi_save2_api.HasCurrentSave()
     export_json_button.visible = is_logged_in
     import_json_button.visible = is_logged_in
     calculate_rks_button.visible = is_logged_in
     save_local_button.disabled = not phi_save2_api.HasCurrentSave()
     export_json_button.disabled = not phi_save2_api.HasCurrentSave()
     calculate_rks_button.disabled = not phi_save2_api.HasCurrentSave()
-    upload_button.disabled = not has_save_downloaded
-    conflict_upload_button.disabled = not has_save_downloaded
+    upload_button.disabled = not phi_save2_api.HasCurrentSave()
+    conflict_upload_button.disabled = not phi_save2_api.HasCurrentSave()
     check_conflict_button.disabled = not has_save_downloaded
     conflict_resolution_panel.visible = false
 

@@ -42,8 +42,9 @@
   - 修改时间（UTC）
   - RKS 值
 - **第二步**: 若元数据不同，则进行差异分析
-  - 逐歌曲逐难度比较分数和准确率
-  - 生成差异列表，显示每个不同的 score/accuracy
+   - 逐歌曲逐难度比较分数和准确率
+   - 生成 `score_diffs` 与 `full_diffs`
+   - `full_diffs` 会包含 Progress / UserInfo / Settings / Keys / SummaryRks 等全量存档差异
 - **第三步**: 显示冲突解决面板
 
 #### 冲突解决（三选一）
@@ -52,7 +53,7 @@
    - 合并本地和云端存档
    - 每首歌取分数较高的版本
    - 更新内存中的 `CurrentSave`
-   - 自动保存到本地加密文件
+   - 自动上传到云端，并同步保存到本地加密文件
 
 2. **Keep Local (Upload) (保留本地)**
    - 丢弃云端存档

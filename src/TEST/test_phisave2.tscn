@@ -5,106 +5,130 @@
 
 [node name="TestPhiSave2" type="Control" unique_id=560608145]
 layout_mode = 3
-anchors_preset = 0
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 script = ExtResource("1_ojcby")
 
-[node name="MainPanel" type="Panel" parent="." unique_id=927722345]
-layout_mode = 1
-
-[node name="VBoxContainer" type="VBoxContainer" parent="MainPanel" unique_id=349662896]
-layout_mode = 1
-
-[node name="TitleLabel" type="Label" parent="MainPanel/VBoxContainer" unique_id=2108293010]
-layout_mode = 2
-size_flags_horizontal = 2
-size_flags_vertical = 0
-theme_override_font_sizes/font_size = 24
-text = "PhiSave2 Test Scene"
-
-[node name="StatusLabel" type="Label" parent="MainPanel/VBoxContainer" unique_id=21285078]
-layout_mode = 2
-size_flags_horizontal = 2
-size_flags_vertical = 0
-theme_override_font_sizes/font_size = 14
-text = "Status: Ready"
-
-[node name="SessionTokenLabel" type="Label" parent="MainPanel/VBoxContainer" unique_id=136709237]
-layout_mode = 2
-size_flags_horizontal = 2
-size_flags_vertical = 0
-text = "Not logged in"
-
-[node name="HSeparator1" type="HSeparator" parent="MainPanel/VBoxContainer" unique_id=290410079]
-layout_mode = 2
-size_flags_vertical = 2
-
-[node name="LoginContainer" type="VBoxContainer" parent="MainPanel/VBoxContainer" unique_id=156805676]
-layout_mode = 2
-size_flags_horizontal = 2
-size_flags_vertical = 0
-
-[node name="LoginLabel" type="Label" parent="MainPanel/VBoxContainer/LoginContainer" unique_id=1469203644]
-layout_mode = 2
-size_flags_horizontal = 2
-size_flags_vertical = 0
-theme_override_font_sizes/font_size = 12
-text = "Login Methods:"
-
-[node name="QRLoginButton" type="Button" parent="MainPanel/VBoxContainer/LoginContainer" unique_id=394339002]
-layout_mode = 2
-size_flags_horizontal = 2
-text = "QR Code Login"
-
-[node name="OAuthLoginButton" type="Button" parent="MainPanel/VBoxContainer/LoginContainer" unique_id=1277129679]
-layout_mode = 2
-size_flags_horizontal = 2
-text = "OAuth Login"
-
-[node name="TokenInputContainer" type="HBoxContainer" parent="MainPanel/VBoxContainer/LoginContainer" unique_id=651717203]
-layout_mode = 2
-size_flags_horizontal = 2
-
-[node name="Label" type="Label" parent="MainPanel/VBoxContainer/LoginContainer/TokenInputContainer" unique_id=1707562048]
-layout_mode = 2
-size_flags_horizontal = 0
-size_flags_vertical = 1
-text = "Session Token:"
-
-[node name="TokenInput" type="LineEdit" parent="MainPanel/VBoxContainer/LoginContainer/TokenInputContainer" unique_id=1167982987]
-custom_minimum_size = Vector2(300, 0)
-layout_mode = 2
-size_flags_horizontal = 3
-placeholder_text = "Paste your session token here"
-
-[node name="InitTokenButton" type="Button" parent="MainPanel/VBoxContainer/LoginContainer/TokenInputContainer" unique_id=1980478714]
-layout_mode = 2
-size_flags_horizontal = 0
-text = "Init"
-
-[node name="QRCodePanel" type="Panel" parent="MainPanel/VBoxContainer" unique_id=1387974077]
-visible = false
-custom_minimum_size = Vector2(300, 300)
-layout_mode = 2
-size_flags_horizontal = 2
-size_flags_vertical = 0
-
-[node name="QRCodeContainer" type="VBoxContainer" parent="MainPanel/VBoxContainer/QRCodePanel" unique_id=385181656]
-layout_mode = 1
-
-[node name="QRCodeLabel" type="Label" parent="MainPanel/VBoxContainer/QRCodePanel/QRCodeContainer" unique_id=1659214587]
-layout_mode = 2
-size_flags_horizontal = 2
-size_flags_vertical = 0
-theme_override_font_sizes/font_size = 12
-text = "QR Code:"
-
-[node name="QRCodeRect" type="TextureRect" parent="MainPanel/VBoxContainer/QRCodePanel" unique_id=1951086703]
+[node name="MainPanel" type="ScrollContainer" parent="." unique_id=927722345]
+custom_minimum_size = Vector2(360, 640)
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MainPanel" unique_id=349662896]
+custom_minimum_size = Vector2(320, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="TitleLabel" type="Label" parent="MainPanel/VBoxContainer" unique_id=2108293010]
+custom_minimum_size = Vector2(0, 52)
+layout_mode = 2
+size_flags_horizontal = 2
+theme_override_font_sizes/font_size = 32
+text = "PhiSave2 Test Scene"
+
+[node name="StatusLabel" type="Label" parent="MainPanel/VBoxContainer" unique_id=21285078]
+custom_minimum_size = Vector2(0, 30)
+layout_mode = 2
+size_flags_horizontal = 2
+theme_override_font_sizes/font_size = 18
+text = "Status: Ready"
+
+[node name="SessionTokenLabel" type="Label" parent="MainPanel/VBoxContainer" unique_id=136709237]
+custom_minimum_size = Vector2(0, 28)
+layout_mode = 2
+size_flags_horizontal = 2
+theme_override_font_sizes/font_size = 14
+text = "Not logged in"
+
+[node name="HSeparator1" type="HSeparator" parent="MainPanel/VBoxContainer" unique_id=290410079]
+layout_mode = 2
+size_flags_vertical = 0
+
+[node name="LoginContainer" type="VBoxContainer" parent="MainPanel/VBoxContainer" unique_id=156805676]
+custom_minimum_size = Vector2(0, 140)
+layout_mode = 2
+size_flags_horizontal = 2
+
+[node name="LoginLabel" type="Label" parent="MainPanel/VBoxContainer/LoginContainer" unique_id=1469203644]
+custom_minimum_size = Vector2(0, 28)
+layout_mode = 2
+size_flags_horizontal = 2
+theme_override_font_sizes/font_size = 18
+text = "Login Methods:"
+
+[node name="QRLoginButton" type="Button" parent="MainPanel/VBoxContainer/LoginContainer" unique_id=394339002]
+custom_minimum_size = Vector2(0, 56)
+layout_mode = 2
+size_flags_horizontal = 2
+theme_override_font_sizes/font_size = 18
+text = "QR Code Login"
+
+[node name="OAuthLoginButton" type="Button" parent="MainPanel/VBoxContainer/LoginContainer" unique_id=1277129679]
+custom_minimum_size = Vector2(0, 56)
+layout_mode = 2
+size_flags_horizontal = 2
+theme_override_font_sizes/font_size = 18
+text = "OAuth Login"
+
+[node name="TokenInputContainer" type="HBoxContainer" parent="MainPanel/VBoxContainer/LoginContainer" unique_id=651717203]
+custom_minimum_size = Vector2(0, 56)
+layout_mode = 2
+size_flags_horizontal = 2
+
+[node name="Label" type="Label" parent="MainPanel/VBoxContainer/LoginContainer/TokenInputContainer" unique_id=1707562048]
+custom_minimum_size = Vector2(140, 0)
+layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 1
+theme_override_font_sizes/font_size = 16
+text = "Session Token:"
+
+[node name="TokenInput" type="LineEdit" parent="MainPanel/VBoxContainer/LoginContainer/TokenInputContainer" unique_id=1167982987]
+custom_minimum_size = Vector2(420, 56)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 0
+placeholder_text = "Paste your session token here"
+
+[node name="InitTokenButton" type="Button" parent="MainPanel/VBoxContainer/LoginContainer/TokenInputContainer" unique_id=1980478714]
+custom_minimum_size = Vector2(92, 56)
+layout_mode = 2
+size_flags_horizontal = 0
+theme_override_font_sizes/font_size = 18
+text = "Init"
+
+[node name="QRCodePanel" type="Panel" parent="MainPanel/VBoxContainer" unique_id=1387974077]
+visible = false
+custom_minimum_size = Vector2(420, 420)
+layout_mode = 2
+size_flags_horizontal = 2
+size_flags_vertical = 0
+
+[node name="QRCodeContainer" type="VBoxContainer" parent="MainPanel/VBoxContainer/QRCodePanel" unique_id=385181656]
+layout_mode = 0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="QRCodeLabel" type="Label" parent="MainPanel/VBoxContainer/QRCodePanel/QRCodeContainer" unique_id=1659214587]
+custom_minimum_size = Vector2(0, 28)
+layout_mode = 2
+size_flags_horizontal = 2
+theme_override_font_sizes/font_size = 18
+text = "QR Code:"
+
+[node name="QRCodeRect" type="TextureRect" parent="MainPanel/VBoxContainer/QRCodePanel/QRCodeContainer" unique_id=1951086703]
+custom_minimum_size = Vector2(360, 360)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
 expand_mode = 1
 stretch_mode = 5
 script = ExtResource("2_4l3p2")
@@ -123,118 +147,147 @@ metadata/_custom_type_script = "uid://dynulhnyq5hpq"
 
 [node name="OAuthLinkButton" type="Button" parent="MainPanel/VBoxContainer" unique_id=1927788945]
 visible = false
+custom_minimum_size = Vector2(0, 56)
 layout_mode = 2
 size_flags_horizontal = 2
+theme_override_font_sizes/font_size = 18
 text = "Open OAuth Link"
 
 [node name="HSeparator2" type="HSeparator" parent="MainPanel/VBoxContainer" unique_id=1578870149]
 layout_mode = 2
-size_flags_vertical = 2
+size_flags_vertical = 0
 
 [node name="SaveManagementLabel" type="Label" parent="MainPanel/VBoxContainer" unique_id=1378814094]
+custom_minimum_size = Vector2(0, 28)
 layout_mode = 2
 size_flags_horizontal = 2
-size_flags_vertical = 0
-theme_override_font_sizes/font_size = 12
+theme_override_font_sizes/font_size = 18
 text = "Save Management:"
 
 [node name="AesKeyContainer" type="HBoxContainer" parent="MainPanel/VBoxContainer" unique_id=2113377001]
+custom_minimum_size = Vector2(0, 56)
 layout_mode = 2
 size_flags_horizontal = 2
 
 [node name="AesKeyLabel" type="Label" parent="MainPanel/VBoxContainer/AesKeyContainer" unique_id=2113377002]
+custom_minimum_size = Vector2(140, 0)
 layout_mode = 2
 size_flags_horizontal = 0
 size_flags_vertical = 1
+theme_override_font_sizes/font_size = 16
 text = "AES Key (hex):"
 
 [node name="AesKeyInput" type="LineEdit" parent="MainPanel/VBoxContainer/AesKeyContainer" unique_id=2113377003]
-custom_minimum_size = Vector2(500, 0)
+custom_minimum_size = Vector2(420, 56)
 layout_mode = 2
 size_flags_horizontal = 3
 placeholder_text = "64 hex chars (32 bytes)"
 
 [node name="AesIvContainer" type="HBoxContainer" parent="MainPanel/VBoxContainer" unique_id=2113377004]
+custom_minimum_size = Vector2(0, 56)
 layout_mode = 2
 size_flags_horizontal = 2
 
 [node name="AesIvLabel" type="Label" parent="MainPanel/VBoxContainer/AesIvContainer" unique_id=2113377005]
+custom_minimum_size = Vector2(140, 0)
 layout_mode = 2
 size_flags_horizontal = 0
 size_flags_vertical = 1
+theme_override_font_sizes/font_size = 16
 text = "AES IV (hex):"
 
 [node name="AesIvInput" type="LineEdit" parent="MainPanel/VBoxContainer/AesIvContainer" unique_id=2113377006]
-custom_minimum_size = Vector2(500, 0)
+custom_minimum_size = Vector2(420, 56)
 layout_mode = 2
 size_flags_horizontal = 3
 placeholder_text = "32 hex chars (16 bytes)"
 
 [node name="RandomCryptoButton" type="Button" parent="MainPanel/VBoxContainer" unique_id=2113377007]
+custom_minimum_size = Vector2(0, 56)
 layout_mode = 2
 size_flags_horizontal = 2
+theme_override_font_sizes/font_size = 18
 text = "Generate Random AES Key/IV"
 
 [node name="DownloadButton" type="Button" parent="MainPanel/VBoxContainer" unique_id=692386536]
 visible = false
+custom_minimum_size = Vector2(0, 56)
 layout_mode = 2
 size_flags_horizontal = 2
+theme_override_font_sizes/font_size = 18
 text = "Download Save from Cloud"
 
 [node name="CheckConflictButton" type="Button" parent="MainPanel/VBoxContainer" unique_id=1849023894]
 visible = false
+custom_minimum_size = Vector2(0, 56)
 layout_mode = 2
 size_flags_horizontal = 2
+theme_override_font_sizes/font_size = 18
 text = "Check for Conflicts"
 
 [node name="SaveLocalButton" type="Button" parent="MainPanel/VBoxContainer" unique_id=466795257]
 visible = false
+custom_minimum_size = Vector2(0, 56)
 layout_mode = 2
 size_flags_horizontal = 2
+theme_override_font_sizes/font_size = 18
 text = "Save to Local (Encrypted)"
 
 [node name="LoadLocalButton" type="Button" parent="MainPanel/VBoxContainer" unique_id=1041371479]
 visible = false
+custom_minimum_size = Vector2(0, 56)
 layout_mode = 2
 size_flags_horizontal = 2
+theme_override_font_sizes/font_size = 18
 text = "Load from Local (Encrypted)"
 
 [node name="UploadButton" type="Button" parent="MainPanel/VBoxContainer" unique_id=2113377009]
 visible = false
+custom_minimum_size = Vector2(0, 56)
 layout_mode = 2
 size_flags_horizontal = 2
+theme_override_font_sizes/font_size = 18
 text = "Upload Save to Cloud"
 
 [node name="ConflictUploadButton" type="Button" parent="MainPanel/VBoxContainer" unique_id=2113377010]
 visible = false
+custom_minimum_size = Vector2(0, 56)
 layout_mode = 2
 size_flags_horizontal = 2
+theme_override_font_sizes/font_size = 18
 text = "Test Conflict Upload"
 
 [node name="ExportJsonButton" type="Button" parent="MainPanel/VBoxContainer" unique_id=782699571]
 visible = false
+custom_minimum_size = Vector2(0, 56)
 layout_mode = 2
 size_flags_horizontal = 2
+theme_override_font_sizes/font_size = 18
 text = "Export as JSON"
 
 [node name="ImportJsonButton" type="Button" parent="MainPanel/VBoxContainer" unique_id=2113377008]
 visible = false
+custom_minimum_size = Vector2(0, 56)
 layout_mode = 2
 size_flags_horizontal = 2
+theme_override_font_sizes/font_size = 18
 text = "Import JSON from File"
 
 [node name="CalculateRKSButton" type="Button" parent="MainPanel/VBoxContainer" unique_id=892912164]
 visible = false
+custom_minimum_size = Vector2(0, 56)
 layout_mode = 2
 size_flags_horizontal = 2
+theme_override_font_sizes/font_size = 18
 text = "Calculate RKS"
 
 [node name="HSeparator3" type="HSeparator" parent="MainPanel/VBoxContainer" unique_id=112821853]
 layout_mode = 2
-size_flags_vertical = 2
+size_flags_vertical = 0
 
 [node name="ConflictPanel" type="Panel" parent="MainPanel/VBoxContainer" unique_id=1862831570]
 visible = false
+custom_minimum_size = Vector2(320, 260)
 layout_mode = 2
 size_flags_horizontal = 2
 size_flags_vertical = 2
@@ -247,27 +300,26 @@ offset_right = -10.0
 offset_bottom = -10.0
 
 [node name="ConflictLabel" type="Label" parent="MainPanel/VBoxContainer/ConflictPanel/VBoxContainer" unique_id=446557211]
+custom_minimum_size = Vector2(0, 28)
 layout_mode = 2
 size_flags_horizontal = 2
-size_flags_vertical = 0
-theme_override_font_sizes/font_size = 14
+theme_override_font_sizes/font_size = 18
 text = "Save Conflict Detected!"
 
 [node name="ConflictDescription" type="Label" parent="MainPanel/VBoxContainer/ConflictPanel/VBoxContainer" unique_id=1748458263]
 layout_mode = 2
 size_flags_horizontal = 2
-size_flags_vertical = 0
+theme_override_font_sizes/font_size = 14
 text = "Differences detected. Choose a resolution strategy:"
 
 [node name="DiffLabel" type="Label" parent="MainPanel/VBoxContainer/ConflictPanel/VBoxContainer" unique_id=683436174]
 layout_mode = 2
 size_flags_horizontal = 2
-size_flags_vertical = 0
-theme_override_font_sizes/font_size = 11
+theme_override_font_sizes/font_size = 14
 text = "Differences:"
 
 [node name="DiffList" type="ItemList" parent="MainPanel/VBoxContainer/ConflictPanel/VBoxContainer" unique_id=1068303746]
-custom_minimum_size = Vector2(0, 100)
+custom_minimum_size = Vector2(0, 180)
 layout_mode = 2
 size_flags_horizontal = 2
 size_flags_vertical = 3
@@ -275,8 +327,7 @@ size_flags_vertical = 3
 [node name="ResolutionLabel" type="Label" parent="MainPanel/VBoxContainer/ConflictPanel/VBoxContainer" unique_id=1676309193]
 layout_mode = 2
 size_flags_horizontal = 2
-size_flags_vertical = 0
-theme_override_font_sizes/font_size = 11
+theme_override_font_sizes/font_size = 14
 text = "Choose resolution:"
 
 [node name="ButtonHBox" type="HBoxContainer" parent="MainPanel/VBoxContainer/ConflictPanel/VBoxContainer" unique_id=25884074]
@@ -285,38 +336,45 @@ size_flags_horizontal = 2
 size_flags_vertical = 0
 
 [node name="MergeButton" type="Button" parent="MainPanel/VBoxContainer/ConflictPanel/VBoxContainer/ButtonHBox" unique_id=42829658]
+custom_minimum_size = Vector2(0, 56)
 layout_mode = 2
 size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 16
 text = "Merge Both"
 
 [node name="KeepLocalButton" type="Button" parent="MainPanel/VBoxContainer/ConflictPanel/VBoxContainer/ButtonHBox" unique_id=29050994]
+custom_minimum_size = Vector2(0, 56)
 layout_mode = 2
 size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 16
 text = "Keep Local (Upload)"
 
 [node name="KeepCloudButton" type="Button" parent="MainPanel/VBoxContainer/ConflictPanel/VBoxContainer/ButtonHBox" unique_id=1031180599]
+custom_minimum_size = Vector2(0, 56)
 layout_mode = 2
 size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 16
 text = "Keep Cloud (Download)"
 
 [node name="HSeparator4" type="HSeparator" parent="MainPanel/VBoxContainer" unique_id=800105772]
 layout_mode = 2
-size_flags_vertical = 2
+size_flags_vertical = 0
 
 [node name="LogLabel" type="Label" parent="MainPanel/VBoxContainer" unique_id=105615401]
+custom_minimum_size = Vector2(0, 28)
 layout_mode = 2
 size_flags_horizontal = 2
-size_flags_vertical = 0
-theme_override_font_sizes/font_size = 12
+theme_override_font_sizes/font_size = 18
 text = "Log Output:"
 
 [node name="ScrollContainer" type="ScrollContainer" parent="MainPanel/VBoxContainer" unique_id=961188180]
-custom_minimum_size = Vector2(0, 150)
+custom_minimum_size = Vector2(0, 240)
 layout_mode = 2
 size_flags_horizontal = 2
 size_flags_vertical = 3
 
 [node name="LogText" type="TextEdit" parent="MainPanel/VBoxContainer/ScrollContainer" unique_id=1501230934]
+custom_minimum_size = Vector2(0, 200)
 layout_mode = 2
 size_flags_horizontal = 2
 size_flags_vertical = 2
