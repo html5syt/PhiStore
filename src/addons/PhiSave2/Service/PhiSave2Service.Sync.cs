@@ -13,8 +13,12 @@ namespace PhiStore.Addons.PhiSave2;
 public partial class PhiSave2Service
 {
     /// <summary>
-    /// 同步云端存档
+    /// 下载并加载云端存档到内存（不自动保存到本地文件）。
     /// </summary>
+    /// <returns>
+    /// 一个包含已下载的 `game file` 对象 ID 与保存记录对象 ID 的元组：
+    /// (fileId, objId)。若未找到则抛出异常。
+    /// </returns>
     public async Task<(string fileId, string objId)> DownloadSaveAsync()
     {
         if (_saveObj == null) throw new InvalidOperationException("Not initialized");
@@ -100,9 +104,10 @@ public partial class PhiSave2Service
     }
 
     /// <summary>
-    /// 获取本地与云端的存档元信息（修改时间与 Summary.Rks）
-    /// localFilePath 可选：如果提供则读取其文件修改时间；否则使用内存 CurrentSave
+    /// 获取本地（或指定文件）与云端存档的元信息，用于冲突检测和决策。
     /// </summary>
+    /// <param name="localFilePath">可选的本地文件路径；若提供则使用该文件的修改时间，否则使用内存的 <c>CurrentSave</c>。</param>
+    /// <returns>返回包含本地/云端修改时间与 Summary.Rks 的 <see cref="SaveMetadata"/>。</returns>
     public async Task<SaveMetadata> GetSaveMetadataAsync(string? localFilePath = null)
     {
         DateTime? localTime = null;
@@ -192,9 +197,11 @@ public partial class PhiSave2Service
     }
 
     /// <summary>
-    /// 同步本地与云端，根据参数选择优先策略或尝试合并。
-    /// 返回 SyncResult 描述操作结果：Uploaded/Downloaded/Merged/Conflict/NoOp
+    /// 同步本地与云端存档，自动决定上传/下载或合并；可通过参数调整优先策略。
     /// </summary>
+    /// <param name="preferLocal">若为 true 则优先将本地上传覆盖云端。</param>
+    /// <param name="allowMerge">若为 true 且出现差异则尝试合并并上传合并结果。</param>
+    /// <returns>返回包含操作类型与可能的差异列表的 <see cref="SyncResult"/>。</returns>
     public async Task<SyncResult> SyncWithCloudAsync(bool preferLocal = false, bool allowMerge = true)
     {
         if (_saveObj == null) throw new InvalidOperationException("Not initialized");
@@ -262,8 +269,14 @@ public partial class PhiSave2Service
     }
 
     /// <summary>
-    /// 直接合并当前本地与云端存档，并将结果同时同步到云端和本地文件（若提供 localPath）。
+    /// 直接合并当前内存与云端存档并同步：
+    /// - 若缺少任一端则采用另一端的存档并视需要上传或保存到本地；
+    /// - 成功合并后会上传合并结果并可选地保存到本地路径。
     /// </summary>
+    /// <param name="localPath">可选的本地路径，用于同时将合并结果保存为本地文件（若非空）。</param>
+    /// <param name="oldFileId">可选的旧 game file 对象 ID，用于在上传时替换/删除旧对象。</param>
+    /// <param name="oldObjId">可选的旧保存记录对象 ID，用于更新 summary 的情况。</param>
+    /// <returns>返回描述合并/同步结果的 <see cref="SyncResult"/>。</returns>
     public async Task<SyncResult> MergeAndSyncAsync(string? localPath = null, string? oldFileId = null, string? oldObjId = null)
     {
         if (_saveObj == null) throw new InvalidOperationException("Not initialized");
@@ -307,10 +320,10 @@ public partial class PhiSave2Service
     }
 
     /// <summary>
-    /// 根据用户选择逐条解决差异并上传结果。
-    /// choices: key => "local" | "cloud" | "higher"
-    /// key 格式与 DiffSavesAsync 保持一致："{songId}_{difficultyIndex}"。
+    /// 根据客户端提供的逐条选择（local/cloud/higher）解决差异并上传合并后的存档。
     /// </summary>
+    /// <param name="choices">键值映射：key 格式为 "{songId}_{difficultyIndex}"，value 为 "local"、"cloud" 或 "higher"。</param>
+    /// <returns>返回 <see cref="SyncResult"/>，描述解析结果与上传状态；出错时状态为 "Error"。</returns>
     public async Task<SyncResult> ResolveDiffsAndApplyAsync(Dictionary<string, string> choices)
     {
         if (_saveObj == null) throw new InvalidOperationException("Not initialized");
@@ -406,8 +419,11 @@ public partial class PhiSave2Service
     }
 
     /// <summary>
-    /// 计算本地与云端的差异（主要 song score 差异），用于 diff 展示
+    /// 比较两个存档的单曲成绩差异，返回差异列表以供 UI 展示或进一步处理。
     /// </summary>
+    /// <param name="local">本地存档（可为 null）。</param>
+    /// <param name="cloud">云端存档（可为 null）。</param>
+    /// <returns>返回不包含相等项的 <see cref="ScoreDiff"/> 列表。</returns>
     public async Task<List<ScoreDiff>> DiffSavesAsync(PhiSaveData? local, PhiSaveData? cloud)
     {
         var diffs = new List<ScoreDiff>();
@@ -453,9 +469,12 @@ public partial class PhiSave2Service
     }
 
     /// <summary>
-    /// 全量比较：除了成绩外还比较 Progress / UserInfo / Settings / Keys / SummaryRks
-    /// 返回路径与局部/云端的序列化值，供上层 UI 显示差异或逐项合并。
+    /// 对存档进行全量比较（包括 Progress、UserInfo、Settings、Keys、SummaryRks 及成绩），
+    /// 返回路径与两端序列化值便于上层逐项展示或合并操作。
     /// </summary>
+    /// <param name="local">本地存档（可为 null）。</param>
+    /// <param name="cloud">云端存档（可为 null）。</param>
+    /// <returns>返回 <see cref="FullDiff"/> 的列表表示所有发现的不一致项。</returns>
     public async Task<List<FullDiff>> DiffFullAsync(PhiSaveData? local, PhiSaveData? cloud)
     {
         var result = new List<FullDiff>();
@@ -488,8 +507,11 @@ public partial class PhiSave2Service
     }
 
     /// <summary>
-    /// 返回带建议（suggestion）的详细差异列表，建议为 "local" | "cloud" | "higher" | "equal"
+    /// 在基础差异之上提供带建议（local/cloud/higher/equal）的详细差异列表，便于 UI 显示建议解法。
     /// </summary>
+    /// <param name="local">本地存档（可为 null）。</param>
+    /// <param name="cloud">云端存档（可为 null）。</param>
+    /// <returns>返回包含建议字段的 <see cref="DetailedScoreDiff"/> 列表。</returns>
     public async Task<List<DetailedScoreDiff>> GetDetailedDiffsAsync(PhiSaveData? local, PhiSaveData? cloud)
     {
         var diffs = await DiffSavesAsync(local, cloud);
@@ -526,8 +548,11 @@ public partial class PhiSave2Service
     }
 
     /// <summary>
-    /// 返回带本地/云对象引用的详细差异，方便上层 UI 构建展示数据。
+    /// 返回包含本地与云端 `SongScore` 对象引用的详细差异列表，便于直接在 UI 中显示原始对象字段。
     /// </summary>
+    /// <param name="local">本地存档（可为 null）。</param>
+    /// <param name="cloud">云端存档（可为 null）。</param>
+    /// <returns>返回 <see cref="DetailedScoreDiffWithObjects"/> 列表。</returns>
     public async Task<List<DetailedScoreDiffWithObjects>> GetDetailedDiffsWithObjectsAsync(PhiSaveData? local, PhiSaveData? cloud)
     {
         var diffs = await GetDetailedDiffsAsync(local, cloud);
@@ -553,8 +578,9 @@ public partial class PhiSave2Service
     }
 
     /// <summary>
-    /// 返回当前内存与云端的差异键列表（格式："{songId}_{difficultyIndex}"），用于 UI 验证与展示。
+    /// 返回当前内存与云端存档之间的差异键列表，键格式为 "{songId}_{difficultyIndex}"。
     /// </summary>
+    /// <returns>差异键字符串列表，便于客户端进行批量选择或校验。</returns>
     public async Task<List<string>> GetCurrentDiffKeysAsync()
     {
         var local = CurrentSave;
@@ -564,9 +590,11 @@ public partial class PhiSave2Service
     }
 
     /// <summary>
-    /// 创建一个合并预览（不应用到 CurrentSave），并保存在 service 里以便后续 Apply/Discard
-    /// 如果传入 local 或 cloud 为 null，则使用当前内存或云端副本
+    /// 创建合并预览（不直接应用），并将结果缓存在服务中以便后续 `ApplyPreviewMerge` 或 `DiscardPreviewMerge`。
     /// </summary>
+    /// <param name="local">用于合并的本地存档；传入 null 则使用当前内存。</param>
+    /// <param name="cloud">用于合并的云端存档；传入 null 则尝试读取云端副本。</param>
+    /// <returns>返回合并后的 `PhiSaveData` 预览（或 null），并在服务内缓存该预览。</returns>
     public async Task<PhiSaveData?> CreateMergePreviewAsync(PhiSaveData? local = null, PhiSaveData? cloud = null)
     {
         if (local == null) local = CurrentSave;
@@ -582,8 +610,9 @@ public partial class PhiSave2Service
     }
 
     /// <summary>
-    /// 应用先前创建的合并预览到 CurrentSave（不自动上传）
+    /// 将先前创建并缓存的合并预览应用到内存的 <c>CurrentSave</c>（不自动上传）。
     /// </summary>
+    /// <returns>若存在并成功应用预览返回 true，否则返回 false。</returns>
     public bool ApplyPreviewMerge()
     {
         if (_previewMerge == null) return false;
@@ -593,8 +622,9 @@ public partial class PhiSave2Service
     }
 
     /// <summary>
-    /// 丢弃当前保存的合并预览
+    /// 丢弃当前缓存的合并预览（如果存在）。
     /// </summary>
+    /// <returns>若存在并成功丢弃返回 true，否则返回 false。</returns>
     public bool DiscardPreviewMerge()
     {
         if (_previewMerge == null) return false;
@@ -603,8 +633,11 @@ public partial class PhiSave2Service
     }
 
     /// <summary>
-    /// 应用合并预览并上传到云端
+    /// 将缓存的合并预览应用到内存并上传到云端。
     /// </summary>
+    /// <param name="oldFileId">可选的旧 game file 对象 ID（用于替换/删除旧对象）。</param>
+    /// <param name="oldObjId">可选的旧保存记录对象 ID（用于更新 summary）。</param>
+    /// <returns>操作完成后返回 true（若没有预览则返回 false）。</returns>
     public async Task<bool> ApplyPreviewAndUploadAsync(string? oldFileId = null, string? oldObjId = null)
     {
         if (_previewMerge == null) return false;
@@ -615,8 +648,12 @@ public partial class PhiSave2Service
     }
 
     /// <summary>
-    /// 应用合并预览，上传到云端，并可选择将合并结果保存到本地文件（localPath 可选）。
+    /// 将缓存的合并预览应用并上传，同时可将合并结果保存为本地文件（可选）。
     /// </summary>
+    /// <param name="oldFileId">可选的旧 game file 对象 ID。</param>
+    /// <param name="oldObjId">可选的旧保存记录对象 ID。</param>
+    /// <param name="localPath">可选的本地文件路径，用于保存合并结果。</param>
+    /// <returns>若存在预览并完成上传返回 true，否则返回 false。</returns>
     public async Task<bool> ApplyPreviewAndUploadAsync(string? oldFileId = null, string? oldObjId = null, string? localPath = null)
     {
         if (_previewMerge == null) return false;
@@ -635,13 +672,18 @@ public partial class PhiSave2Service
     }
 
     /// <summary>
-    /// 获取当前合并预览（调试用）
+    /// 获取当前缓存的合并预览（仅供调试或 UI 查询）。
     /// </summary>
+    /// <returns>返回当前的预览对象或 null。</returns>
     public PhiSaveData? GetPreviewMerge() => _previewMerge;
 
     /// <summary>
-    /// 合并两个存档：按单曲分数取更高者，其他字段以最新非空为准
+    /// 合并两个存档：对每首歌按分数/准确度选择更优的记录，其他元数据取非空优先值。
+    /// 该方法是确定性合并策略的实现，适用于自动合并场景。
     /// </summary>
+    /// <param name="local">本地存档（可为 null）。</param>
+    /// <param name="cloud">云端存档（可为 null）。</param>
+    /// <returns>返回合并后的 <see cref="PhiSaveData"/> 对象。</returns>
     public PhiSaveData MergeSaves(PhiSaveData? local, PhiSaveData? cloud)
     {
         var result = new PhiSaveData();

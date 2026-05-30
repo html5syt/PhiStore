@@ -319,7 +319,7 @@ func _on_keep_local_pressed() -> void:
     _log("Keeping local save and uploading to cloud...")
     status_label.text = "Uploading local save..."
     
-    var upload_request = phi_save2_api.KeepLocalAndUpload(old_save_game_file_object_id, old_save_object_id)
+    var upload_request = phi_save2_api.UploadSaveAsync(old_save_game_file_object_id, old_save_object_id)
     _hold_request(upload_request)
     upload_request.Completed.connect(func(_result):
         _log("✓ Local save uploaded successfully")
@@ -338,7 +338,7 @@ func _on_keep_cloud_pressed() -> void:
     _log("Keeping cloud save and downloading to local...")
     status_label.text = "Downloading cloud save..."
     
-    var download_request = phi_save2_api.KeepCloudAndDownload()
+    var download_request = phi_save2_api.DownloadAndDecryptSaveAsync()
     _hold_request(download_request)
     download_request.Completed.connect(func(_result):
         _log("✓ Cloud save downloaded successfully")
@@ -412,7 +412,7 @@ func _on_conflict_upload_pressed() -> void:
     _log("Testing conflict upload path (keep local and upload)...")
     status_label.text = "Testing conflict upload..."
 
-    var upload_request = phi_save2_api.KeepLocalAndUpload(old_save_game_file_object_id, old_save_object_id)
+    var upload_request = phi_save2_api.UploadSaveAsync(old_save_game_file_object_id, old_save_object_id)
     _hold_request(upload_request)
     upload_request.Completed.connect(func(_result):
         _log("✓ Conflict upload path completed successfully")

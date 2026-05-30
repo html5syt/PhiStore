@@ -1,9 +1,5 @@
 using System;
 using System.IO;
-using System.Net.Http;
-using System.Security.Cryptography;
-using System.Text;
-using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Godot;
@@ -21,12 +17,12 @@ public partial class TapTapApkLinkRequest : RefCounted
 
     public void Resolve(string downloadUrl, string fileName, int versionCode, string versionName)
     {
-        CallDeferred(MethodName.EmitSignal, SignalName.Completed, downloadUrl, fileName, versionCode, versionName);
+        CallDeferred(GodotObject.MethodName.EmitSignal, SignalName.Completed, downloadUrl, fileName, versionCode, versionName);
     }
 
     public void Reject(string message)
     {
-        CallDeferred(MethodName.EmitSignal, SignalName.Error, message);
+        CallDeferred(GodotObject.MethodName.EmitSignal, SignalName.Error, message);
     }
 }
 

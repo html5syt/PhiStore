@@ -23,6 +23,7 @@ namespace PhiStore.Addons.PhiSave2;
 [JsonSerializable(typeof(GameSettings))]
 [JsonSerializable(typeof(GameUserInfo))]
 [JsonSerializable(typeof(GameKeyFlag))]
+[JsonSerializable(typeof(Dictionary<string, GameKeyFlag>), TypeInfoPropertyName = "DictionaryStringGameKeyFlag")]
 [JsonSerializable(typeof(Challenge))]
 [JsonSerializable(typeof(Money))]
 [JsonSerializable(typeof(GameProgressNodeVersion2))]

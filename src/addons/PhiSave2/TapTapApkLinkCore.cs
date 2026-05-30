@@ -3,7 +3,6 @@ using System.IO;
 using System.Net.Http;
 using System.Security.Cryptography;
 using System.Text;
-using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
@@ -49,7 +48,7 @@ namespace PhiStore.Addons.PhiSave2
         {
             var resolvedAppId = appId > 0 ? appId : DefaultAppId;
             // Delegate to PhiInfoService which is already non-Godot
-            var svc = new PhiStore.Addons.PhiInfo.PhiInfoService();
+            var svc = new PhiInfo.PhiInfoService();
             var info = await svc.GetApkInfoAsync(resolvedAppId);
             return new ApkInfo
             {

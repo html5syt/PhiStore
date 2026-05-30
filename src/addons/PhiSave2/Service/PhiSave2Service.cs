@@ -1,15 +1,11 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.IO.Compression;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
-using System.Net.Http.Headers;
 using PhigrosLibraryCSharp.CloudSave;
 using PhigrosLibraryCSharp.CloudSave.Login;
 using PhiStore.Addons.PhiSave2.Models;
-using PhigrosLibraryCSharp.Serialization;
 using PhiStore.Addons.PhiSave2.Internal;
 
 namespace PhiStore.Addons.PhiSave2;
@@ -33,8 +29,8 @@ public partial class PhiSave2Service : IDisposable
     private PhiSaveData? _previewMerge = null;
 
     // Events for UI/host to subscribe to when using service without Godot
-    public event Action<PhigrosLibraryCSharp.CloudSave.Login.CompleteQRCodeData>? QrCodeAvailable;
-    public event Action<PhigrosLibraryCSharp.CloudSave.Login.TapTapTokenData?>? QrCodeCheckResult;
+    public event Action<CompleteQRCodeData>? QrCodeAvailable;
+    public event Action<TapTapTokenData?>? QrCodeCheckResult;
     public event Action<string>? OAuthUrlGenerated;
     /// <summary>
     /// (success, sessionTokenOrError)
@@ -101,6 +97,13 @@ public partial class PhiSave2Service : IDisposable
         return false;
     }
 
+    /// <summary>
+    /// 为当前 `CurrentSave` 中已存在的成绩项计算每首歌的 RKS 条目以及总体汇总值。
+    /// difficulties 参数为歌曲难度映射（键格式："{songId}_{difficultyNameOrIndex}" -> 数值难度）。
+    /// 返回包含逐项条目与聚合指标的 <see cref="RksDetails"/>。
+    /// </summary>
+    /// <param name="difficulties">映射歌曲难度的字典，用于计算单首曲目的 RKS。</param>
+    /// <returns>包含条目列表及汇总 RKS 值的 <see cref="RksDetails"/> 对象。</returns>
     public RksDetails CalculateRksDetails(Dictionary<string, float> difficulties)
     {
         var entries = new List<RksEntry>();
@@ -155,11 +158,17 @@ public partial class PhiSave2Service : IDisposable
     // ====== OAuth local callback support ======
     /// <summary>
     /// 启动本地 HTTP 回调监听并返回将要在浏览器打开的授权 URL。
-    /// 调用方需在浏览器中打开返回的 URL。方法会在成功交换 token 后返回 session token。
+    /// 调用方需在浏览器中打开返回的 URL。方法会在成功交换 token 后通过 <see cref="LoginCompleted"/> 事件通知结果。
+    /// 如果传入的 <paramref name="port"/> 为 0，则自动选择一个可用端口。
     /// </summary>
-    /// <summary>
-    /// 开始 OAuth 流程。如果传入的 port 为 0，则自动选择一个可用端口。
-    /// </summary>
+    /// <param name="port">本地回调监听端口，传 0 自动选择可用端口。</param>
+    /// <param name="authEndpoint">OAuth 授权端点 URL。</param>
+    /// <param name="tokenEndpoint">OAuth Token 交换端点 URL。</param>
+    /// <param name="clientId">客户端 ID。</param>
+    /// <param name="clientSecret">客户端密钥。</param>
+    /// <param name="scope">请求的权限范围（可选）。</param>
+    /// <param name="state">可选的状态参数，用于防止 CSRF。</param>
+    /// <returns>返回用于在浏览器中打开的授权 URL 字符串。</returns>
     public async Task<string> StartOAuthFlowAsync(int port, string authEndpoint, string tokenEndpoint, string clientId, string clientSecret, string scope = "", string state = "phistore_state")
     {
         if (port <= 0)

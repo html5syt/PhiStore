@@ -1,23 +1,18 @@
 using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Net.Http.Headers;
 using System.Text.Json;
 using System.Threading.Tasks;
 using PhigrosLibraryCSharp.CloudSave.Login;
 using PhigrosLibraryCSharp.CloudSave;
-using PhiStore.Addons.PhiSave2.Internal;
-using PhiStore.Addons.PhiSave2.Models;
-using PhigrosLibraryCSharp.Serialization;
 
 namespace PhiStore.Addons.PhiSave2;
 
 public partial class PhiSave2Service
 {
     /// <summary>
-    /// 设置自定义云端服务器地址。如果不设置，将根据 ClientId 自动生成默认 TapTap 域名。
+    /// 设置自定义云端服务器地址。若不设置则根据 ClientId 使用默认 TapTap 域名。
     /// </summary>
+    /// <param name="server">云服务器根地址（可带或不带尾部斜杠）；传入 null 可清除自定义地址。</param>
     public void SetCloudServer(string? server)
     {
         _customCloudServer = server?.TrimEnd('/');
@@ -31,8 +26,11 @@ public partial class PhiSave2Service
     }
 
     /// <summary>
-    /// 初始化 Save 对象
+    /// 使用会话 Token 与可选的 ClientId/ClientSecret 初始化云端 Save 客户端。
     /// </summary>
+    /// <param name="token">LeanCloud/Phigros 的会话 Token，用于后续 API 调用。</param>
+    /// <param name="clientId">可选的客户端 ID（覆盖默认值以使用自定义租户）。</param>
+    /// <param name="clientSecret">可选的客户端密钥（覆盖默认值以使用自定义租户）。</param>
     public void Initialize(string token, string clientId, string clientSecret)
     {
         _sessionToken = token;
@@ -59,21 +57,7 @@ public partial class PhiSave2Service
         // 3. 如果设置了自定义服务器地址，使用 RequestHandler 进行重定向
         if (!string.IsNullOrEmpty(_customCloudServer))
         {
-            var targetBase = _customCloudServer.TrimEnd('/');
-            _saveObj.RequestHandler = async (s, req) =>
-            {
-                var original = req.RequestUri;
-                if (original != null)
-                {
-                    var builder = new UriBuilder(targetBase)
-                    {
-                        Path = original.AbsolutePath,
-                        Query = original.Query
-                    };
-                    req.RequestUri = builder.Uri;
-                }
-                return await s.Client.SendAsync(req);
-            };
+            // 不通过 RequestHandler 注入重定向，后续请求统一由显式 URL 构建逻辑处理。
         }
     }
 
@@ -114,8 +98,9 @@ public partial class PhiSave2Service
     }
 
     /// <summary>
-    /// 二维码登录第一步：请求二维码
+    /// 二维码登录第一步：向 TapTap 请求登录二维码并在可用时触发 <see cref="QrCodeAvailable"/> 事件。
     /// </summary>
+    /// <returns>返回包含二维码 URL 与过期信息的 <see cref="CompleteQRCodeData"/> 对象。</returns>
     public async Task<CompleteQRCodeData> RequestQrCodeAsync()
     {
         var qr = await TapTapHelper.RequestLoginQrCode();
@@ -124,8 +109,10 @@ public partial class PhiSave2Service
     }
 
     /// <summary>
-    /// 二维码登录第二步：轮询结果
+    /// 二维码登录第二步：查询二维码的轮询结果并触发 <see cref="QrCodeCheckResult"/> 事件。
     /// </summary>
+    /// <param name="qr">来自 <see cref="RequestQrCodeAsync"/> 的二维码数据。</param>
+    /// <returns>若用户已完成扫码并授权则返回 <see cref="TapTapTokenData"/>，否则返回 null 或未授权状态。</returns>
     public async Task<TapTapTokenData?> CheckQrCodeAsync(CompleteQRCodeData qr)
     {
         var res = await TapTapHelper.CheckQRCodeResult(qr);
@@ -134,8 +121,10 @@ public partial class PhiSave2Service
     }
 
     /// <summary>
-    /// 二维码登录第三步：换取 Phigros Token
+    /// 二维码登录第三步：使用 TapTap 返回的数据获取用户资料并换取 Phigros/LeanCloud 会话 Token，随后初始化 Save 客户端。
     /// </summary>
+    /// <param name="taptapData">来自 TapTap 的 token/授权数据。</param>
+    /// <returns>返回获取到的会话 Token 字符串；若失败则可能返回空字符串。</returns>
     public async Task<string> CompleteLoginAsync(TapTapTokenData taptapData)
     {
         var profile = await TapTapHelper.GetProfile(taptapData.Data);
@@ -161,13 +150,13 @@ public partial class PhiSave2Service
     {
         if (profileData == null) return string.Empty;
         // Try JsonElement
-        if (profileData is System.Text.Json.JsonElement je)
+        if (profileData is JsonElement je)
         {
-            if (je.ValueKind == System.Text.Json.JsonValueKind.Object)
+            if (je.ValueKind == JsonValueKind.Object)
             {
                 foreach (var name in new[] { "objectId", "id", "userId", "openId", "uid" })
                 {
-                    if (je.TryGetProperty(name, out var v) && v.ValueKind == System.Text.Json.JsonValueKind.String)
+                    if (je.TryGetProperty(name, out var v) && v.ValueKind == JsonValueKind.String)
                         return v.GetString() ?? string.Empty;
                 }
             }

@@ -5,7 +5,6 @@ using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
-using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
@@ -43,6 +42,16 @@ public partial class PhiSave2Service
         return builder.Uri.ToString();
     }
 
+    /// <summary>
+    /// 将内存中的当前存档打包并上传到云端：
+    /// 1. 创建文件令牌（file token）并发起分片上传；
+    /// 2. 完成上传后回调并将 Summary 更新到 _GameSave 类；
+    /// 3. 可选地删除旧的 game file 对象。
+    /// </summary>
+    /// <param name="oldSaveGameFileObjectId">可选的旧 game file 对象 ID，用于在成功上传后删除旧对象。</param>
+    /// <param name="oldSaveObjectId">可选的旧保存记录对象 ID（用于更新 summary）。</param>
+    /// <param name="packedSaveBuffer">已打包的 Save ZIP 字节数组。</param>
+    /// <param name="packedSummaryBuffer">Summary 的二进制表示（用于写入 summary 字段）。</param>
     public async Task UploadSaveAsync(string? oldSaveGameFileObjectId, string? oldSaveObjectId, byte[] packedSaveBuffer, byte[] packedSummaryBuffer)
     {
         if (_saveObj == null) throw new InvalidOperationException("Not initialized");

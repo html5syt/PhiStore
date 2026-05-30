@@ -6,6 +6,7 @@ using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 using PhiInfo.Core;
 using PhiInfo.Core.Type;
 using PhiInfo.Processing;
@@ -51,41 +52,40 @@ public class PhiInfoService : IDisposable
         return new AndroidPackagesDataProvider(zips, cldbStream);
     }
 
-    // --- Data access helpers (engine-agnostic) ---
     public Language[] GetSupportedLanguages()
     {
         if (_context == null) throw new InvalidOperationException("Context not initialized");
         return Enum.GetValues<Language>();
     }
 
-    public System.Collections.Generic.List<SongInfo> GetSongsData()
+    public List<SongInfo> GetSongsData()
     {
         if (_context == null) throw new InvalidOperationException("Context not initialized");
         return _context.Info.ExtractSongs();
     }
 
-    public System.Collections.Generic.List<Folder> GetCollectionData()
+    public List<Folder> GetCollectionData()
     {
         if (_context == null) throw new InvalidOperationException("Context not initialized");
         return _context.Info.ExtractCollection();
     }
 
-    public System.Collections.Generic.List<Avatar> GetAvatarsData()
+    public List<Avatar> GetAvatarsData()
     {
         if (_context == null) throw new InvalidOperationException("Context not initialized");
         return _context.Info.ExtractAvatars();
     }
 
-    public System.Collections.Generic.List<ChapterInfo> GetChaptersData()
+    public List<ChapterInfo> GetChaptersData()
     {
         if (_context == null) throw new InvalidOperationException("Context not initialized");
         return _context.Info.ExtractChapters();
     }
 
-    public System.Collections.Generic.Dictionary<string, string> GetAssetCatalogData()
+    public Dictionary<string, string> GetAssetCatalogData()
     {
         if (_context == null) throw new InvalidOperationException("Context not initialized");
-        return new System.Collections.Generic.Dictionary<string, string>(_context.Asset.Catalog);
+        return new Dictionary<string, string>(_context.Asset.Catalog);
     }
 
     public T GetAsset<T>(string assetPath) where T : UnityAsset, new()
@@ -95,12 +95,12 @@ public class PhiInfoService : IDisposable
         if (!catalog.TryGetValue(assetPath, out var rawPath))
         {
             rawPath = catalog.FirstOrDefault(kvp => kvp.Key.Equals(assetPath, StringComparison.OrdinalIgnoreCase)).Value
-                ?? throw new System.IO.FileNotFoundException($"Catalog missing tracking for {assetPath}");
+                ?? throw new FileNotFoundException($"Catalog missing tracking for {assetPath}");
         }
         return _context.Asset.Get<T>(rawPath);
     }
 
-    public System.Collections.Generic.Dictionary<Language, System.Collections.Generic.List<string>> GetTipsData()
+    public Dictionary<Language, List<string>> GetTipsData()
     {
         if (_context == null) throw new InvalidOperationException("Context not initialized");
         return _context.Info.ExtractTips();
@@ -161,7 +161,7 @@ public class PhiInfoService : IDisposable
 
     private void InitAsync(Func<IDataProvider> providerFactory, Action<int, float>? progress = null, Action<bool, string>? completed = null)
     {
-        System.Threading.Tasks.Task.Run(() =>
+        Task.Run(() =>
         {
             FreeContext();
             for (int i = 0; i < 3; i++)
@@ -336,7 +336,7 @@ public class PhiInfoService : IDisposable
 
         var prefix = match.Groups[1].Value;
         var pattern = $"{prefix}-*.apk";
-        var files = System.IO.Directory.GetFiles(".", pattern);
+        var files = Directory.GetFiles(".", pattern);
         if (files.Length == 0)
         {
             return null;
@@ -346,7 +346,7 @@ public class PhiInfoService : IDisposable
         string? maxFile = null;
         foreach (var file in files)
         {
-            var nameOnly = System.IO.Path.GetFileName(file);
+            var nameOnly = Path.GetFileName(file);
             var code = ExtractVersionCodeFromFileName(nameOnly);
             if (code.HasValue && code.Value > maxCode)
             {

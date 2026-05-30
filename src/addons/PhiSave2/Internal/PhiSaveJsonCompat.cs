@@ -14,10 +14,15 @@ namespace PhiStore.Addons.PhiSave2.Internal;
 /// </summary>
 public static class PhiSaveJsonCompat
 {
-    // Use a cached JsonSerializerContext instance configured with our custom converters
-    // and pass JsonTypeInfo to JsonSerializer to remain AOT/trimming-safe.
+    // 共享的 JsonSerializerContext 实例，使用预定义选项和显式转换器。
     private static readonly PhiSaveJsonContext SharedContext = new PhiSaveJsonContext(CreateOptions());
 
+    /// <summary>
+    /// 公开当前兼容层使用的 JSON 选项，供同一套转换器在其它 entry 级读写场景中复用。
+    /// </summary>
+    public static JsonSerializerOptions Options => SharedContext.Options;
+
+    // 提供直接的序列化/反序列化方法，供外部调用。
     public static string Serialize(PhiSaveData data)
     {
         var json = JsonSerializer.Serialize(data, SharedContext.PhiSaveData);
@@ -30,12 +35,44 @@ public static class PhiSaveJsonCompat
         return (PhiSaveData?)JsonSerializer.Deserialize(normalized, SharedContext.PhiSaveData);
     }
 
+#pragma warning disable IL2026, IL3050
+    /// <summary>
+    /// 使用当前兼容层的选项序列化任意支持的值。
+    /// </summary>
+    public static string SerializeValue<T>(T value)
+    {
+        return JsonSerializer.Serialize(value, Options);
+    }
+
+    /// <summary>
+    /// 使用当前兼容层的选项反序列化任意支持的值。
+    /// </summary>
+    public static T? DeserializeValue<T>(string json)
+    {
+        var normalized = NormalizeInputJson(json);
+        return JsonSerializer.Deserialize<T>(normalized, Options);
+    }
+#pragma warning restore IL2026, IL3050
+
+    // 将 Unicode 转义序列转换回原始字符
     public static string NormalizeInputJson(string raw)
     {
         if (string.IsNullOrEmpty(raw)) return raw;
         return UnescapeUnicodeEscapes(raw);
     }
 
+    // 将 Unicode 转义序列（\uXXXX）转换回原始字符，避免因转义导致的解析问题。
+    private static string UnescapeUnicodeEscapes(string text)
+    {
+        if (string.IsNullOrEmpty(text)) return text;
+        return Regex.Replace(text, "\\\\u([0-9a-fA-F]{4})", static m =>
+        {
+            var code = Convert.ToInt32(m.Groups[1].Value, 16);
+            return ((char)code).ToString();
+        });
+    }
+
+    // AES 加密/解密相关的兼容方法，保持与原有实现一致的加密流程（AES + GZip），并提供默认密钥/IV 以确保兼容性。
     private static JsonSerializerOptions CreateOptions()
     {
         var options = new JsonSerializerOptions
@@ -58,16 +95,7 @@ public static class PhiSaveJsonCompat
         return options;
     }
 
-    private static string UnescapeUnicodeEscapes(string text)
-    {
-        if (string.IsNullOrEmpty(text)) return text;
-        return Regex.Replace(text, "\\\\u([0-9a-fA-F]{4})", static m =>
-        {
-            var code = Convert.ToInt32(m.Groups[1].Value, 16);
-            return ((char)code).ToString();
-        });
-    }
-
+    // 5个主要Entries的转换器
     private sealed class SongScoreJsonConverter : JsonConverter<SongScore>
     {
         public override SongScore Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
@@ -78,8 +106,8 @@ public static class PhiSaveJsonCompat
             var score = GetInt(root, "Score", 0);
             var acc = GetFloat(root, "Accuracy", GetFloat(root, "Acc", 0f));
             var id = GetString(root, "Id", string.Empty);
-            var difficulty = (Difficulty)GetInt(root, "Difficulty", 0);
-            var status = (ScoreStatus)GetInt(root, "Status", 0);
+            var difficulty = ParseEnum(root, "Difficulty", (Difficulty)0);
+            var status = ParseScoreStatus(root);
             return new SongScore(score, acc, id, difficulty, status);
         }
 
@@ -93,9 +121,9 @@ public static class PhiSaveJsonCompat
             writer.WritePropertyName("Id");
             writer.WriteStringValue(value.Id);
             writer.WritePropertyName("Difficulty");
-            writer.WriteNumberValue((int)value.Difficulty);
+            writer.WriteStringValue(value.Difficulty.ToString());
             writer.WritePropertyName("Status");
-            writer.WriteNumberValue((int)value.Status);
+            writer.WriteStringValue(value.Status.ToString());
             writer.WriteEndObject();
         }
     }
@@ -143,8 +171,8 @@ public static class PhiSaveJsonCompat
             var score = GetInt(root, "Score", 0);
             var acc = GetFloat(root, "Accuracy", GetFloat(root, "Acc", 0f));
             var id = GetString(root, "Id", string.Empty);
-            var difficulty = (Difficulty)GetInt(root, "Difficulty", 0);
-            var status = (ScoreStatus)GetInt(root, "Status", 0);
+            var difficulty = ParseEnum(root, "Difficulty", (Difficulty)0);
+            var status = ParseScoreStatus(root);
             return new SongScore(score, acc, id, difficulty, status);
         }
 
@@ -154,10 +182,31 @@ public static class PhiSaveJsonCompat
             writer.WriteNumber("Score", value.Score);
             writer.WriteNumber("Accuracy", value.Accuracy);
             writer.WriteString("Id", value.Id);
-            writer.WriteNumber("Difficulty", (int)value.Difficulty);
-            writer.WriteNumber("Status", (int)value.Status);
+            writer.WriteString("Difficulty", value.Difficulty.ToString());
+            writer.WriteString("Status", value.Status.ToString());
             writer.WriteEndObject();
         }
+    }
+
+    private static ScoreStatus ParseScoreStatus(JsonElement root)
+    {
+        if (TryGetProperty(root, "Status", out var statusNode))
+        {
+            if (statusNode.ValueKind == JsonValueKind.String)
+            {
+                var raw = statusNode.GetString();
+                if (!string.IsNullOrWhiteSpace(raw) && Enum.TryParse<ScoreStatus>(raw, true, out var parsed))
+                {
+                    return parsed;
+                }
+            }
+            else if (statusNode.ValueKind == JsonValueKind.Number)
+            {
+                return ParseEnum(root, "Status", (ScoreStatus)0);
+            }
+        }
+
+        return ScoreStatus.NotFc;
     }
 
     private sealed class GameSettingsJsonConverter : JsonConverter<GameSettings>
@@ -235,10 +284,10 @@ public static class PhiSaveJsonCompat
                 (short)GetInt(root, "SongUpdateInfo", 0),
                 challenge,
                 money,
-                (DifficultyUnlockFlag)GetInt(root, "UnlockFlagOfSpasmodic", 0),
-                (DifficultyUnlockFlag)GetInt(root, "UnlockFlagOfIgallta", 0),
-                (DifficultyUnlockFlag)GetInt(root, "UnlockFlagOfRrharil", 0),
-                (SongRecordFlag)GetInt(root, "FlagOfSongRecordKey", 0),
+                ParseEnum(root, "UnlockFlagOfSpasmodic", (DifficultyUnlockFlag)0),
+                ParseEnum(root, "UnlockFlagOfIgallta", (DifficultyUnlockFlag)0),
+                ParseEnum(root, "UnlockFlagOfRrharil", (DifficultyUnlockFlag)0),
+                ParseEnum(root, "FlagOfSongRecordKey", (SongRecordFlag)0),
                 node2
             );
         }
@@ -268,13 +317,13 @@ public static class PhiSaveJsonCompat
             writer.WritePropertyName("Money");
             JsonSerializer.Serialize(writer, value.Money, PhiSaveJsonContext.Default.Money);
             writer.WritePropertyName("UnlockFlagOfSpasmodic");
-            writer.WriteNumberValue((int)value.UnlockFlagOfSpasmodic);
+            writer.WriteStringValue(value.UnlockFlagOfSpasmodic.ToString());
             writer.WritePropertyName("UnlockFlagOfIgallta");
-            writer.WriteNumberValue((int)value.UnlockFlagOfIgallta);
+            writer.WriteStringValue(value.UnlockFlagOfIgallta.ToString());
             writer.WritePropertyName("UnlockFlagOfRrharil");
-            writer.WriteNumberValue((int)value.UnlockFlagOfRrharil);
+            writer.WriteStringValue(value.UnlockFlagOfRrharil.ToString());
             writer.WritePropertyName("FlagOfSongRecordKey");
-            writer.WriteNumberValue((int)value.FlagOfSongRecordKey);
+            writer.WriteStringValue(value.FlagOfSongRecordKey.ToString());
             writer.WritePropertyName("Node2");
             if (value.Node2 == null)
             {
@@ -319,7 +368,7 @@ public static class PhiSaveJsonCompat
 
             var node3 = ParseNode3(n2);
             return new GameProgressNodeVersion2(
-                (RandomVersionFlag)GetInt(n2, "RandomVersionUnlocked", 0),
+                ParseEnum(n2, "RandomVersionUnlocked", (RandomVersionFlag)0),
                 node3
             );
         }
@@ -330,8 +379,8 @@ public static class PhiSaveJsonCompat
 
             var node4 = ParseNode4(n3);
             return new GameProgressNodeVersion3(
-                (Chapter8UnlockFlag)GetInt(n3, "Chapter8UnlockFlag", 0),
-                (DifficultyUnlockFlag)GetInt(n3, "Chapter8SongUnlockFlag", 0),
+                ParseEnum(n3, "Chapter8UnlockFlag", (Chapter8UnlockFlag)0),
+                ParseEnum(n3, "Chapter8SongUnlockFlag", (DifficultyUnlockFlag)0),
                 node4
             );
         }
@@ -341,7 +390,7 @@ public static class PhiSaveJsonCompat
             if (!TryGetProperty(node3, "Node4", out var n4) || n4.ValueKind != JsonValueKind.Object) return null;
 
             return new GameProgressNodeVersion4(
-                (TakumiUnlockFlag)GetInt(n4, "FlagOfSongRecordKeyTakumi", 0)
+                ParseEnum(n4, "FlagOfSongRecordKeyTakumi", (TakumiUnlockFlag)0)
             );
         }
     }
@@ -352,7 +401,7 @@ public static class PhiSaveJsonCompat
         {
             using var doc = JsonDocument.ParseValue(ref reader);
             var root = doc.RootElement;
-            var typeByte = (byte)GetInt(root, "Type", 0);
+            var typeByte = ParseGameKeyType(root, "Type", 0);
             var bytes = new List<byte>();
 
             if (TryGetProperty(root, "Flags", out var flagsNode) && flagsNode.ValueKind == JsonValueKind.Object)
@@ -387,7 +436,7 @@ public static class PhiSaveJsonCompat
         {
             writer.WriteStartObject();
             writer.WritePropertyName("Type");
-            writer.WriteNumberValue((int)value.Type);
+            writer.WriteStringValue(FormatGameKeyType((byte)value.Type));
             writer.WritePropertyName("Flags");
             writer.WriteStartObject();
             var payloadBytes = new List<byte>(GetGameKeyFlagPayloadBytes((byte)value.Type, value.Payload));
@@ -521,14 +570,14 @@ public static class PhiSaveJsonCompat
             var node3 = TryGetProperty(root, "Node3", out var n3) && n3.ValueKind == JsonValueKind.Object
                 ? JsonSerializer.Deserialize(n3.GetRawText(), PhiSaveJsonContext.Default.GameProgressNodeVersion3)
                 : null;
-            return new GameProgressNodeVersion2((RandomVersionFlag)GetInt(root, "RandomVersionUnlocked", 0), node3);
+            return new GameProgressNodeVersion2(ParseEnum(root, "RandomVersionUnlocked", (RandomVersionFlag)0), node3);
         }
 
         public override void Write(Utf8JsonWriter writer, GameProgressNodeVersion2 value, JsonSerializerOptions options)
         {
             writer.WriteStartObject();
             writer.WritePropertyName("RandomVersionUnlocked");
-            writer.WriteNumberValue((int)value.RandomVersionUnlocked);
+            writer.WriteStringValue(value.RandomVersionUnlocked.ToString());
             writer.WritePropertyName("Node3");
             if (value.Node3 == null) writer.WriteNullValue();
             else JsonSerializer.Serialize(writer, value.Node3, PhiSaveJsonContext.Default.GameProgressNodeVersion3);
@@ -546,8 +595,8 @@ public static class PhiSaveJsonCompat
                 ? JsonSerializer.Deserialize(n4.GetRawText(), PhiSaveJsonContext.Default.GameProgressNodeVersion4)
                 : null;
             return new GameProgressNodeVersion3(
-                (Chapter8UnlockFlag)GetInt(root, "Chapter8UnlockFlag", 0),
-                (DifficultyUnlockFlag)GetInt(root, "Chapter8SongUnlockFlag", 0),
+                ParseEnum(root, "Chapter8UnlockFlag", (Chapter8UnlockFlag)0),
+                ParseEnum(root, "Chapter8SongUnlockFlag", (DifficultyUnlockFlag)0),
                 node4);
         }
 
@@ -555,9 +604,9 @@ public static class PhiSaveJsonCompat
         {
             writer.WriteStartObject();
             writer.WritePropertyName("Chapter8UnlockFlag");
-            writer.WriteNumberValue((int)value.Chapter8UnlockFlag);
+            writer.WriteStringValue(value.Chapter8UnlockFlag.ToString());
             writer.WritePropertyName("Chapter8SongUnlockFlag");
-            writer.WriteNumberValue((int)value.Chapter8SongUnlockFlag);
+            writer.WriteStringValue(value.Chapter8SongUnlockFlag.ToString());
             writer.WritePropertyName("Node4");
             if (value.Node4 == null) writer.WriteNullValue();
             else JsonSerializer.Serialize(writer, value.Node4, PhiSaveJsonContext.Default.GameProgressNodeVersion4);
@@ -571,16 +620,95 @@ public static class PhiSaveJsonCompat
         {
             using var doc = JsonDocument.ParseValue(ref reader);
             var root = doc.RootElement;
-            return new GameProgressNodeVersion4((TakumiUnlockFlag)GetInt(root, "FlagOfSongRecordKeyTakumi", 0));
+            return new GameProgressNodeVersion4(ParseEnum(root, "FlagOfSongRecordKeyTakumi", (TakumiUnlockFlag)0));
         }
 
         public override void Write(Utf8JsonWriter writer, GameProgressNodeVersion4 value, JsonSerializerOptions options)
         {
             writer.WriteStartObject();
             writer.WritePropertyName("FlagOfSongRecordKeyTakumi");
-            writer.WriteNumberValue((int)value.FlagOfSongRecordKeyTakumi);
+            writer.WriteStringValue(value.FlagOfSongRecordKeyTakumi.ToString());
             writer.WriteEndObject();
         }
+    }
+
+    // 辅助方法
+    private static TEnum ParseEnum<TEnum>(JsonElement root, string name, TEnum fallback) where TEnum : struct, Enum
+    {
+        if (!TryGetProperty(root, name, out var e)) return fallback;
+
+        if (e.ValueKind == JsonValueKind.String)
+        {
+            var raw = e.GetString();
+            if (!string.IsNullOrWhiteSpace(raw) && Enum.TryParse<TEnum>(raw, true, out var parsedByName))
+            {
+                return parsedByName;
+            }
+
+            if (!string.IsNullOrWhiteSpace(raw) && int.TryParse(raw, out var parsedInt))
+            {
+                return (TEnum)Enum.ToObject(typeof(TEnum), parsedInt);
+            }
+        }
+
+        if (e.ValueKind == JsonValueKind.Number && e.TryGetInt32(out var n))
+        {
+            return (TEnum)Enum.ToObject(typeof(TEnum), n);
+        }
+
+        return fallback;
+    }
+
+    private static byte ParseGameKeyType(JsonElement root, string name, byte fallback)
+    {
+        if (!TryGetProperty(root, name, out var e)) return fallback;
+
+        if (e.ValueKind == JsonValueKind.Number && e.TryGetByte(out var n))
+        {
+            return n;
+        }
+
+        if (e.ValueKind == JsonValueKind.String)
+        {
+            var raw = e.GetString();
+            if (string.IsNullOrWhiteSpace(raw)) return fallback;
+            if (byte.TryParse(raw, out var numeric)) return numeric;
+
+            byte typeMask = 0;
+            foreach (var token in raw.Split('|', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries))
+            {
+                typeMask |= token switch
+                {
+                    "HasReadCollectionPieceCount" => (byte)(1 << 0),
+                    "HasUnlockedSingle" => (byte)(1 << 1),
+                    "HasUnlockedCollectionPieceCount" => (byte)(1 << 2),
+                    "HasUnlockedIllustration" => (byte)(1 << 3),
+                    "HasUnlockedAvatar" => (byte)(1 << 4),
+                    _ => (byte)0
+                };
+            }
+
+            if (typeMask != 0) return typeMask;
+        }
+
+        return fallback;
+    }
+
+    private static string FormatGameKeyType(byte typeByte)
+    {
+        var entries = new List<string>();
+        if ((typeByte & (1 << 0)) != 0) entries.Add("HasReadCollectionPieceCount");
+        if ((typeByte & (1 << 1)) != 0) entries.Add("HasUnlockedSingle");
+        if ((typeByte & (1 << 2)) != 0) entries.Add("HasUnlockedCollectionPieceCount");
+        if ((typeByte & (1 << 3)) != 0) entries.Add("HasUnlockedIllustration");
+        if ((typeByte & (1 << 4)) != 0) entries.Add("HasUnlockedAvatar");
+
+        if (entries.Count == 0)
+        {
+            return typeByte.ToString();
+        }
+
+        return string.Join("|", entries);
     }
 
     private static bool TryGetProperty(JsonElement root, string name, out JsonElement value)
