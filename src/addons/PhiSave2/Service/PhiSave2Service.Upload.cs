@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -8,13 +10,125 @@ using System.Net.Http.Json;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
 using PhigrosLibraryCSharp.CloudSave;
+using PhigrosLibraryCSharp.Serialization;
 
+// PhiSave2Service：云端存档上传
 namespace PhiStore.Addons.PhiSave2;
 
 public partial class PhiSave2Service
-{
+{    
+    /// <summary>
+     /// 将内存中的当前存档打包并上传到云端：
+     /// 1. 创建文件令牌（file token）并发起分片上传；
+     /// 2. 完成上传后回调并将 Summary 更新到 _GameSave 类；
+     /// 3. 可选地删除旧的 game file 对象。
+     /// </summary>
+     /// <param name="oldSaveGameFileObjectId">可选的旧 game file 对象 ID，用于在成功上传后删除旧对象。</param>
+     /// <param name="oldSaveObjectId">可选的旧保存记录对象 ID（用于更新 summary）。</param>
+     /// <param name="packedSaveBuffer">已打包的 Save ZIP 字节数组。</param>
+     /// <param name="packedSummaryBuffer">Summary 的二进制表示（用于写入 summary 字段）。</param>
+    public async Task UploadSaveAsync(string? oldSaveGameFileObjectId, string? oldSaveObjectId, byte[] packedSaveBuffer, byte[] packedSummaryBuffer)
+    {
+        if (_saveObj == null) throw new InvalidOperationException("Not initialized");
+        if (CurrentSave == null) throw new InvalidOperationException("No save in memory to upload.");
+        if (string.IsNullOrWhiteSpace(_userObjectId))
+        {
+            throw new InvalidOperationException("Missing user object id for upload.");
+        }
+
+        FileTokenInfo token = await CreateFileTokenAsync(packedSaveBuffer, _userObjectId);
+        CreateUploadResponse uploadInfo = await CreateUploadAsync(token);
+
+        (int, RequestUploadPart)[] parts = [(1, await UploadPartAsync(1, packedSaveBuffer, token, uploadInfo))];
+        await CompleteUploadAsync(token, uploadInfo, parts);
+        await UpdateSummaryAsync(token, packedSummaryBuffer, oldSaveObjectId, _userObjectId);
+
+        if (!string.IsNullOrEmpty(oldSaveGameFileObjectId))
+            await DeleteOldAsync(oldSaveGameFileObjectId);
+    }
+
+    /// <summary>
+    /// 上传内存存档到云端
+    /// 该方法相比较于重载版本会直接从当前内存中的存档构建上传所需的上下文并打包成 ZIP，因此不需要调用方提供已打包的字节数组。
+    /// </summary>
+    public async Task UploadSaveAsync(string? oldFileId, string? oldObjId)
+    {
+        if (_saveObj == null || CurrentSave == null) throw new InvalidOperationException("Missing state");
+
+        if (string.IsNullOrWhiteSpace(_userObjectId) && !string.IsNullOrWhiteSpace(_sessionToken))
+        {
+            try
+            {
+                var fetched = await FetchUserObjectIdFromServerAsync();
+                if (!string.IsNullOrWhiteSpace(fetched)) _userObjectId = fetched;
+            }
+            catch { }
+        }
+
+        // 获取原有的 SaveInfo 以构建上下文
+        var container = await _saveObj.GetSaveInfoFromCloudAsync();
+        var originalInfo = container.Results.FirstOrDefault();
+
+        if (string.IsNullOrWhiteSpace(_userObjectId) && !string.IsNullOrWhiteSpace(originalInfo?.User?.ObjectId))
+        {
+            _userObjectId = originalInfo.User.ObjectId;
+        }
+
+        if (string.IsNullOrWhiteSpace(_userObjectId))
+        {
+            throw new InvalidOperationException("Missing user object id for upload.");
+        }
+
+        var ctx = new SaveContext(new Dictionary<string, SaveContext.Entry>(), originalInfo!);
+        CurrentSave.WriteToContext(ctx);
+
+        // 构建 Summary：在打包前确保 ctx 中的 Summary 已更新为 CurrentSave 的值
+        try
+        {
+            var existing = ctx.ReadSummary();
+            if (existing != null)
+            {
+                existing.Rks = CurrentSave.SummaryRks;
+                ctx.SaveSummary(existing);
+            }
+        }
+        catch { }
+
+        byte[] packedSave;
+        using (var ms = new MemoryStream())
+        {
+            using (var archive = new ZipArchive(ms, ZipArchiveMode.Create, true))
+            {
+                SaveContext.CipherFunction encryptor = (data, ct) =>
+                {
+                    if (_saveObj == null) return Task.FromResult(data);
+                    return _saveObj.Encrypt(data, ct);
+                };
+                await ctx.SaveToZipAsync(archive, encryptor, CancellationToken.None);
+            }
+            packedSave = ms.ToArray();
+        }
+
+        byte[] packedSummary = Array.Empty<byte>();
+        try
+        {
+            var ctxSummary = ctx.ReadSummary();
+            if (ctxSummary != null)
+            {
+                using var ms2 = new MemoryStream();
+                var bw = new ByteWriter(ms2);
+                ctxSummary.Serialize(bw);
+                packedSummary = ms2.ToArray();
+            }
+        }
+        catch { }
+
+        await UploadSaveAsync(oldFileId, oldObjId, packedSave, packedSummary);
+    }
+
     private static string BuildApiUrl(string baseUrl, string relativePath)
     {
         var baseUri = new Uri(baseUrl, UriKind.Absolute);
@@ -40,36 +154,6 @@ public partial class PhiSave2Service
             Fragment = string.Empty
         };
         return builder.Uri.ToString();
-    }
-
-    /// <summary>
-    /// 将内存中的当前存档打包并上传到云端：
-    /// 1. 创建文件令牌（file token）并发起分片上传；
-    /// 2. 完成上传后回调并将 Summary 更新到 _GameSave 类；
-    /// 3. 可选地删除旧的 game file 对象。
-    /// </summary>
-    /// <param name="oldSaveGameFileObjectId">可选的旧 game file 对象 ID，用于在成功上传后删除旧对象。</param>
-    /// <param name="oldSaveObjectId">可选的旧保存记录对象 ID（用于更新 summary）。</param>
-    /// <param name="packedSaveBuffer">已打包的 Save ZIP 字节数组。</param>
-    /// <param name="packedSummaryBuffer">Summary 的二进制表示（用于写入 summary 字段）。</param>
-    public async Task UploadSaveAsync(string? oldSaveGameFileObjectId, string? oldSaveObjectId, byte[] packedSaveBuffer, byte[] packedSummaryBuffer)
-    {
-        if (_saveObj == null) throw new InvalidOperationException("Not initialized");
-        if (CurrentSave == null) throw new InvalidOperationException("No save in memory to upload.");
-        if (string.IsNullOrWhiteSpace(_userObjectId))
-        {
-            throw new InvalidOperationException("Missing user object id for upload.");
-        }
-
-        FileTokenInfo token = await CreateFileTokenAsync(packedSaveBuffer, _userObjectId);
-        CreateUploadResponse uploadInfo = await CreateUploadAsync(token);
-
-        (int, RequestUploadPart)[] parts = [(1, await UploadPartAsync(1, packedSaveBuffer, token, uploadInfo))];
-        await CompleteUploadAsync(token, uploadInfo, parts);
-        await UpdateSummaryAsync(token, packedSummaryBuffer, oldSaveObjectId, _userObjectId);
-
-        if (!string.IsNullOrEmpty(oldSaveGameFileObjectId))
-            await DeleteOldAsync(oldSaveGameFileObjectId);
     }
 
     private async Task<FileTokenInfo> CreateFileTokenAsync(byte[] packedSaveBuffer, string userObjectId)

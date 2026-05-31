@@ -51,7 +51,7 @@ public partial class PhiSave2API : RefCounted
     private string _oldObjId = string.Empty;
 
     public PhiSaveData? CurrentSave => _service.CurrentSave;
-    // 信号绑定部分
+    // ======信号绑定部分======
     [Signal]
     public delegate void QrCodeGeneratedEventHandler(string url, int expiresInSeconds);
 
@@ -97,7 +97,7 @@ public partial class PhiSave2API : RefCounted
         };
     }
 
-    // 登录与sessiontoken获取部分
+    // ======登录与sessiontoken获取部分======
     /// <summary>
     /// 请求二维码并开始轮询登录
     /// 返回的信号将包含二维码 URL，使用外部 UI 渲染
@@ -224,7 +224,7 @@ public partial class PhiSave2API : RefCounted
     /// </summary>
     public string GetSessionToken() => _service.SessionToken;
 
-    // 存档上传与下载
+    // ======存档上传与下载======
     /// <summary>
     /// 下载云端存档并解包到内存
     /// </summary>
@@ -694,8 +694,8 @@ public partial class PhiSave2API : RefCounted
         return arr;
     }
 
-    // 导入导出部分
-    // 本地加密存档
+    // ======导入导出部分======
+    // ======本地加密存档=======
     /// <summary>
     /// 将内存中的 PhiSaveData 保存到本地加密文件。
     /// 支持传入自定义密钥和 IV 供调试。
@@ -733,7 +733,7 @@ public partial class PhiSave2API : RefCounted
         }
     }
 
-    // JSON明文
+    // ======JSON明文======
     /// <summary>
     /// 导出为 JSON 字符串
     /// </summary>
@@ -839,7 +839,7 @@ public partial class PhiSave2API : RefCounted
         }
     }
 
-    // Summary二进制字符串
+    // ======Summary二进制字符串======
     /// <summary>
     /// 导出当前 Summary 为二进制并以 Base64 返回
     /// </summary>
@@ -868,7 +868,7 @@ public partial class PhiSave2API : RefCounted
         catch (Exception ex) { return ex.Message; }
     }
 
-    // RKS计算与信息获取
+    // ======RKS计算与信息获取======
     /// <summary>
     /// 基于内存中的存档进行RKS计算
     /// </summary>
@@ -943,7 +943,7 @@ public partial class PhiSave2API : RefCounted
         return outd;
     }
 
-    // 辅助方法&TapTap APK链接获取
+    // ======辅助方法&TapTap APK链接获取======
     /// <summary>
     /// GDScript 辅助方法：检查当前是否加载了存档到内存
     /// </summary>
